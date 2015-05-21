@@ -1,0 +1,56 @@
+20150306T102452,==== Initializing Parameters ====
+20150306T102452,Reading in config file ....
+20150306T102452,['lastRA', 'None']
+20150306T102452,['maxdRA', '2']
+20150306T102452,['elevation', '1198']
+20150306T102452,['maxdDEC', '2']
+20150306T102452,['trackingRate', '14.451']
+20150306T102452,['lat', '46.9528']
+20150306T102452,['lastGuiderRot', 'None']
+20150306T102452,['lon', '-120.7278']
+20150306T102452,['lastFocusPos', '1500']
+20150306T102452,['lastDEC', 'None']
+20150306T102452,Configuration parameters read
+20150306T093750,==== Initializing Parameters ====
+20150306T093750,Reading in config file ....
+20150306T093750,['lastRA', 'None']
+20150306T093750,['maxdRA', '2']
+20150306T093750,['elevation', '1198']
+20150306T093750,['maxdDEC', '2']
+20150306T093750,['trackingRate', '14.451']
+20150306T093750,['lat', '46.9528']
+20150306T093750,['lastGuiderRot', 'None']
+20150306T093750,['lon', '-120.7278']
+20150306T093750,['lastFocusPos', '1500']
+20150306T093750,['lastDEC', 'None']
+20150306T093750,Configuration parameters read
+20150306T025605,==== Initializing Parameters ====
+20150306T025605,Reading in config file ....
+20150306T025605,['elevation', '1198']
+20150306T025605,['lastGuiderRot', 'None']
+20150306T025605,['lastRA', 'None']
+20150306T025605,['decWrap', '{-270,270}']
+20150306T025605,['horizonLimit', '20']
+20150306T025605,['lat', '46.9528']
+20150306T025605,['lastFocusPos', '1500']
+20150306T025605,['trackingRate', '14.451']
+20150306T025605,['lon', '-120.7278']
+20150306T025605,['maxdRA', '2']
+20150306T025605,['maxdDEC', '2']
+20150306T025605,['lastDEC', 'None']
+20150306T025605,Configuration parameters read
+20150306T140827,==== Initializing Parameters ====
+20150306T140827,Reading in config file ....
+20150306T140827,['elevation', '1198']
+20150306T140827,['lastGuiderRot', 'None']
+20150306T140827,['lastRA', 'None']
+20150306T140827,['decWrap', '{-270,270}']
+20150306T140827,['horizonLimit', '20']
+20150306T140827,['lat', '46.9528']
+20150306T140827,['lastFocusPos', '1500']
+20150306T140827,['trackingRate', '14.451']
+20150306T140827,['lon', '-120.7278']
+20150306T140827,['maxdRA', '2']
+20150306T140827,['maxdDEC', '2']
+20150306T140827,['lastDEC', 'None']
+20150306T140827,Configuration parameters read
