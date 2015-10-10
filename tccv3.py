@@ -3,7 +3,7 @@ import time
 import wx
 import os
 import subprocess
-import pyfits
+
 import re
 import astropy
 from astropy.time import Time
@@ -620,8 +620,10 @@ class NightLog(wx.Panel):
         wx.Panel.__init__(self,parent)
         
         self.labelastr=wx.StaticText(self, -1, "Astronomer(s)")
-        self.labelobs=wx.StaticText(self, -1, "Observer (s)")
+        self.labelobs=wx.StaticText(self, -1, "Observer(s)")
         self.labelinst=wx.StaticText(self, -1, "Instrument")
+        self.labelstart=wx.StaticText(self, -1, "Start Time")
+        self.labelend=wx.StaticText(self, -1, "End Time")
         self.usastr=wx.TextCtrl(self,size=(180,-1))
         self.usobs=wx.TextCtrl(self,size=(180,-1))
         self.usinst=wx.TextCtrl(self,size=(75,-1))
@@ -632,15 +634,25 @@ class NightLog(wx.Panel):
         
         
         
-        
+        self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
+
+        self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
+        self.gbox1.Add(self.usastr, 0, wx.ALIGN_LEFT)
+        self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
+        self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
+        self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
+        self.gbox1.Add(self.usinst,0, wx.ALIGN_LEFT)
+        self.gbox1.Add(self.labelstart,0,wx.ALIGN_RIGHT)
+        self.gbox1.Add(self.usstart,0,wx.ALIGN_LEFT)
+        self.gbox1.Add(self.labelend,0,wx.ALIGN_RIGHT)
+        self.gbox1.Add(self.usend,0,wx.ALIGN_LEFT)
         
         self.hbox=wx.BoxSizer(wx.VERTICAL)
         
+        self.hbox.Add(gbox1,0, wx.ALIGN_CENTER)
         
-        self.hbox.Add(self.userHeader,0,wx.ALIGN_CENTER)
-        
-        
-
+        self.SetSizer(self.hbox)
+        self.Show()
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
