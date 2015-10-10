@@ -130,7 +130,7 @@ class Control(wx.Panel):
         self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
-        self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
+       # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
                
         #setup sizers
@@ -198,10 +198,10 @@ class Control(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    def onMouseOver(self, event):
+    #def onMouseOver(self, event):
             # mouseover changes colour of button
-            self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
-            event.Skip()
+            #self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
+            #event.Skip()
 
   
 class Target(wx.Panel):
@@ -619,8 +619,20 @@ class NightLog(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        self.userHeader=wx.StaticText(self,label="                                                                ACTUAL\n"\
-                       " ASTRONOMER               OBSERVER(S)              INST      START  FINISH\n",size=(575,-1))
+        self.labelastr=wx.StaticText(self, -1, "Astronomer(s)")
+        self.labelobs=wx.StaticText(self, -1, "Observer (s)")
+        self.labelinst=wx.StaticText(self, -1, "Instrument")
+        self.usastr=wx.TextCtrl(self,size=(180,-1))
+        self.usobs=wx.TextCtrl(self,size=(180,-1))
+        self.usinst=wx.TextCtrl(self,size=(75,-1))
+        self.usstart=wx.TextCtrl(self,size=(50,-1))
+        self.usend=wx.TextCtrl(self,size=(50,-1))
+        
+        
+        
+        
+        
+        
         
         self.hbox=wx.BoxSizer(wx.VERTICAL)
         
