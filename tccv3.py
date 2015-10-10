@@ -30,95 +30,95 @@ class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
 
-        self.logBox=wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
+        self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
-        self.targetNameLabel=wx.StaticText(self, size=(75,-1))
+        self.targetNameLabel = wx.StaticText(self, size=(75,-1))
         self.targetNameLabel.SetLabel('Name: ')
-        self.targetNameText=wx.TextCtrl(self,size=(100,-1))
+        self.targetNameText = wx.TextCtrl(self,size=(100,-1))
 
-        self.targetRaLabel=wx.StaticText(self, size=(75,-1))
+        self.targetRaLabel = wx.StaticText(self, size=(75,-1))
         self.targetRaLabel.SetLabel('RA: ')
-        self.targetRaText=wx.TextCtrl(self,size=(100,-1))
+        self.targetRaText = wx.TextCtrl(self,size=(100,-1))
 
-        self.targetDecLabel=wx.StaticText(self, size=(75,-1))
+        self.targetDecLabel = wx.StaticText(self, size=(75,-1))
         self.targetDecLabel.SetLabel('DEC: ')
-        self.targetDecText=wx.TextCtrl(self,size=(100,-1))
+        self.targetDecText = wx.TextCtrl(self,size=(100,-1))
 
-        self.targetEpochLabel=wx.StaticText(self, size=(75,-1))
+        self.targetEpochLabel = wx.StaticText(self, size=(75,-1))
         self.targetEpochLabel.SetLabel('EPOCH: ')
-        self.targetEpochText=wx.TextCtrl(self,size=(100,-1))
+        self.targetEpochText = wx.TextCtrl(self,size=(100,-1))
 
-        self.targetMagLabel=wx.StaticText(self, size=(75,-1))
+        self.targetMagLabel = wx.StaticText(self, size=(75,-1))
         self.targetMagLabel.SetLabel('V Mag: ')
-        self.targetMagText=wx.TextCtrl(self,size=(100,-1))
+        self.targetMagText = wx.TextCtrl(self,size=(100,-1))
 
         #Current Positions
-        self.currentNameLabel=wx.StaticText(self, size=(75,-1))
+        self.currentNameLabel = wx.StaticText(self, size=(75,-1))
         self.currentNameLabel.SetLabel('Name:')
-        self.currentNamePos=wx.StaticText(self,size=(100,-1))
+        self.currentNamePos = wx.StaticText(self,size=(100,-1))
         self.currentNamePos.SetLabel('Unknown')
         self.currentNamePos.SetForegroundColour((255,0,0))
 
-        self.currentRaLabel=wx.StaticText(self, size=(75,-1))
+        self.currentRaLabel = wx.StaticText(self, size=(75,-1))
         self.currentRaLabel.SetLabel('RA: ')
-        self.currentRaPos=wx.StaticText(self,size=(100,-1))
+        self.currentRaPos = wx.StaticText(self,size=(100,-1))
         self.currentRaPos.SetLabel('Unknown')
         self.currentRaPos.SetForegroundColour((255,0,0))
 
-        self.currentDecLabel=wx.StaticText(self, size=(75,-1))
+        self.currentDecLabel = wx.StaticText(self, size=(75,-1))
         self.currentDecLabel.SetLabel('DEC: ')
-        self.currentDecPos=wx.StaticText(self,size=(100,-1))
+        self.currentDecPos = wx.StaticText(self,size=(100,-1))
         self.currentDecPos.SetLabel('Unknown')
         self.currentDecPos.SetForegroundColour((255,0,0))
 
-        self.currentEpochLabel=wx.StaticText(self, size=(75,-1))
+        self.currentEpochLabel = wx.StaticText(self, size=(75,-1))
         self.currentEpochLabel.SetLabel('EPOCH: ')
-        self.currentEpochPos=wx.StaticText(self,size=(75,-1))
+        self.currentEpochPos = wx.StaticText(self,size=(75,-1))
         self.currentEpochPos.SetLabel('Unknown')
         self.currentEpochPos.SetForegroundColour((255,0,0))
 
-        self.currentUTCLabel=wx.StaticText(self, size=(75,-1))
+        self.currentUTCLabel = wx.StaticText(self, size=(75,-1))
         self.currentUTCLabel.SetLabel('UTC: ')
-        self.currentUTCPos=wx.StaticText(self,size=(75,-1))
+        self.currentUTCPos = wx.StaticText(self,size=(75,-1))
         self.currentUTCPos.SetLabel('Unknown')
         self.currentUTCPos.SetForegroundColour((255,0,0))
 
-        self.currentLSTLabel=wx.StaticText(self, size=(75,-1))
+        self.currentLSTLabel = wx.StaticText(self, size=(75,-1))
         self.currentLSTLabel.SetLabel('LST: ')
-        self.currentLSTPos=wx.StaticText(self,size=(75,-1))
+        self.currentLSTPos = wx.StaticText(self,size=(75,-1))
         self.currentLSTPos.SetLabel('Unknown')
         self.currentLSTPos.SetForegroundColour((255,0,0))
 
-        self.currentLocalLabel=wx.StaticText(self, size=(75,-1))
+        self.currentLocalLabel = wx.StaticText(self, size=(75,-1))
         self.currentLocalLabel.SetLabel('Local: ')
-        self.currentLocalPos=wx.StaticText(self,size=(75,-1))
+        self.currentLocalPos = wx.StaticText(self,size=(75,-1))
         self.currentLocalPos.SetLabel('Unknown')
         self.currentLocalPos.SetForegroundColour((255,0,0))
 
-        self.currentJDLabel=wx.StaticText(self, size=(75,-1))
+        self.currentJDLabel = wx.StaticText(self, size=(75,-1))
         self.currentJDLabel.SetLabel('MJD: ')
-        self.currentJDPos=wx.StaticText(self,size=(75,-1))
+        self.currentJDPos = wx.StaticText(self,size=(75,-1))
         self.currentJDPos.SetLabel('Unknown')
         self.currentJDPos.SetForegroundColour((255,0,0))
 
 
-        self.currentFocusLabel=wx.StaticText(self, size=(75,-1))
+        self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
         self.currentFocusLabel.SetLabel('Focus: ')
-        self.currentFocusPos=wx.StaticText(self,size=(75,-1))
+        self.currentFocusPos = wx.StaticText(self,size=(75,-1))
         self.currentFocusPos.SetLabel('Unknown')
         self.currentFocusPos.SetForegroundColour((255,0,0))
 
-        self.currentTRLabel=wx.StaticText(self, size=(125,-1))
+        self.currentTRLabel = wx.StaticText(self, size=(125,-1))
         self.currentTRLabel.SetLabel('Tracking Rate: ')
-        self.currentTRPos=wx.StaticText(self,size=(75,-1))
+        self.currentTRPos = wx.StaticText(self,size=(75,-1))
         self.currentTRPos.SetLabel('Unknown')
         self.currentTRPos.SetForegroundColour((255,0,0))
 
 
         #Focus Change
-        self.focusIncPlusButton=wx.Button(self, -1, 'Increment Positive')
-        self.focusIncNegButton=wx.Button(self, -1, 'Increment Negative')
+        self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
+        self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetLabel('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
@@ -618,13 +618,17 @@ class TCC(wx.Frame):
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
-
+	
+	nb.AddPage(scienceFocusPage, "Science Focus")
+	
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(1)
 
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(2)
-
+	
+	nb.AddPage(guiderFocusPage, "Guider Focus")
+	
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(3)
 
