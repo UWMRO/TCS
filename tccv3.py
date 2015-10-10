@@ -280,15 +280,13 @@ class Target(wx.Panel):
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
 
-        if debug ==True:
-            self.dir='/Users/jwhueh/projects/MRO/tcc/tccv3/'
+        debug==True
+        self.dir=os.getcwd()
             
-            self.nameText.SetValue('M31')
-            self.raText.SetValue('00:44:42.3')
-            self.decText.SetValue('41:16:09')
-            self.epochText.SetValue('2000')
-        else:
-            self.dir=os.getcwd()
+        self.nameText.SetValue('M31')
+        self.raText.SetValue('00:44:42.3')
+        self.decText.SetValue('41:16:09')
+        self.epochText.SetValue('2000')
         self.fileText.SetLabel(self.dir+'20150302.list')
 
 
@@ -601,12 +599,9 @@ class TCC(wx.Frame):
         self.mro=ephem.Observer()
         #self.mro = None
         debug=True
-        if debug==True:
-            self.dir='/Users/jwhueh/projects/MRO/tcc/tccv3/'
-        else:
-            self.dir=os.getcwd()
-
-        # setup notebook
+        
+        self.dir=os.getcwd()
+        #setup notebook
         p=wx.Panel(self)
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
@@ -656,7 +651,7 @@ class TCC(wx.Frame):
         self.readConfig()
         
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
-        img_default=self.dir+'gimg/gcam_56901_859.jpg'
+        img_default=self.dir+'\gimg\gcam_56901_859.jpg'
         img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
         self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
         
