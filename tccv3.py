@@ -130,7 +130,7 @@ class Control(wx.Panel):
         self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
-        self.butn1.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
+        self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
         def onMouseOver(self, event):
             # mouseover changes colour of button
