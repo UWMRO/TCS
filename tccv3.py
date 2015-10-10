@@ -293,7 +293,7 @@ class ScienceFocus(wx.Panel):
         wx.Panel.__init__(self,parent)
         None
 
-     self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
+        self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
         self.currentFocusLabel.SetLabel('Focus: ')
         self.currentFocusPos = wx.StaticText(self,size=(75,-1))
         self.currentFocusPos.SetLabel('Unknown')
@@ -611,7 +611,16 @@ class Initialization(wx.Panel):
 class NightLog(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-        None
+        
+        self.userHeader=wx.StaticText(self,label="                                                                ACTUAL\n"\
+                       " ASTRONOMER               OBSERVER(S)              INST      START  FINISH\n",size=(575,-1))
+        
+        self.hbox=wx.BoxSizer(wx.VERTICAL)
+        
+        
+        self.hbox.Add(self.userHeader,0,wx.ALIGN_CENTER)
+        
+        
 
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
