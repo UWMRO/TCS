@@ -129,7 +129,7 @@ class Control(wx.Panel):
         self.trackButton = wx.Button(self, -1, "Start Tracking")
         self.trackButton.Disable()
 
-        self.stopButton = wx.Button(self, -1, "STOP")
+        self.stopButton = wx.Button(self, -1, "HALT MOTION")
        
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -151,7 +151,7 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
 
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.currentNamePos, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.currentNamePos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentRaLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentRaPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentDecLabel, 0, wx.ALIGN_RIGHT)
