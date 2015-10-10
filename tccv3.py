@@ -288,7 +288,10 @@ class Target(wx.Panel):
         self.decText.SetValue('41:16:09')
         self.epochText.SetValue('2000')
         self.fileText.SetLabel(self.dir+'20150302.list')
-
+class ScienceFocus(wx.Panel):
+    def __init__(self,parent, debug, night):
+        wx.Panel.__init__(self,parent)
+        None
 
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -477,7 +480,11 @@ class GuiderControl(wx.Panel):
             print self.rotAng, m
             self.Refresh()
             time.sleep(0.05)
-       
+
+class GuiderFocus(wx.Panel):
+    def __init__(self,parent, debug, night):
+        wx.Panel.__init__(self,parent)
+        None       
 
 
 
@@ -606,32 +613,36 @@ class TCC(wx.Frame):
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
+        scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
+        guiderFocusPage=GuiderFocus(nb,debug,self.night)
         initPage=Initialization(nb, debug, self.night)
         logPage=NightLog(nb, debug, self.night)
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
-	
-	nb.AddPage(scienceFocusPage, "Science Focus")
-	
+        
+        nb.AddPage(scienceFocusPage, "Science Focus")
+        self.scienceFocus=nb.GetPage(1)
+        
         nb.AddPage(targetPage,"Target List")
-        self.target=nb.GetPage(1)
-
+        self.target=nb.GetPage(2)
+        
         nb.AddPage(guiderControlPage,"Guider Control")
-        self.guiderControl=nb.GetPage(2)
+        self.guiderControl=nb.GetPage(3)
 	
-	nb.AddPage(guiderFocusPage, "Guider Focus")
-	
+        nb.AddPage(guiderFocusPage, "Guider Focus")
+        self.guiderFocus=nb.GetPage(4)
+ 
         nb.AddPage(guiderPage,"Guider Performance Monitor")
-        self.guider=nb.GetPage(3)
-
+        self.guider=nb.GetPage(5)
+        
         nb.AddPage(initPage,"Initiailization Parameters")
-        self.init=nb.GetPage(4)
+        self.init=nb.GetPage(6)
 
         nb.AddPage(logPage,"Night Log")
-        self.nl=nb.GetPage(5)
+        self.nl=nb.GetPage(7)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
 
