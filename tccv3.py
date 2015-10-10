@@ -666,7 +666,7 @@ class TCC(wx.Frame):
         self.readConfig()
         
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
-        img_default=self.dir+'\gimg\gcam_56901_859.jpg'
+        img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
         self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
         
