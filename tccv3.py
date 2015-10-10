@@ -132,11 +132,7 @@ class Control(wx.Panel):
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
-        def onMouseOver(self, event):
-            # mouseover changes colour of button
-            self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
-            event.Skip()
-       
+               
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
@@ -201,6 +197,11 @@ class Control(wx.Panel):
         self.vbox.Add(self.logBox,0,wx.ALIGN_CENTER)
 
         self.SetSizer(self.vbox)
+
+    def onMouseOver(self, event):
+            # mouseover changes colour of button
+            self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
+            event.Skip()
 
   
 class Target(wx.Panel):
