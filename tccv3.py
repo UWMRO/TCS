@@ -293,6 +293,25 @@ class ScienceFocus(wx.Panel):
         wx.Panel.__init__(self,parent)
         None
 
+     self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
+        self.currentFocusLabel.SetLabel('Focus: ')
+        self.currentFocusPos = wx.StaticText(self,size=(75,-1))
+        self.currentFocusPos.SetLabel('Unknown')
+        self.currentFocusPos.SetForegroundColour((255,0,0))
+
+#Focus Change
+        self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
+        self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
+        self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
+        self.focusAbsText.SetLabel('1500')
+        self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
+        
+        
+        self.slewButton = wx.Button(self, -1, "Slew to Target")
+        self.slewButton.Disable()
+        self.trackButton = wx.Button(self, -1, "Start Tracking")
+        self.trackButton.Disable()
+
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
