@@ -622,6 +622,9 @@ class NightLog(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
+        self.nltitle=wx.StaticText(self,-1, "Manastash Ridge Observatory Night Log")
+        font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        self.nltitle.SetFont(font)
         self.labelastr=wx.StaticText(self, -1, "Astronomer(s)")
         self.labelobs=wx.StaticText(self, -1, "Observer(s)")
         self.labelinst=wx.StaticText(self, -1, "Instrument")
@@ -636,11 +639,11 @@ class NightLog(wx.Panel):
         
         
         
-        
+        #First box components for observer and astronomer identification
         self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
 
         self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usastr, 0, wx.ALIGN_LEFT)
+        self.gbox1.Add(self.usastr, 0, wx.EXPAND|wx.ALL)
         self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
         self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
         self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
@@ -650,11 +653,28 @@ class NightLog(wx.Panel):
         self.gbox1.Add(self.labelend,0,wx.ALIGN_RIGHT)
         self.gbox1.Add(self.usend,0,wx.ALIGN_LEFT)
         
+        
+        
+        #Activity Log
+        self.actheader=wx.StaticText(self,label="             -------------------- ACTIVITY LOG ---------------------")
+        self.actlog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
+        
+        #Failure Log
+        self.failheader=wx.StaticText(self,label="             -------------------- FAILURE LOG ---------------------")
+        self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
+        
+        
+        
         self.hbox=wx.BoxSizer(wx.VERTICAL)
         
+        self.hbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
         self.hbox.AddSpacer(10)
         self.hbox.Add(self.gbox1,0, wx.ALIGN_LEFT)
-        
+        self.hbox.AddSpacer(10)
+        self.hbox.Add(self.actheader,0,wx.ALIGN_CENTER)
+        self.hbox.Add(self.actlog,0,wx.ALIGN_CENTER)
+        self.hbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
+        self.hbox.Add(self.faillog,0, wx.ALIGN_CENTER)
         self.SetSizer(self.hbox)
         self.Show()
 class TCC(wx.Frame):
