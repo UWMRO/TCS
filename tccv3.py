@@ -131,10 +131,12 @@ class Control(wx.Panel):
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
-        self.jogNButton = wx.Button(self, -1, 'N')
-        self.jogSButton = wx.Button(self, -1, 'S')
-        self.jogWButton = wx.Button(self, -1, 'W')
-        self.jogEButton = wx.Button(self, -1, 'E')
+        #need to reposition these, they're all on top of each other in the
+        #top left
+        self.jogNButton = wx.Button(self, -1, 'N', pos = (300, 300))
+        self.jogSButton = wx.Button(self, -1, 'S', pos = (300, 400))
+        self.jogWButton = wx.Button(self, -1, 'W', pos = (250, 350))
+        self.jogEButton = wx.Button(self, -1, 'E', pos = (350, 350))
                
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
