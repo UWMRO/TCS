@@ -3,7 +3,6 @@ import time
 import wx
 import os
 import subprocess
-
 import re
 import astropy
 from astropy.time import Time
@@ -132,6 +131,10 @@ class Control(wx.Panel):
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
        # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
+       self.jogNButton = wx.Button(self, -1, 'N')
+       self.jogSButton = wx.Button(self, -1, 'S')
+       self.jogWButton = wx.Button(self, -1, 'W')
+       self.jogEButton = wx.Button(self, -1, 'E')
                
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
