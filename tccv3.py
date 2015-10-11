@@ -649,7 +649,8 @@ class NightLog(wx.Panel):
         
         self.hbox=wx.BoxSizer(wx.VERTICAL)
         
-        self.hbox.Add(gbox1,0, wx.ALIGN_CENTER)
+        self.hbox.AddSpacer(10)
+        self.hbox.Add(self.gbox1,0, wx.ALIGN_LEFT)
         
         self.SetSizer(self.hbox)
         self.Show()
