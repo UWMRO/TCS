@@ -645,7 +645,7 @@ class NightLog(wx.Panel):
         self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
 
         self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usastr, 0, wx.EXPAND|wx.ALL)
+        self.gbox1.Add(self.usastr, 1, wx.EXPAND)
         self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
         self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
         self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
