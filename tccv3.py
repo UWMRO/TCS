@@ -628,57 +628,47 @@ class NightLog(wx.Panel):
         font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
         self.nltitle.SetFont(font)
         self.labelastr=wx.StaticText(self, -1, "Astronomer(s)")
-        self.labelobs=wx.StaticText(self, -1, "Observer(s)---")
-        self.labelinst=wx.StaticText(self, -1, "Instrument---")
-        self.labelstart=wx.StaticText(self, -1, "Start Time----")
-        self.labelend=wx.StaticText(self, -1, "End Time-----")
-        self.usastr=wx.TextCtrl(self)
-        self.usobs=wx.TextCtrl(self)
-        self.usinst=wx.TextCtrl(self,size=(75,-1))
+        self.labelobs=wx.StaticText(self, -1, "Observer(s)")
+        self.labelinst=wx.StaticText(self, -1, "Instrument")
+        self.labelstart=wx.StaticText(self, -1, "Start Time")
+        self.labelend=wx.StaticText(self, -1, "End Time")
+        self.usastr=wx.TextCtrl(self,size=(50,-1))
+        self.usobs=wx.TextCtrl(self, size=(50,-1))
+        self.usinst=wx.TextCtrl(self,size=(50,-1))
         self.usstart=wx.TextCtrl(self,size=(50,-1))
         self.usend=wx.TextCtrl(self,size=(50,-1))
         
+        #First box components for observer and astronomer identification
         
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox1.Add(self.labelastr,0,wx.ALIGN_RIGHT)
         self.hbox1.AddSpacer(5)
         self.hbox1.Add(self.usastr,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox1.AddSpacer(10)
         
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.labelobs,0,wx.ALIGN_RIGHT)
-        self.hbox2.AddSpacer(5)
+        self.hbox2.AddSpacer(21)
         self.hbox2.Add(self.usobs,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox2.AddSpacer(10)
         
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3.Add(self.labelinst,0,wx.ALIGN_RIGHT)
-        self.hbox3.AddSpacer(5)
+        self.hbox3.AddSpacer(23)
         self.hbox3.Add(self.usinst,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox3.AddSpacer(10)
         
         self.hbox4=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox4.Add(self.labelstart,0,wx.ALIGN_RIGHT)
-        self.hbox4.AddSpacer(5)
+        self.hbox4.AddSpacer(27)
         self.hbox4.Add(self.usstart,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox4.AddSpacer(10)
         
         self.hbox5=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox5.Add(self.labelend,0,wx.ALIGN_RIGHT)
-        self.hbox5.AddSpacer(5)
+        self.hbox5.AddSpacer(31)
         self.hbox5.Add(self.usend,1,wx.ALIGN_LEFT|wx.EXPAND)
-        '''     
-        #First box components for observer and astronomer identification
-        self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
-
-        self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usastr, 1, wx.ALIGN_LEFT| wx.EXPAND)
-        self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usinst,0, wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelstart,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usstart,0,wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelend,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usend,0,wx.ALIGN_LEFT)
-        '''
-        
+        self.hbox5.AddSpacer(10)        
         
         
         #Activity Log
