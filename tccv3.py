@@ -632,20 +632,23 @@ class NightLog(wx.Panel):
         self.labelinst=wx.StaticText(self, -1, "Instrument")
         self.labelstart=wx.StaticText(self, -1, "Start Time")
         self.labelend=wx.StaticText(self, -1, "End Time")
-        self.usastr=wx.TextCtrl(self,size=(180,-1))
-        self.usobs=wx.TextCtrl(self,size=(180,-1))
+        self.usastr=wx.TextCtrl(self)
+        self.usobs=wx.TextCtrl(self)
         self.usinst=wx.TextCtrl(self,size=(75,-1))
         self.usstart=wx.TextCtrl(self,size=(50,-1))
         self.usend=wx.TextCtrl(self,size=(50,-1))
         
         
-        
-        
+        self.hbox=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox.Add(self.labelastr,0,wx.ALIGN_RIGHT)
+        self.hbox.AddSpacer(5)
+        self.hbox.Add(self.usastr,1,wx.ALIGN_LEFT|wx.EXPAND)
+        '''     
         #First box components for observer and astronomer identification
         self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
 
         self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usastr, 1, wx.EXPAND)
+        self.gbox1.Add(self.usastr, 1, wx.ALIGN_LEFT| wx.EXPAND)
         self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
         self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
         self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
@@ -654,6 +657,7 @@ class NightLog(wx.Panel):
         self.gbox1.Add(self.usstart,0,wx.ALIGN_LEFT)
         self.gbox1.Add(self.labelend,0,wx.ALIGN_RIGHT)
         self.gbox1.Add(self.usend,0,wx.ALIGN_LEFT)
+        '''
         
         
         
@@ -667,18 +671,20 @@ class NightLog(wx.Panel):
         
         
         
-        self.hbox=wx.BoxSizer(wx.VERTICAL)
+        self.vbox=wx.BoxSizer(wx.VERTICAL)
         
-        self.hbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
-        self.hbox.AddSpacer(10)
-        self.hbox.Add(self.gbox1,0, wx.ALIGN_LEFT)
-        self.hbox.AddSpacer(10)
-        self.hbox.Add(self.actheader,0,wx.ALIGN_CENTER)
-        self.hbox.Add(self.actlog,0,wx.ALIGN_CENTER)
-        self.hbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
-        self.hbox.Add(self.faillog,0, wx.ALIGN_CENTER)
-        self.SetSizer(self.hbox)
+        self.vbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.hbox,0,wx.ALIGN_LEFT|wx.EXPAND)
+        #self.vbox.Add(self.gbox1,0, wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.actheader,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.actlog,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
+        self.vbox.Add(self.faillog,0, wx.ALIGN_CENTER)
+        self.SetSizer(self.vbox)
         self.Show()
+        
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
