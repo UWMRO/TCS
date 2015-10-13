@@ -620,9 +620,13 @@ class Initialization(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-class NightLog(wx.Panel):
+class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
-        wx.Panel.__init__(self,parent)
+        self.parent = parent
+        wx.ScrolledWindow.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL)    
+        fontsz = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT).GetPixelSize()
+        self.SetScrollRate(fontsz.x, fontsz.y)
+        self.EnableScrolling(True,True)
         
         self.nltitle=wx.StaticText(self,-1, "Manastash Ridge Observatory Night Log")
         font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
@@ -672,15 +676,19 @@ class NightLog(wx.Panel):
         
         
         #Activity Log
-        self.actheader=wx.StaticText(self,label="             -------------------- ACTIVITY LOG ---------------------")
+        self.actheader=wx.StaticText(self,label="ACTIVITY LOG")
         self.actlog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
         
         #Failure Log
-        self.failheader=wx.StaticText(self,label="             -------------------- FAILURE LOG ---------------------")
+        self.failheader=wx.StaticText(self,label="FAILURE LOG")
         self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
         
+        #Focus Log
+        self.focheader=wx.StaticText(self,label="FOCUS LOG")
+        self.focinfo=wx.StaticText(self,label='Time            Instrument            Focus              Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
+        self.foclog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
         
-        
+        #Vertical box organization
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         
         self.vbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
@@ -694,12 +702,15 @@ class NightLog(wx.Panel):
         self.vbox.Add(self.hbox4,0,wx.ALIGN_LEFT|wx.EXPAND)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.hbox5,0,wx.ALIGN_LEFT|wx.EXPAND)
-        #self.vbox.Add(self.gbox1,0, wx.ALIGN_LEFT|wx.EXPAND)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.actheader,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.actlog,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
         self.vbox.Add(self.faillog,0, wx.ALIGN_CENTER)
+        self.vbox.Add(self.focheader,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.focinfo,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.foclog,0,wx.ALIGN_CENTER)
+        
         self.SetSizer(self.vbox)
         self.Show()
         
