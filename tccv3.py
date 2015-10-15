@@ -556,10 +556,15 @@ class Initialization(wx.Panel):
         self.precessEpochText.SetLabel('None')
 
         # this should autofill from tcc.conf
-        self.trackingRateLabel=wx.StaticText(self, size=(100,-1))
-        self.trackingRateLabel.SetLabel('Tracking Rate: ')
-        self.trackingRateText=wx.TextCtrl(self,size=(100,-1))
-        self.rateButton = wx.Button(self, -1, "Set Tracking Rate")
+        self.trackingRateRALabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
+        self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
+        self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
+        
+        self.trackingRateDECLabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
+        self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
+        self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
 
         #allows for change in maximum guider offsets, should be set by tcc.conf as an initial value
         self.maxdRALabel=wx.StaticText(self, size=(75,-1))
@@ -579,7 +584,7 @@ class Initialization(wx.Panel):
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
+        self.gbox2=wx.GridSizer(rows=5, cols=3, hgap=5, vgap=5)
 
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
@@ -594,9 +599,12 @@ class Initialization(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.precessEpochText, 0, wx.ALIGN_RIGHT) 
 
-        self.gbox2.Add(self.trackingRateLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.trackingRateText, 0, wx.ALIGN_LEFT) 
-        self.gbox2.Add(self.rateButton, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.trackingRateRALabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.trackingRateRAText, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.rateRAButton, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.trackingRateDECLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.trackingRateDECText, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.rateDECButton,0,wx.ALIGN_LEFT)
         self.gbox2.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.maxdRAText, 0, wx.ALIGN_LEFT) 
         self.gbox2.Add(self.dRAButton, 0, wx.ALIGN_LEFT)
@@ -686,8 +694,21 @@ class NightLog(wx.ScrolledWindow):
         
         #Focus Log
         self.focheader=wx.StaticText(self,label="FOCUS LOG")
-        self.focinfo=wx.StaticText(self,label='Time               Instrument               Focus                 Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
-        self.foclog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
+        #self.focinfo=wx.StaticText(self,label='Time               Instrument               Focus                 Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
+        #self.foclog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
+        self.foclog=wx.ListCtrl(self,size=(600,100), style=wx.LC_REPORT| wx.VSCROLL | wx.LC_VRULES)
+        self.foclog.InsertColumn(0,'Time',width=50)
+        self.foclog.InsertColumn(1,'Instrument',width=75)
+        self.foclog.InsertColumn(2,'Focus',width=75)
+        self.foclog.InsertColumn(3,'Az',width=50)
+        self.foclog.InsertColumn(5,'El',width=50)
+        self.foclog.InsertColumn(6,'Temp',width=50)
+        self.foclog.InsertColumn(7,'Strc',width=50)
+        self.foclog.InsertColumn(8,'Prim',width=50)
+        self.foclog.InsertColumn(9,'Sec',width=50)
+        self.foclog.InsertColumn(10,'Air',width=50)
+        self.foclog.InsertColumn(11,'filt',width=50)
+        self.foclog.InsertColumn(12,'FWHM',width=50)
         
         self.focusButton=wx.Button(self,label="Number of Focus Lines")
        # self.Bind(wx.EVT_BUTTON,self.getFocus,self.focusButton)
@@ -735,7 +756,7 @@ class NightLog(wx.ScrolledWindow):
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.focheader,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
-        self.vbox.Add(self.focinfo,0,wx.ALIGN_CENTER)
+        #self.vbox.Add(self.focinfo,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.foclog,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.hbox6,0,wx.ALIGN_CENTER)
@@ -892,7 +913,7 @@ class TCC(wx.Frame):
         self.sb.SetStatusText('Init Telescope to Enable Slew / Track',3)
         self.init.targetDecText.SetValue(str(self.dict['lat']))
         self.init.targetEpochText.SetValue(str( '%.3f') % t['epoch'])
-        self.init.trackingRateText.SetValue(str(self.dict['trackingRate']))
+        self.init.trackingRateRAText.SetValue(str(self.dict['trackingRate']))
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return 
