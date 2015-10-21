@@ -133,10 +133,11 @@ class Control(wx.Panel):
 
         #need to reposition these, they're all on top of each other in the
         #top left
-        self.jogNButton = wx.Button(self, -1, 'N', pos = (300, 300))
-        self.jogSButton = wx.Button(self, -1, 'S', pos = (300, 400))
-        self.jogWButton = wx.Button(self, -1, 'W', pos = (250, 350))
-        self.jogEButton = wx.Button(self, -1, 'E', pos = (350, 350))
+        self.jogNButton = wx.Button(self, -1, 'N', pos = (650, 175))
+        self.jogSButton = wx.Button(self, -1, 'S', pos = (650, 225))
+        self.jogWButton = wx.Button(self, -1, 'W', pos = (600, 200))
+        self.jogEButton = wx.Button(self, -1, 'E', pos = (700, 200))
+        #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
                
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
