@@ -557,10 +557,15 @@ class Initialization(wx.Panel):
         self.precessEpochText.SetLabel('None')
 
         # this should autofill from tcc.conf
-        self.trackingRateLabel=wx.StaticText(self, size=(100,-1))
-        self.trackingRateLabel.SetLabel('Tracking Rate: ')
-        self.trackingRateText=wx.TextCtrl(self,size=(100,-1))
-        self.rateButton = wx.Button(self, -1, "Set Tracking Rate")
+        self.trackingRateRALabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
+        self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
+        self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
+        
+        self.trackingRateDECLabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
+        self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
+        self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
 
         #allows for change in maximum guider offsets, should be set by tcc.conf as an initial value
         self.maxdRALabel=wx.StaticText(self, size=(75,-1))
@@ -580,7 +585,7 @@ class Initialization(wx.Panel):
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
+        self.gbox2=wx.GridSizer(rows=5, cols=3, hgap=5, vgap=5)
 
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
@@ -595,9 +600,12 @@ class Initialization(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.precessEpochText, 0, wx.ALIGN_RIGHT) 
 
-        self.gbox2.Add(self.trackingRateLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.trackingRateText, 0, wx.ALIGN_LEFT) 
-        self.gbox2.Add(self.rateButton, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.trackingRateRALabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.trackingRateRAText, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.rateRAButton, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.trackingRateDECLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.trackingRateDECText, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.rateDECButton,0,wx.ALIGN_LEFT)
         self.gbox2.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.maxdRAText, 0, wx.ALIGN_LEFT) 
         self.gbox2.Add(self.dRAButton, 0, wx.ALIGN_LEFT)
@@ -621,45 +629,145 @@ class Initialization(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-class NightLog(wx.Panel):
+class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
-        wx.Panel.__init__(self,parent)
+        self.parent = parent
+        wx.ScrolledWindow.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL)    
+        fontsz = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT).GetPixelSize()
+        self.SetScrollRate(fontsz.x, fontsz.y)
+        self.EnableScrolling(True,True)
         
+        self.nltitle=wx.StaticText(self,-1, "Manastash Ridge Observatory Night Log")
+        font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        self.nltitle.SetFont(font)
         self.labelastr=wx.StaticText(self, -1, "Astronomer(s)")
         self.labelobs=wx.StaticText(self, -1, "Observer(s)")
         self.labelinst=wx.StaticText(self, -1, "Instrument")
         self.labelstart=wx.StaticText(self, -1, "Start Time")
         self.labelend=wx.StaticText(self, -1, "End Time")
-        self.usastr=wx.TextCtrl(self,size=(180,-1))
-        self.usobs=wx.TextCtrl(self,size=(180,-1))
-        self.usinst=wx.TextCtrl(self,size=(75,-1))
+        self.usastr=wx.TextCtrl(self,size=(50,-1))
+        self.usobs=wx.TextCtrl(self, size=(50,-1))
+        self.usinst=wx.TextCtrl(self,size=(50,-1))
         self.usstart=wx.TextCtrl(self,size=(50,-1))
         self.usend=wx.TextCtrl(self,size=(50,-1))
         
+        #First box components for observer and astronomer identification
+        
+        self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox1.Add(self.labelastr,0,wx.ALIGN_RIGHT)
+        self.hbox1.AddSpacer(5)
+        self.hbox1.Add(self.usastr,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox1.AddSpacer(10)
+        
+        self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox2.Add(self.labelobs,0,wx.ALIGN_RIGHT)
+        self.hbox2.AddSpacer(21)
+        self.hbox2.Add(self.usobs,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox2.AddSpacer(10)
+        
+        self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox3.Add(self.labelinst,0,wx.ALIGN_RIGHT)
+        self.hbox3.AddSpacer(23)
+        self.hbox3.Add(self.usinst,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox3.AddSpacer(10)
+        
+        self.hbox4=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox4.Add(self.labelstart,0,wx.ALIGN_RIGHT)
+        self.hbox4.AddSpacer(27)
+        self.hbox4.Add(self.usstart,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox4.AddSpacer(10)
+        
+        self.hbox5=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox5.Add(self.labelend,0,wx.ALIGN_RIGHT)
+        self.hbox5.AddSpacer(31)
+        self.hbox5.Add(self.usend,1,wx.ALIGN_LEFT|wx.EXPAND)
+        self.hbox5.AddSpacer(10)        
         
         
+        #Activity Log
+        self.actheader=wx.StaticText(self,label="ACTIVITY LOG")
+        self.actlog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
+        
+        #Failure Log
+        self.failheader=wx.StaticText(self,label="FAILURE LOG")
+        self.failinfo=wx.StaticText(self,label="Time                                                                          Description                                                                                    ")
+        self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
+        
+        #Focus Log
+        self.focheader=wx.StaticText(self,label="FOCUS LOG")
+        #self.focinfo=wx.StaticText(self,label='Time               Instrument               Focus                 Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
+        #self.foclog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
+        self.foclog=wx.ListCtrl(self,size=(600,100), style=wx.LC_REPORT| wx.VSCROLL | wx.LC_VRULES)
+        self.foclog.InsertColumn(0,'Time',width=50)
+        self.foclog.InsertColumn(1,'Instrument',width=75)
+        self.foclog.InsertColumn(2,'Focus',width=75)
+        self.foclog.InsertColumn(3,'Az',width=50)
+        self.foclog.InsertColumn(5,'El',width=50)
+        self.foclog.InsertColumn(6,'Temp',width=50)
+        self.foclog.InsertColumn(7,'Strc',width=50)
+        self.foclog.InsertColumn(8,'Prim',width=50)
+        self.foclog.InsertColumn(9,'Sec',width=50)
+        self.foclog.InsertColumn(10,'Air',width=50)
+        self.foclog.InsertColumn(11,'filt',width=50)
+        self.foclog.InsertColumn(12,'FWHM',width=50)
+        
+        self.focusButton=wx.Button(self,label="Number of Focus Lines")
+       # self.Bind(wx.EVT_BUTTON,self.getFocus,self.focusButton)
+        self.focusNum=wx.TextCtrl(self,size=(30,-1))
+        self.focusNum.AppendText('1')
+        
+        self.hbox6=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox6.Add(self.focusButton,0,wx.ALIGN_CENTER)
+        self.hbox6.AddSpacer(5)
+        self.hbox6.Add(self.focusNum,0,wx.ALIGN_CENTER)
+        
+        #Save as and Submit buttons
+        self.saveButton=wx.Button(self,label="Save As")
+        
+        self.submitButton=wx.Button(self,label="Submit")
+        
+        self.hbox7=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox7.Add(self.saveButton,0,wx.ALIGN_CENTER)
+        self.hbox7.AddSpacer(25)
+        self.hbox7.Add(self.submitButton,0,wx.ALIGN_CENTER)
         
         
-        self.gbox1=wx.GridSizer(rows=5,cols=2,hgap=5,vgap=5)
-
-        self.gbox1.Add(self.labelastr, 0, wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usastr, 0, wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelobs,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usobs,0,wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelinst,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usinst,0, wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelstart,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usstart,0,wx.ALIGN_LEFT)
-        self.gbox1.Add(self.labelend,0,wx.ALIGN_RIGHT)
-        self.gbox1.Add(self.usend,0,wx.ALIGN_LEFT)
+        #Vertical box organization
+        self.vbox=wx.BoxSizer(wx.VERTICAL)
         
-        self.hbox=wx.BoxSizer(wx.VERTICAL)
+        self.vbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.hbox1,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.hbox2,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.hbox3,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.hbox4,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.hbox5,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.actheader,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.actlog,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.failinfo,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.faillog,0, wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.focheader,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
+        #self.vbox.Add(self.focinfo,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.foclog,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
+        self.vbox.Add(self.hbox6,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(25)
+        self.vbox.Add(self.hbox7,0,wx.ALIGN_CENTER)
         
-        self.hbox.AddSpacer(10)
-        self.hbox.Add(self.gbox1,0, wx.ALIGN_LEFT)
         
-        self.SetSizer(self.hbox)
+        self.SetSizer(self.vbox)
         self.Show()
+        
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
@@ -806,7 +914,7 @@ class TCC(wx.Frame):
         self.sb.SetStatusText('Init Telescope to Enable Slew / Track',3)
         self.init.targetDecText.SetValue(str(self.dict['lat']))
         self.init.targetEpochText.SetValue(str( '%.3f') % t['epoch'])
-        self.init.trackingRateText.SetValue(str(self.dict['trackingRate']))
+        self.init.trackingRateRAText.SetValue(str(self.dict['trackingRate']))
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return 
@@ -914,6 +1022,12 @@ class TCC(wx.Frame):
     def test(self,event):
         print 'this is a test event'
         return
+        
+    def getFocus(self,event):
+        num=self.focusNum.GetValue()
+        files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
+        for l in files:
+            self.focusLog.AppendText(l)
 
 if __name__=="__main__":
   app = wx.App()
