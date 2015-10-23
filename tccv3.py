@@ -527,6 +527,10 @@ class Initialization(wx.Panel):
         # add line to separate the different sections
 
         self.atZenithButton = wx.Button(self, -1, "Telescope at Zenith")
+        self.atZenithButton.Bind(wx.EVT_BUTTON,self.onZenith)
+        
+
+        #self.zenith = wx.PopupWindow("um r u sure")
 
         #Set current telescope position
         self.targetNameLabel=wx.StaticText(self, size=(75,-1))
@@ -628,6 +632,11 @@ class Initialization(wx.Panel):
         self.vbox.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
         self.SetSizer(self.vbox)
+
+    def onZenith(self, event):
+        self.second_window = wx.Frame(None)
+        text = wx.StaticText(self.second_window, -1, "r u sure ._.")
+        self.second_window.Show()
 
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
