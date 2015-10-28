@@ -328,9 +328,14 @@ class ScienceFocus(wx.Panel):
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
+        
+        self.guiderTZLabel=wx.StaticText(self, size=(75,-1))
+        self.guiderTZLabel.SetLabel('Time Zone: ')
+        time_options=['Pacific','UTC']
+        self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)   
 
+        #self.header=wx.StaticText(self,-1,"Guider Performance")
         #Add current offset and timing information only.
-
         self.dpi = 100
         self.fig = Figure((7.0,4.5), dpi=self.dpi)
         self.canvas = FigCanvas(self,-1, self.fig)
@@ -338,9 +343,10 @@ class Guider(wx.Panel):
         self.ax1 = self.fig.add_subplot(211)
         self.ax1.set_title('Guider Performance', size='small')
         self.ax1.set_ylabel('Offset (arcmin)', size='x-small')
-        self.seeingline, = self.ax1.plot([1,2,3], label="Seeing")
-        self.line2, = self.ax1.plot([3,2,1], label="Line 2")
-        self.ax1.legend(handles=[self.seeingline,self.line2], loc=1)
+        
+        self.ax1.plot([1,2,3], label="Seeing")
+        self.ax1.plot([3,2,1], label="Line 2")
+        self.ax1.legend(bbox_to_anchor=(0,1.02,1.,.102),loc=3,ncol=2,mode="expand",borderaxespad=0.)
 
         for xlabel_i in self.ax1.get_xticklabels():
             xlabel_i.set_fontsize(8)
@@ -358,6 +364,11 @@ class Guider(wx.Panel):
         self.toolbar = NavigationToolbar(self.canvas)
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
+        self.hbox=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox.Add(self.guiderTZLabel,0)
+        self.hbox.Add(self.guiderTZCombo,0)
+        self.vbox.Add(self.hbox,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(5)
         self.vbox.Add(self.canvas, 0, wx.ALIGN_CENTER)
         self.vbox.Add(self.toolbar,0, wx.ALIGN_CENTER)
 
