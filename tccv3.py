@@ -338,6 +338,10 @@ class Guider(wx.Panel):
         self.ax1 = self.fig.add_subplot(211)
         self.ax1.set_title('Guider Performance', size='small')
         self.ax1.set_ylabel('Offset (arcmin)', size='x-small')
+        self.seeingline, = self.ax1.plot([1,2,3], label="Seeing")
+        self.line2, = self.ax1.plot([3,2,1], label="Line 2")
+        self.ax1.legend(handles=[self.seeingline,self.line2], loc=1)
+
         for xlabel_i in self.ax1.get_xticklabels():
             xlabel_i.set_fontsize(8)
         for ylabel_i in self.ax1.get_yticklabels():
@@ -699,7 +703,7 @@ class NightLog(wx.ScrolledWindow):
         
         #Failure Log
         self.failheader=wx.StaticText(self,label="FAILURE LOG")
-        self.failinfo=wx.StaticText(self,label="Time                                                                          Description                                                                                    ")
+        #self.failinfo=wx.StaticText(self,label="Time                                                                          Description                                                                                    ")
         self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
         
         #Focus Log
@@ -761,7 +765,7 @@ class NightLog(wx.ScrolledWindow):
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
-        self.vbox.Add(self.failinfo,0,wx.ALIGN_CENTER)
+        #self.vbox.Add(self.failinfo,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.faillog,0, wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.focheader,0,wx.ALIGN_CENTER)
