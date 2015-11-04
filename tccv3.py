@@ -223,10 +223,11 @@ class Control(wx.Panel):
                     elevation = 1198*u.m,
                     name = "Manastash Ridge Observatory"
                     )
-        self.Obstime=Time.now()
+        self.Obstime=Time('2015-11-3 06:10:00')
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
         
         self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
+        plt.show()
 
     #def onMouseOver(self, event):
             # mouseover changes colour of button
