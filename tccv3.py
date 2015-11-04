@@ -23,7 +23,10 @@ from pytz import timezone
 import scipy
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from scipy import linspace, polyval, polyfit, sqrt, stats, randn
-
+#Astroplan test imports
+from astroplan import Observer, FixedTarget
+from astroplan.plots import plot_sky
+import astropy.units as u
 
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -138,9 +141,14 @@ class Control(wx.Panel):
         self.jogWButton = wx.Button(self, -1, 'W', pos = (600, 200))
         self.jogEButton = wx.Button(self, -1, 'E', pos = (700, 200))
         #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
-               
+        
+        #Astroplan test
+        self.plot_button=wx.Button(self,-1,'Plot Target')
+        self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
+        
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
+        self.vbox1=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
@@ -157,7 +165,12 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
-
+        
+        self.vbox1.Add(self.gbox,0,wx.ALIGN_CENTER)
+        self.vbox1.AddSpacer(10)
+        self.vbox1.Add(self.plot_button,0,wx.ALIGN_CENTER)
+        
+        
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentNamePos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentRaLabel, 0, wx.ALIGN_RIGHT)
@@ -186,7 +199,7 @@ class Control(wx.Panel):
 
         self.hbox1.Add(self.gbox2, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
-        self.hbox1.Add(self.gbox, 0, wx.ALIGN_CENTER)
+        self.hbox1.Add(self.vbox1, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
         self.hbox1.Add(self.gbox3, 0, wx.ALIGN_CENTER)
 
@@ -203,6 +216,17 @@ class Control(wx.Panel):
         self.vbox.Add(self.logBox,0,wx.ALIGN_CENTER)
 
         self.SetSizer(self.vbox)
+    def target_plot(self,event):
+        self.target=FixedTarget.from_name("m31")
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                    latitude = 46.9528*u.deg,
+                    elevation = 1198*u.m,
+                    name = "Manastash Ridge Observatory"
+                    )
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        
+        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
 
     #def onMouseOver(self, event):
             # mouseover changes colour of button
@@ -1052,7 +1076,18 @@ class TCC(wx.Frame):
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
             self.focusLog.AppendText(l)
-
+    """Uses the astroplan package to plot a targets movement for a specified observing period"""        
+    def target_plot(self,event):
+        self.target=FixedTarget.from_name("Polaris")
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                    latitude = 46.9528*u.deg,
+                    elevation = 1198*u.m,
+                    name = "Manastash Ridge Observatory"
+                    )
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        
+        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
 if __name__=="__main__":
   app = wx.App()
   app.frame = TCC()
