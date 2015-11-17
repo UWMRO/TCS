@@ -386,10 +386,10 @@ class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        self.guiderTZLabel=wx.StaticText(self, size=(75,-1))
-        self.guiderTZLabel.SetLabel('Time Zone: ')
-        time_options=['Pacific','UTC']
-        self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)   
+        #self.guiderTZLabel=wx.StaticText(self, size=(75,-1))
+        #self.guiderTZLabel.SetLabel('Time Zone: ')
+        #time_options=['Pacific','UTC']
+        #self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)   
 
         #self.header=wx.StaticText(self,-1,"Guider Performance")
         #Add current offset and timing information only.
@@ -421,10 +421,10 @@ class Guider(wx.Panel):
         self.toolbar = NavigationToolbar(self.canvas)
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
-        self.hbox=wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox.Add(self.guiderTZLabel,0)
-        self.hbox.Add(self.guiderTZCombo,0)
-        self.vbox.Add(self.hbox,0,wx.ALIGN_CENTER)
+        #self.hbox=wx.BoxSizer(wx.HORIZONTAL)
+        #self.hbox.Add(self.guiderTZLabel,0)
+        #self.hbox.Add(self.guiderTZCombo,0)
+        #self.vbox.Add(self.hbox,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.canvas, 0, wx.ALIGN_CENTER)
         self.vbox.Add(self.toolbar,0, wx.ALIGN_CENTER)
@@ -857,7 +857,8 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
-
+        #Stores current time zone for whole GUI
+        self.current_timezone=Time.now()
         self.mro=ephem.Observer()
         #self.mro = None
         debug=True
@@ -911,7 +912,7 @@ class TCC(wx.Frame):
 
         self.createMenu()
 
-        self.sb = self.CreateStatusBar(4)
+        self.sb = self.CreateStatusBar(5)
 
         sizer=wx.BoxSizer()
         sizer.Add(nb,1, wx.EXPAND|wx.ALL)
@@ -935,8 +936,15 @@ class TCC(wx.Frame):
 
         tool_file = wx.Menu()
         m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
-        self.Bind(wx.EVT_MENU, self.on_night, m_night)   
-
+        self.Bind(wx.EVT_MENU, self.on_night, m_night)
+        
+        self.tz_choice=wx.Menu()
+        tz_UTC=self.tz_choice.Append(-1,'UTC')
+        self.Bind(wx.EVT_MENU, self.on_UTC, tz_UTC)
+        tz_P=self.tz_choice.Append(-1,'Pacific')
+        self.Bind(wx.EVT_MENU, self.on_Pacific, tz_P)
+        tool_file.AppendMenu(-1,'Time Zone',self.tz_choice)
+        
         self.menubar.Append(menu_file, "&File")
         self.menubar.Append(tool_file, "&Tools")
         
@@ -962,7 +970,15 @@ class TCC(wx.Frame):
             color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
             self.SetBackgroundColour(color)
         return
-
+    def on_UTC(self,event):
+        self.current_timezone=Time.now()
+        self.sb.SetStatusText('Timezone: UTC',4)
+        return
+    def on_Pacific(self,event):
+        self.current_timezone=Time.now()-7*u.h
+        self.sb.SetStatusText('Timezone: Pacific',4)
+        return
+        
     """Take input from the any system and log both on screen and to a file.
     Necessary to define command structure for easy expansion"""
     def log(self, input):
@@ -993,6 +1009,7 @@ class TCC(wx.Frame):
         self.sb.SetStatusText('Slewing: False',1)
         self.sb.SetStatusText('Guiding: False',2)
         self.sb.SetStatusText('Init Telescope to Enable Slew / Track',3)
+        self.sb.SetStatusText('Timezone: UTC',4)
         self.init.targetDecText.SetValue(str(self.dict['lat']))
         self.init.targetEpochText.SetValue(str( '%.3f') % t['epoch'])
         self.init.trackingRateRAText.SetValue(str(self.dict['trackingRate']))
