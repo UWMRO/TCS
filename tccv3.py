@@ -23,11 +23,12 @@ from pytz import timezone
 import scipy
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from scipy import linspace, polyval, polyfit, sqrt, stats, randn
-#Astroplan test imports
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+#from astroplan.plots.finder import plot_finder_image
+#from astroquery.skyview import SkyView
 
 
 class Control(wx.Panel):
@@ -449,6 +450,7 @@ class GuiderControl(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
         #thread.start_new_thread(self.rotPaint,())
+        #finder_chart=plot_finder_image(self.target.target, fov_radius=2*u.degree)
         
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
@@ -953,7 +955,7 @@ class TCC(wx.Frame):
     """Exit in a graceful way so that the telescope information can be saved and used at a later time"""
     def on_exit(self, event):
         dlg = wx.MessageDialog(self,
-                               "Do you really want to exit the TCC",
+                               "Do you really want to exit the TCC?",
                                "Confirm Exit", wx.OK|wx.CANCEL|wx.ICON_QUESTION)
         result = dlg.ShowModal()
         dlg.Destroy()
