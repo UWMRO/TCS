@@ -25,8 +25,10 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 #Astroplan test imports
 from astroplan import Observer, FixedTarget
-from astroplan.plots import plot_sky
+from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
+from astropy.coordinates import SkyCoord
+
 
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -142,9 +144,6 @@ class Control(wx.Panel):
         self.jogEButton = wx.Button(self, -1, 'E', pos = (700, 200))
         #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
         
-        #Astroplan test
-        self.plot_button=wx.Button(self,-1,'Plot Target')
-        self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
         
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -167,8 +166,7 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
         
         self.vbox1.Add(self.gbox,0,wx.ALIGN_CENTER)
-        self.vbox1.AddSpacer(10)
-        self.vbox1.Add(self.plot_button,0,wx.ALIGN_CENTER)
+        
         
         
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
@@ -216,18 +214,6 @@ class Control(wx.Panel):
         self.vbox.Add(self.logBox,0,wx.ALIGN_CENTER)
 
         self.SetSizer(self.vbox)
-    def target_plot(self,event):
-        self.target=FixedTarget.from_name("m31")
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                    latitude = 46.9528*u.deg,
-                    elevation = 1198*u.m,
-                    name = "Manastash Ridge Observatory"
-                    )
-        self.Obstime=Time('2015-11-3 06:10:00')
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        
-        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
-        plt.show()
 
     #def onMouseOver(self, event):
             # mouseover changes colour of button
@@ -259,15 +245,18 @@ class Target(wx.Panel):
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
-
+        self.nameText.SetLabel('M31')
+        
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
-
+        self.raText.SetLabel('00h42m44.330s')
+        
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
-
+        self.decText.SetLabel('+41d16m07.50s')
+        
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
@@ -278,7 +267,13 @@ class Target(wx.Panel):
         self.magText=wx.TextCtrl(self,size=(100,-1))
         
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-
+        
+        self.plot_button=wx.Button(self,-1,'Plot Target')
+        self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
+        
+        self.airmass_button=wx.Button(self,-1,"Airmass Curve")
+        self.airmass_button.Bind(wx.EVT_BUTTON,self.airmass_plot)
+        
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
@@ -308,6 +303,10 @@ class Target(wx.Panel):
         self.hbox3.Add(self.selectButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(50)
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(50)
+        self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(50)
+        self.hbox3.Add(self.airmass_button,0,wx.ALIGN_CENTER)
      
         self.vbox.Add(self.hbox1,0, wx.ALIGN_CENTER,5)
         self.vbox.AddSpacer(10)
@@ -321,11 +320,44 @@ class Target(wx.Panel):
         debug==True
         self.dir=os.getcwd()
             
-        self.nameText.SetValue('M31')
-        self.raText.SetValue('00:44:42.3')
-        self.decText.SetValue('41:16:09')
-        self.epochText.SetValue('2000')
-        self.fileText.SetLabel(self.dir+'20150302.list')
+        
+        
+    
+    
+    
+    '''Plot the selected targets position over the next 8 hours'''      
+    def target_plot(self,event):
+        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
+        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        self.Obstime=Time('2015-11-3 06:10:00')
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        self.target_style={'color':'SteelBlue'}
+        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.legend(shadow=True, loc=2)
+        plt.show()
+    def airmass_plot(self,event):
+        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
+        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        self.Obstime=Time('2015-11-3 06:10:00')
+        self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
+        self.target_style={'color':'SteelBlue'}
+        self.airmass=plot_airmass(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.axhline(y=2,linestyle='--',color='orange')
+        plt.axhline(y=2.5,linestyle='--',color='r')
+        plt.legend(shadow=True, loc=1)
+        plt.show()
+        
+
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -1021,7 +1053,22 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-
+    
+    """Use Astroplan to plot the currently selected targets position over the next eight hours"""
+    def target_plot(self,event):
+        self.target=FixedTarget.from_name("m31")
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        self.Obstime=Time('2015-11-3 06:10:00')
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        
+        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
+        plt.show()
+        return
+        
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
         name='Zenith'
