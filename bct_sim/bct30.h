@@ -5,7 +5,7 @@
 
 #include <iostream>
 //#include "mcapi.h"
-#include "indiapi.h"
+//#include "indiapi.h"
 
 //#define Ra 1	// PMC board axis n assigned to <name> servo
 //#define Dec 2

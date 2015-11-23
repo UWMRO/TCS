@@ -8,12 +8,12 @@ int main(){
 
 bct30::bct30(void)
 {
-
+    printf("bct30 constructor called\n");
 }
 
 bct30::~bct30()
 {
-
+    printf("bct30 destructor called\n");
 }
 
 
@@ -21,7 +21,7 @@ bct30::~bct30()
 /******* private commands *********/
 int bct30::OpenController(void)
 {
-
+    printf("OpenController(void) called\n");
 }
 
 
@@ -33,7 +33,7 @@ int bct30::OpenController(void)
 /*    Return the raw encoder count */
 int bct30::getEncoderCnt(int AxisNumber, double *posit)
 {
-    printf("getEncoderCnt() called");
+    printf("getEncoderCnt(%d, posit_ref) called\n", AxisNumber);
 }
 
 
@@ -48,29 +48,29 @@ int bct30::getEncoderCnt(int AxisNumber, double *posit)
 */
 int bct30::getPosition(int AxisNumber, double *degrees)
 {
-    printf("getPosition() called.");
+    printf("getPosition(%d, degrees_ref) called\n", AxisNumber);
 }
 
 void bct30::getVelocity(int AxisNumber, double *velocity)
 {
-    printf("getVelocity() called.");
+    printf("getVelocity(%d, velocity_ref) called\n", AxisNumber);
 }
 
 
 short int bct30::getDigitalIO(int channel)
 {
-    printf("getDigitalIO() called.");
+    printf("getDigitalIO(%d) called\n", channel);
 }
 
 // return a human-readable string
 void bct30::TranslateError(char *buff, int buff_len)
 {
-    printf("TranslateError called.");
+    printf("TranslateError(%s, %d) called\n", buff, buff_len);
 }
 
 short int bct30::GetError()
 {
-    printf("GetError called.");
+    printf("GetError() called\n");
 }
 
 
@@ -79,61 +79,65 @@ short int bct30::GetError()
 
 int bct30::setZenith(void)
 {
-    printf("setZenith() called.");
+    printf("setZenith(void) called\n");
 }
 
 int bct30::setEncoderToZero(int AxisNumber)
 {
-    printf("setEncoderToZero() called.");
+    printf("setEncoderToZero(%d) called\n", AxisNumber);
 }
 
 /* set current encoder value to degrees off zenith */
 void bct30::setPosition(int AxisNumber, double *degrees)
 {
-    printf("setPosition() called.");
+    printf("setPosition(%d, degrees_ref) called\n", AxisNumber);
 }
 
 /** Motion Commands **/
 /* normal stop */
 void bct30::stopSlew(int AxisNumber)
 {
-    printf("stopSlew() called.");
+    printf("stopSlew(%d) called\n", AxisNumber);
 }
 
 /* normal stop */
 void bct30::stopSlew()
 {
-    printf("stopSlew() called.");
+    printf("stopSlew() called\n");
 }
 
 /* Estop - abrupt stop */
 void bct30::estop(int AxisNumber)
 {
-    printf("estop() called.");
+    printf("estop(%d) called\n", AxisNumber);
 }
 
 void bct30::estop(void)
 {
-    printf("estop() called.");
+    printf("estop(void) called\n");
 }
 
 
 void bct30::enableAmp(int AxisNumber, bool state)
 {
-    printf("enableAmp() called.");
+    printf("enableAmp(%d,", AxisNumber);
+    if (state)
+        printf(" True) called\n");
+    else
+        printf(" False) called\n");
 }
 
 
 
 bool bct30::IsAtTarget(int AxisNumber)
 {
-   printf("IsAtTarget() called.");
+   printf("IsAtTarget() called\n");
 }
 
 
 bool bct30::IsStopped(int AxisNumber)
 {
-    printf("IsStopped() called.");
+    printf("IsStopped(%d) called\n", AxisNumber);
 }
 
 
@@ -143,7 +147,7 @@ bool bct30::IsStopped(int AxisNumber)
 */
 void bct30::MoveRelative(int AxisNumber, double distance)
 {
-    printf("MoveRelative() called.");
+    printf("MoveRelative(%d, %f) called\n", AxisNumber, distance);
 }
 
 
@@ -153,7 +157,7 @@ void bct30::MoveRelative(int AxisNumber, double distance)
 
 int bct30::Jog(int AxisNumber, double distance)
 {
-    printf("Jog() called.");
+    printf("Jog(%d, %f) called\n", AxisNumber, distance);
 }
 
 
@@ -164,7 +168,7 @@ int bct30::Jog(int AxisNumber, double distance)
 */
 int bct30::moveTo(int AxisNumber, double *degrees)
 {
-    printf("moveTo() called.");
+    printf("moveTo(%d, degrees_ref) called\n", AxisNumber);
 }
 
 
@@ -174,59 +178,59 @@ int bct30::moveTo(int AxisNumber, double *degrees)
 
 void bct30::MoveAbsolute(int AxisNumber, double position)
 {
-    printf("MoveAbsolute() called.");
+    printf("MoveAbsolute(%d, %f) called\n", AxisNumber, position);
 }
 
 
 /* track at standard sideral rate */
 void bct30::track(void)
 {
-    printf("track() called.");
+    printf("track(void) called\n");
 }
 
 
 /* Track at non-sidereal rate. rate is arcsec/sec (or deg/hr) */
 int bct30::track(int AxisNumber, double rate)
 {
-    printf("track() called.");
+    printf("track(%d, %f) called\n", AxisNumber, rate);
 }
 
 /* move degrees off zenith */
 void bct30::moveRelativeDegrees(int AxisNumber, double *degrees)
 {
-    printf("moveRelativeDegrees() called.");
+    printf("moveRelativeDegrees(%d, degrees_ref) called\n", AxisNumber);
 }
 
 int bct30::checkHandPaddle()
 {
-    printf("checkHandPaddle() called.");
+    printf("checkHandPaddle() called\n");
 }
 
 /* a safer, position-based jog */
 /* depricated: regular jog seems fine now */
 void bct30::checkHandPaddle2()
 {
-    printf("checkHandPaddle2() called.");
+    printf("checkHandPaddle2() called\n");
 }
 
 void bct30::GetFollowingError(int AxisNumber, double *error)
 {
-    printf("GetFollowingError() called.");
+    printf("GetFollowingError(%d, error_ref) called\n", AxisNumber);
 }
 
 void bct30::Reset(int AxisNumber)
 {
-    printf("Reset() called.");
+    printf("Reset(%d) called\n", AxisNumber);
 }
 
 void bct30::getStatus(int AxisNumber, int *stat)
 {
-    printf("getStatus() called.");
+    printf("getStatus(%d, stat_ref) called\n", AxisNumber);
 }
 
 void bct30::getMode(int AxisNumber, int *mode)
 {
-    printf("getMode() called.");
+    printf("getMode(%d, mode_ref) called\n", AxisNumber);
 }
 
 /*******************************
@@ -234,7 +238,7 @@ void bct30::getMode(int AxisNumber, int *mode)
 ********************************/
 int bct30::initAxis(int AxisNumber)
 {
-    printf("initAxis() called.");
+    printf("initAxis() called\n");
 }
 
 
