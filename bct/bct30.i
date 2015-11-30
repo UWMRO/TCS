@@ -7,6 +7,8 @@
 #include "mcapi_standin.h"
 %}
 
+/* TODO: figure out how to handle pass-by-reference function args */
+
 class bct30
 {
 public:
