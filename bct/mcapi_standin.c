@@ -1,161 +1,178 @@
+#include <stdio.h>
 
-void MCStop(void *hCtlr, int axes)
+#include "mcapi_standin.h"
+
+void MCStop(HCTRLR hCtlr, int axes)
 {
-	
+    printf("MCStop()\n");
 }
 
-void MCReset(void *hCtlr, int axes)
+void MCReset(HCTRLR hCtlr, int axes)
 {
-	
+    printf("MCReset()\n");
 }
 
-void MCClose(void *hCtlr)
+void MCClose(HCTRLR hCtlr)
 {
-	
+    printf("MCClose()\n");
 }
 
 int MCOpen(int a, int b, const char *c)
 {
-	
+    printf("MCOpen()\n");
+    return 1;
 }
 
-void MCTranslateErrorEx(void *hCtlr, char *buf, int size)
+void MCTranslateErrorEx(HCTRLR hCtlr, char *buf, int size)
 {
-	
+    printf("MCTranslateErrorEx()\n");
 }
 
-void MCConfigureDigitalIO(void *hCtlr, void *func, int mask)
+void MCConfigureDigitalIO(HCTRLR hCtlr, int func, int mask)
 {
-	
+    printf("MCConfigureDigitalIO()\n");
 }
 
-int MCGetPositionEx(void *hCtlr, int axis, double *posit)
+int MCGetPositionEx(HCTRLR hCtlr, int axis, double *posit)
 {
-	
+    printf("MCGetPositionEx()\n");
+    return 1;
 }
 
-void MCGetVelocityActual(void *hCtlr, int axis, double *velocity)
+void MCGetVelocityActual(HCTRLR hCtlr, int axis, double *velocity)
 {
-	
+    printf("MCGetVelocityActual()\n");
 }
 
-short int MCGetDigitalIO(void *hCtlr, int channel)
+short int MCGetDigitalIO(HCTRLR hCtlr, int channel)
 {
-	
+    printf("MCGetDigitalIO()\n");
+    return 1;
 }
 
-int MCGetError(void *hCtlr)
+int MCGetError(HCTRLR hCtlr)
 {
-	
+    printf("MCGetError()\n");
+    return 0;
 }
 
-void MCSetPosition(void *hCtlr, int axis, double distance)
+void MCSetPosition(HCTRLR hCtlr, int axis, double distance)
 {
-	
+    printf("MCSetPosition()\n");
 }
 
-void MCAbort(void *hCtlr, int axis)
+void MCAbort(HCTRLR hCtlr, int axis)
 {
-	
+    printf("MCAbort()\n");
 }
 
-void MCEnableDigitalIO(void *hCtlr, bool enable, bool state)
+void MCEnableDigitalIO(HCTRLR hCtlr, bool enable, bool state)
 {
-	
+    printf("MCEnableDigitalIO()\n");
 }
 
-bool MCIsStopped(void *hCtlr, int axis, int a)
+bool MCIsStopped(HCTRLR hCtlr, int axis, int a)
 {
-	
+    printf("MCIsStopped()\n");
+    return true;
 }
 
-void MCSetVelocity(void *hCtlr, int axis, int vel)
+void MCSetVelocity(HCTRLR hCtlr, int axis, int vel)
 {
-	
+    printf("MCSetVelocity()\n");
 }
 
-void MCSetOperatingMode(void *hCtlr, int axis, int a, int pos)
+void MCSetOperatingMode(HCTRLR hCtlr, int axis, int a, int pos)
 {
-	
+    printf("MCSetOperatingMode()\n");
 }
 
-void MCMoveRelative(void *hCtlr, int axis, double distance)
+void MCMoveRelative(HCTRLR hCtlr, int axis, double distance)
 {
-	
+    printf("MCSetOperatingMode()\n");
 }
 
-void MCGetOperatingMode(void *hCtlr, int axis, int *mode)
+void MCGetOperatingMode(HCTRLR hCtlr, int axis, int *mode)
 {
-	
+    printf("MCGetOperationMode()\n");
 }
 
-void MCMoveAbsolute(void *hCtlr, int axis, double position)
+void MCMoveAbsolute(HCTRLR hCtlr, int axis, double position)
 {
-	
+    printf("MCMoveAbsolute()\n");
 }
 
-void MCGetVelocityActual(void *hCtlr, int axis, double *vel)
+void MCDirection(HCTRLR hCtlr, int axis, int a)
 {
-	
+    printf("MCDirection()\n");
 }
 
-void MCDirection(void *hCtlr, int axis, int a)
+void MCGoEx(HCTRLR hCtlr, int axis, double a)
 {
-	
+    printf("MCGoEx()\n");
 }
 
-void MCGoEx(void hCtlr, int axis, double a)
+void MCEnableAxis(HCTRLR hCtlr, int axis, bool a)
 {
-	
+    printf("MCEnableAxis()\n");
 }
 
-void MCEnableAxis(void *hCtlr, int axis, bool a)
+void MCGetStatusEx(HCTRLR hCtlr, int axis, MCSTATUSEX *status)
 {
-	
+    printf("MCGetStatusEx()\n");
 }
 
-void MCGetStatusEx(void *hCtlr, int axis, int *status)
+void MCDecodeStatusEx(HCTRLR hCtlr, MCSTATUSEX *new_stat, DWORD stat)
 {
-	
+    printf("MCDecodeStatusEx()\n");
 }
 
-void MCDecodeStatusEx(void *hCtlr, int *new_stat, DWORD stat)
+void MCGetMotionConfigEx(int a, int axis, MCMOTIONEX *p_motion)
 {
-	
+    printf("MCGetMotionConfigEx()\n");
 }
 
-void MCGetMotionConfigEx(int a, int axis, void *p_motion)
+void MCSetMotionConfigEx(HCTRLR hCtlr, int axis, MCMOTIONEX *p_motion)
 {
-	
+    printf("MCSetMotionConfigEx()\n");
 }
 
-void MCSetMotionConfigEx(void *hCtlr, int axis, void *p_motion)
+void MCSetServoOutputPhase(HCTRLR hCtlr, int axis, int phase_rev)
 {
-	
+    printf("MCSetServoOutputPhase()\n");
 }
 
-void MCSetServoOutputPhase(void *hCtlr, int axis, int phase_rev)
+void MCGetFilterConfigEx(HCTRLR hCtlr, int axis, MCFILTEREX *p_filter)
 {
-	
+    printf("MCGetFilterConfigEx()\n");
 }
 
-void MCGetFilterConfigEx(void *hCtlr, int axis, void *p_filter)
+void MCSetFilterConfigEx(HCTRLR hCtlr, int axis, MCFILTEREX *p_filter)
 {
-	
+    printf("MCSetFilterConfigEx()\n");
 }
 
-void MCSetFilterConfigEx(void *hCtlr, int axis, void *p_filter)
+void MCSetProfile(HCTRLR hCtlr, int axis, int prof)
 {
-	
+    printf("MCSetProfile()\n");
 }
 
-void MCSetProfile(void *hCtlr, int axis, int prof)
+void MCSetLimits(HCTRLR hCtlr, int axis, int limit, int a, double b, double c)
 {
-	
+    printf("MCSetLimits()\n");
 }
 
-void MCSetLimits(void *hCtlr, int axis, int limit, int a, double b, double c)
+extern void MCGetFollowingError(HCTRLR hCtlr, int axis, double *error)
 {
-	
+    printf("MCGetFollowingError()\n");
 }
 
+extern void MCSetModuleInputMode(HCTRLR hCtlr, int axis, int a)
+{
+    printf("MCSetModuleInputMode()\n");
+}
+
+extern void MCSetModuleOutputMode(HCTRLR hCtlr, int axis, int a)
+{
+    printf("MCSetModuleOutputMode()\n");
+}

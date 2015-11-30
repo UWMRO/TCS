@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "mcapi.h"
+//#include "mcapi.h"
+#include "mcapi_standin.h"
+
 #ifndef INDI_DEVAPI_H
 #include "indicom.h"
 #endif

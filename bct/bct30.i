@@ -4,7 +4,7 @@
 #include "indicom.h"
 #include "globals.h"
 #include "iomappings.h"
-#include "mcapi.h"
+#include "mcapi_standin.h"
 %}
 
 class bct30
