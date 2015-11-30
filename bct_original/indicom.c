@@ -24,7 +24,7 @@
 */
 
 /* needed for sincos() in math.h */
-//#define _GNU_SOURCE
+#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <math.h>
@@ -67,7 +67,7 @@ void apparentCoord(double jd0, double jdf, double *RA, double *Dec);
 void getSexComponents(double value, int *d, int *m, int *s);
 
 double K = ( 20.49552 / 3600. );
-double Obliquity, L, L0, LM, M, M0, O, P;
+double Obliquity, K, L, L0, LM, M, M0, O, P;
 double XP, YP, ZP;
 double CX, SX, CY, SY, CZ, SZ;
 double P1[3][3], P2[3][3];

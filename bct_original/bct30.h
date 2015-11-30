@@ -4,8 +4,7 @@
 #define __BCT30__
 
 #include <iostream>
-//#include "mcapi.h"
-#include "mcapi_standin.h"
+#include "mcapi.h"
 #include "indiapi.h"
 
 //#define Ra 1	// PMC board axis n assigned to <name> servo
