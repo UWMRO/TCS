@@ -453,13 +453,14 @@ class GuiderControl(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
         #thread.start_new_thread(self.rotPaint,())
-        self.current_target=FixedTarget.from_name('m31')
+        self.current_target=None
         
         self.fig = Figure((4,4))
         self.canvas = FigCanvas(self,-1, self.fig)
-
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
+        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
         
@@ -1055,7 +1056,7 @@ class TCC(wx.Frame):
         mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
         
         self.coordinates=SkyCoord(ra,dec,frame='icrs')
-        self.guiderControl.current_target=FixedTarget(name=name,coord=self.coordinates)
+        self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
         
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
