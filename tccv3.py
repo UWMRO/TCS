@@ -455,8 +455,11 @@ class GuiderControl(wx.Panel):
         #thread.start_new_thread(self.rotPaint,())
         self.current_target=FixedTarget.from_name('m31')
         
-        #self.finder_axis = plt.subplot(111)
-        #plt.sca(self.finder_axis)
+        self.fig = Figure((4,4))
+        self.canvas = FigCanvas(self,-1, self.fig)
+
+        self.ax1 = self.fig.add_subplot(111)
+        self.ax1.set_axis_off()
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
         
@@ -501,7 +504,8 @@ class GuiderControl(wx.Panel):
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
         
         #self.hbox2.Add(self.panel2,0,wx.ALIGN_RIGHT)
-        self.hbox2.AddSpacer(350)
+        self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
+        self.hbox2.AddSpacer(133)
         self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
         
         self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
@@ -524,7 +528,8 @@ class GuiderControl(wx.Panel):
         
     '''Load the finder chart for the current target'''
     def load_finder_chart(self,event):
-        self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree)
+        self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
+        self.ax1.set_axis_off()
         return
 
 
