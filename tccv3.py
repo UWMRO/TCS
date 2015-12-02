@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as dt
 import numpy as np
 from matplotlib.figure import Figure
+from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
@@ -27,8 +28,9 @@ from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
 from astropy.coordinates import SkyCoord
-#from astroplan.plots.finder import plot_finder_image
-#from astroquery.skyview import SkyView
+from astroplan.plots.finder import plot_finder_image
+from astroquery.skyview import SkyView
+import wcsaxes
 
 
 class Control(wx.Panel):
@@ -240,7 +242,7 @@ class Target(wx.Panel):
         self.targetList.InsertColumn(2,'DEC',width=125)
         self.targetList.InsertColumn(3,'EPOCH',width=75)
         self.targetList.InsertColumn(5,'V Mag',width=75)
-        self.selectButton = wx.Button(self, -1, "Enter Target to Control Tab")
+        self.selectButton = wx.Button(self, -1, "Select as Current Target")
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
         self.nameLabel=wx.StaticText(self, size=(50,-1))
@@ -341,6 +343,7 @@ class Target(wx.Panel):
         self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
         plt.show()
+    '''Plot the selected targets airmass curve'''
     def airmass_plot(self,event):
         self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
         self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
@@ -357,7 +360,7 @@ class Target(wx.Panel):
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
         plt.show()
-        
+    
 
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -450,11 +453,15 @@ class GuiderControl(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
         #thread.start_new_thread(self.rotPaint,())
-        #finder_chart=plot_finder_image(self.target.target, fov_radius=2*u.degree)
+        self.current_target=FixedTarget.from_name('m31')
         
+        #self.finder_axis = plt.subplot(111)
+        #plt.sca(self.finder_axis)
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
-
+        
+        self.finderButton=wx.Button(self,-1,"Load Finder Chart")
+        self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars")
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding")
 
@@ -487,7 +494,8 @@ class GuiderControl(wx.Panel):
         self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderBinningLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderBinningCombo, 0, wx.ALIGN_RIGHT)
-
+        
+        self.hbox.Add(self.finderButton,0,wx.ALIGN_RIGHT)
         self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_RIGHT)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
@@ -513,6 +521,11 @@ class GuiderControl(wx.Panel):
 
         
         self.SetSizer(self.vbox)
+        
+    '''Load the finder chart for the current target'''
+    def load_finder_chart(self,event):
+        self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree)
+        return
 
 
     def InitBuffer(self):
@@ -1028,13 +1041,17 @@ class TCC(wx.Frame):
         #also log the transformations
         return
 
-    """Take a selected item from the list and fill in the slew target window"""
+    """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
     def targetSelectSlew(self, event):
         name = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0)
         ra = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         dec = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
         epoch = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
+        
+        self.coordinates=SkyCoord(ra,dec,frame='icrs')
+        self.guiderControl.current_target=FixedTarget(name=name,coord=self.coordinates)
+        
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
         self.control.targetRaText.SetValue(ra)
