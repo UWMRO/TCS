@@ -18,7 +18,7 @@ class Parser(object):
 		if input[0]=='focus':
 			value=input[1]
 			logread= "Focusing telescope"
-			return {'log':logread, 'focus': self.pmc.slew(value)
+			return {'log':logread, 'focus': self.pmc.slew(value)}
 
 		if input[0]=='offset':
 			RAjog=input[1]
@@ -28,17 +28,17 @@ class Parser(object):
 
 		if input[0]=='toggle track':
 			tracking=input[1]
-			if tracking=True:
+			if tracking==True:
 				logread= "Turning tracking on"
-			elif tracking=False:
+			elif tracking==False:
 				logread= "Turning tracking off"
-			return {'log':logread,'track_toggle':self.pmc.track_set(tracking)
+			return {'log':logread,'track_toggle':self.pmc.track_set(tracking)}
 
 		if input[0]=='set tracking rate':
 			RArate=input[1]
 			DECrate=input[2]
-			logread:"Setting RA and DEC tracking rates to specified values"
-			return {'log':logread1,  'trackingrate':self.pmc.track_setrate(RArate,DECrate)
+			logread="Setting RA and DEC tracking rates to specified values"
+			return {'log':logread,  'trackingrate':self.pmc.track_setrate(RArate,DECrate)}
 
 		if input[0]=='tracking status':
 			return self.pmc.track_status()
