@@ -53,7 +53,7 @@ class pmc():
 		returns: confirmation and set rates
 		'''
 		None
-	def track_status(self)
+	def track_status(self):
 		'''
 		Displays status information for guider tracking
 		arguments:

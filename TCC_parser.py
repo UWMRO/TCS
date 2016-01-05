@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-#import pmc
+import pmc
 
 class Parser(object):
 	def __init__(self):
