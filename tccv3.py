@@ -32,6 +32,10 @@ from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
 
+from twisted.internet import wxreactor
+wxreactor.install()
+from twisted.internet import reactor, protocol
+from twisted.protocols import basic
 
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -129,8 +133,8 @@ class Control(wx.Panel):
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetLabel('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
-        
-        
+
+
         self.slewButton = wx.Button(self, -1, "Slew to Target")
         self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
@@ -146,8 +150,8 @@ class Control(wx.Panel):
         self.jogWButton = wx.Button(self, -1, 'W', pos = (600, 200))
         self.jogEButton = wx.Button(self, -1, 'E', pos = (700, 200))
         #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
-        
-        
+
+
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
@@ -156,7 +160,7 @@ class Control(wx.Panel):
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=10, cols=2, hgap=5, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
-        
+
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetRaLabel, 0, wx.ALIGN_RIGHT)
@@ -167,11 +171,11 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
-        
+
         self.vbox1.Add(self.gbox,0,wx.ALIGN_CENTER)
-        
-        
-        
+
+
+
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentNamePos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentRaLabel, 0, wx.ALIGN_RIGHT)
@@ -223,16 +227,16 @@ class Control(wx.Panel):
             #self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
             #event.Skip()
 
-  
+
 class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-      
+
         #setup the test and retrieval button for getting target list
         self.fileLabel=wx.StaticText(self, size=(125,-1))
         self.fileLabel.SetLabel('Target List Path: ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
-        
+
         self.listButton = wx.Button(self, -1, "Retrieve List")
 
         #show list of targets with selection button.  When the target is highlighted the selection button will input the data into the Control window.
@@ -249,17 +253,17 @@ class Target(wx.Panel):
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
         self.nameText.SetLabel('M31')
-        
+
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
         self.raText.SetLabel('00h42m44.330s')
-        
+
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
         self.decText.SetLabel('+41d16m07.50s')
-        
+
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
@@ -268,15 +272,15 @@ class Target(wx.Panel):
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
-        
+
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-        
+
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
-        
+
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
         self.airmass_button.Bind(wx.EVT_BUTTON,self.airmass_plot)
-        
+
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
@@ -299,7 +303,7 @@ class Target(wx.Panel):
         self.gbox.Add(self.epochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.magLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.magText, 0, wx.ALIGN_RIGHT)
-       
+
         self.hbox2.Add(self.targetList,0, wx.ALIGN_CENTER)
         self.hbox2.Add(self.gbox,0,wx.ALIGN_CENTER)
 
@@ -310,7 +314,7 @@ class Target(wx.Panel):
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(50)
         self.hbox3.Add(self.airmass_button,0,wx.ALIGN_CENTER)
-     
+
         self.vbox.Add(self.hbox1,0, wx.ALIGN_CENTER,5)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox2,0, wx.ALIGN_CENTER,5)
@@ -322,13 +326,13 @@ class Target(wx.Panel):
 
         debug==True
         self.dir=os.getcwd()
-            
-        
-        
-    
-    
-    
-    '''Plot the selected targets position over the next 8 hours'''      
+
+
+
+
+
+
+    '''Plot the selected targets position over the next 8 hours'''
     def target_plot(self,event):
         self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
         self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
@@ -360,7 +364,7 @@ class Target(wx.Panel):
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
         plt.show()
-    
+
 
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -379,8 +383,8 @@ class ScienceFocus(wx.Panel):
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetLabel('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
-        
-        
+
+
         self.slewButton = wx.Button(self, -1, "Slew to Target")
         self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
@@ -389,11 +393,11 @@ class ScienceFocus(wx.Panel):
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-        
+
         #self.guiderTZLabel=wx.StaticText(self, size=(75,-1))
         #self.guiderTZLabel.SetLabel('Time Zone: ')
         #time_options=['Pacific','UTC']
-        #self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)   
+        #self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)
 
         #self.header=wx.StaticText(self,-1,"Guider Performance")
         #Add current offset and timing information only.
@@ -404,7 +408,7 @@ class Guider(wx.Panel):
         self.ax1 = self.fig.add_subplot(211)
         self.ax1.set_title('Guider Performance', size='small')
         self.ax1.set_ylabel('Offset (arcmin)', size='x-small')
-        
+
         self.ax1.plot([1,2,3], label="Seeing")
         self.ax1.plot([3,2,1], label="Line 2")
         self.ax1.legend(bbox_to_anchor=(0,1.02,1.,.102),loc=3,ncol=2,mode="expand",borderaxespad=0.)
@@ -439,7 +443,7 @@ class Guider(wx.Panel):
 class GuiderControl(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-        
+
         # add visual representation of stepper and periscope position
         # show computation for decovultion of position
         # image display w/ vector offset arrows
@@ -454,16 +458,16 @@ class GuiderControl(wx.Panel):
 
         #thread.start_new_thread(self.rotPaint,())
         self.current_target=None
-        
+
         self.fig = Figure((4,4))
         self.canvas = FigCanvas(self,-1, self.fig)
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-        
+
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
-        
+
         self.finderButton=wx.Button(self,-1,"Load Finder Chart")
         self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars")
@@ -477,7 +481,7 @@ class GuiderControl(wx.Panel):
         self.guiderBinningLabel=wx.StaticText(self, size=(75,-1))
         self.guiderBinningLabel.SetLabel('Binning: ')
         binning_options=['1','2','3']
-        self.guiderBinningCombo=wx.ComboBox(self,size=(50,-1), choices=binning_options, style=wx.CB_READONLY)   
+        self.guiderBinningCombo=wx.ComboBox(self,size=(50,-1), choices=binning_options, style=wx.CB_READONLY)
 
         self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure')
 
@@ -498,17 +502,17 @@ class GuiderControl(wx.Panel):
         self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderBinningLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderBinningCombo, 0, wx.ALIGN_RIGHT)
-        
+
         self.hbox.Add(self.finderButton,0,wx.ALIGN_RIGHT)
         self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_RIGHT)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
-        
+
         #self.hbox2.Add(self.panel2,0,wx.ALIGN_RIGHT)
         self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
         self.hbox2.AddSpacer(133)
         self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
-        
+
         self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
         self.hbox2.AddSpacer(10)
         self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
@@ -524,9 +528,9 @@ class GuiderControl(wx.Panel):
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
 
-        
+
         self.SetSizer(self.vbox)
-        
+
     '''Load the finder chart for the current target'''
     def load_finder_chart(self,event):
         self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
@@ -542,7 +546,7 @@ class GuiderControl(wx.Panel):
 
         self.Buffer=wx.EmptyBitmap(size.width,size.height)
         self.dc=wx.MemoryDC()
-        
+
         self.dc.SelectObject(self.Buffer)
         self.dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
         self.dc.Clear()
@@ -609,7 +613,7 @@ class GuiderControl(wx.Panel):
 class GuiderFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-        None       
+        None
 
 
 
@@ -621,7 +625,7 @@ class Initialization(wx.Panel):
 
         self.atZenithButton = wx.Button(self, -1, "Telescope at Zenith")
         self.atZenithButton.Bind(wx.EVT_BUTTON,self.onZenith)
-        
+
 
         #self.zenith = wx.PopupWindow("um r u sure")
 
@@ -658,7 +662,7 @@ class Initialization(wx.Panel):
         self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
         self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
-        
+
         self.trackingRateDECLabel=wx.StaticText(self, size=(100,-1))
         self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
         self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
@@ -695,7 +699,7 @@ class Initialization(wx.Panel):
         self.gbox.Add(self.precessDecText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetEpochLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.precessEpochText, 0, wx.ALIGN_RIGHT) 
+        self.gbox.Add(self.precessEpochText, 0, wx.ALIGN_RIGHT)
 
         self.gbox2.Add(self.trackingRateRALabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.trackingRateRAText, 0, wx.ALIGN_LEFT)
@@ -704,10 +708,10 @@ class Initialization(wx.Panel):
         self.gbox2.Add(self.trackingRateDECText, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.rateDECButton,0,wx.ALIGN_LEFT)
         self.gbox2.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.maxdRAText, 0, wx.ALIGN_LEFT) 
+        self.gbox2.Add(self.maxdRAText, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.dRAButton, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.maxdDECLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.maxdDECText, 0, wx.ALIGN_LEFT) 
+        self.gbox2.Add(self.maxdDECText, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.dDECButton, 0, wx.ALIGN_LEFT)
 
 
@@ -734,11 +738,11 @@ class Initialization(wx.Panel):
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
         self.parent = parent
-        wx.ScrolledWindow.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL)    
+        wx.ScrolledWindow.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL)
         fontsz = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT).GetPixelSize()
         self.SetScrollRate(fontsz.x, fontsz.y)
         self.EnableScrolling(True,True)
-        
+
         self.nltitle=wx.StaticText(self,-1, "Manastash Ridge Observatory Night Log")
         font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
         self.nltitle.SetFont(font)
@@ -752,49 +756,49 @@ class NightLog(wx.ScrolledWindow):
         self.usinst=wx.TextCtrl(self,size=(50,-1))
         self.usstart=wx.TextCtrl(self,size=(50,-1))
         self.usend=wx.TextCtrl(self,size=(50,-1))
-        
+
         #First box components for observer and astronomer identification
-        
+
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox1.Add(self.labelastr,0,wx.ALIGN_RIGHT)
         self.hbox1.AddSpacer(5)
         self.hbox1.Add(self.usastr,1,wx.ALIGN_LEFT|wx.EXPAND)
         self.hbox1.AddSpacer(10)
-        
+
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2.Add(self.labelobs,0,wx.ALIGN_RIGHT)
         self.hbox2.AddSpacer(21)
         self.hbox2.Add(self.usobs,1,wx.ALIGN_LEFT|wx.EXPAND)
         self.hbox2.AddSpacer(10)
-        
+
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3.Add(self.labelinst,0,wx.ALIGN_RIGHT)
         self.hbox3.AddSpacer(23)
         self.hbox3.Add(self.usinst,1,wx.ALIGN_LEFT|wx.EXPAND)
         self.hbox3.AddSpacer(10)
-        
+
         self.hbox4=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox4.Add(self.labelstart,0,wx.ALIGN_RIGHT)
         self.hbox4.AddSpacer(27)
         self.hbox4.Add(self.usstart,1,wx.ALIGN_LEFT|wx.EXPAND)
         self.hbox4.AddSpacer(10)
-        
+
         self.hbox5=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox5.Add(self.labelend,0,wx.ALIGN_RIGHT)
         self.hbox5.AddSpacer(31)
         self.hbox5.Add(self.usend,1,wx.ALIGN_LEFT|wx.EXPAND)
-        self.hbox5.AddSpacer(10)        
-        
-        
+        self.hbox5.AddSpacer(10)
+
+
         #Activity Log
         self.actheader=wx.StaticText(self,label="ACTIVITY LOG")
         self.actlog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
-        
+
         #Failure Log
         self.failheader=wx.StaticText(self,label="FAILURE LOG")
         #self.failinfo=wx.StaticText(self,label="Time                                                                          Description                                                                                    ")
         self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
-        
+
         #Focus Log
         self.focheader=wx.StaticText(self,label="FOCUS LOG")
         #self.focinfo=wx.StaticText(self,label='Time               Instrument               Focus                 Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
@@ -812,31 +816,31 @@ class NightLog(wx.ScrolledWindow):
         self.foclog.InsertColumn(10,'Air',width=50)
         self.foclog.InsertColumn(11,'filt',width=50)
         self.foclog.InsertColumn(12,'FWHM',width=50)
-        
+
         self.focusButton=wx.Button(self,label="Number of Focus Lines")
        # self.Bind(wx.EVT_BUTTON,self.getFocus,self.focusButton)
         self.focusNum=wx.TextCtrl(self,size=(30,-1))
         self.focusNum.AppendText('1')
-        
+
         self.hbox6=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox6.Add(self.focusButton,0,wx.ALIGN_CENTER)
         self.hbox6.AddSpacer(5)
         self.hbox6.Add(self.focusNum,0,wx.ALIGN_CENTER)
-        
+
         #Save as and Submit buttons
         self.saveButton=wx.Button(self,label="Save As")
-        
+
         self.submitButton=wx.Button(self,label="Submit")
-        
+
         self.hbox7=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox7.Add(self.saveButton,0,wx.ALIGN_CENTER)
         self.hbox7.AddSpacer(25)
         self.hbox7.Add(self.submitButton,0,wx.ALIGN_CENTER)
-        
-        
+
+
         #Vertical box organization
         self.vbox=wx.BoxSizer(wx.VERTICAL)
-        
+
         self.vbox.Add(self.nltitle, 0, wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox1,0,wx.ALIGN_LEFT|wx.EXPAND)
@@ -865,16 +869,17 @@ class NightLog(wx.ScrolledWindow):
         self.vbox.Add(self.hbox6,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(25)
         self.vbox.Add(self.hbox7,0,wx.ALIGN_CENTER)
-        
-        
+
+
         self.SetSizer(self.vbox)
         self.Show()
-        
+
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
-            
+
+        self.protocol = None
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
@@ -883,7 +888,7 @@ class TCC(wx.Frame):
         self.mro=ephem.Observer()
         #self.mro = None
         debug=True
-        
+
         self.dir=os.getcwd()
         #setup notebook
         p=wx.Panel(self)
@@ -899,22 +904,22 @@ class TCC(wx.Frame):
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
-        
+
         nb.AddPage(scienceFocusPage, "Science Focus")
         self.scienceFocus=nb.GetPage(1)
-        
+
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(2)
-        
+
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(3)
-	
+
         nb.AddPage(guiderFocusPage, "Guider Focus")
         self.guiderFocus=nb.GetPage(4)
- 
+
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(5)
-        
+
         nb.AddPage(initPage,"Initiailization Parameters")
         self.init=nb.GetPage(6)
 
@@ -941,34 +946,34 @@ class TCC(wx.Frame):
         p.Layout()
 
         self.readConfig()
-        
+
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
         self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-        
+
 
     def createMenu(self):
         self.menubar = wx.MenuBar()
-        
+
         menu_file = wx.Menu()
         m_exit = menu_file.Append(-1, "E&xit\tCtrl-X", "Exit")
-        self.Bind(wx.EVT_MENU, self.on_exit, m_exit)   
+        self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
 
         tool_file = wx.Menu()
         m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
         self.Bind(wx.EVT_MENU, self.on_night, m_night)
-        
+
         self.tz_choice=wx.Menu()
         tz_UTC=self.tz_choice.Append(-1,'UTC')
         self.Bind(wx.EVT_MENU, self.on_UTC, tz_UTC)
         tz_P=self.tz_choice.Append(-1,'Pacific')
         self.Bind(wx.EVT_MENU, self.on_Pacific, tz_P)
         tool_file.AppendMenu(-1,'Time Zone',self.tz_choice)
-        
+
         self.menubar.Append(menu_file, "&File")
         self.menubar.Append(tool_file, "&Tools")
-        
+
         self.SetMenuBar(self.menubar)
 
     """Exit in a graceful way so that the telescope information can be saved and used at a later time"""
@@ -999,7 +1004,7 @@ class TCC(wx.Frame):
         self.current_timezone=Time.now()-7*u.h
         self.sb.SetStatusText('Timezone: Pacific',4)
         return
-        
+
     """Take input from the any system and log both on screen and to a file.
     Necessary to define command structure for easy expansion"""
     def log(self, input):
@@ -1036,7 +1041,7 @@ class TCC(wx.Frame):
         self.init.trackingRateRAText.SetValue(str(self.dict['trackingRate']))
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
-        return 
+        return
 
     def startSlew(self,event):
         ra=self.control.targetRaText.GetValue()
@@ -1054,10 +1059,10 @@ class TCC(wx.Frame):
         dec = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
         epoch = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
-        
+
         self.coordinates=SkyCoord(ra,dec,frame='icrs')
         self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
-        
+
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
         self.control.targetRaText.SetValue(ra)
@@ -1091,11 +1096,11 @@ class TCC(wx.Frame):
             self.target.targetList.InsertStringItem(0,str(l[0]))
             self.target.targetList.SetStringItem(0,1,str(l[1]))
             self.target.targetList.SetStringItem(0,2,str(l[2]))
-            self.target.targetList.SetStringItem(0,3,str(l[3]))  
+            self.target.targetList.SetStringItem(0,3,str(l[3]))
 
         f_in.close()
         return
-    
+
     """Use Astroplan to plot the currently selected targets position over the next eight hours"""
     def target_plot(self,event):
         self.target=FixedTarget.from_name("m31")
@@ -1106,11 +1111,11 @@ class TCC(wx.Frame):
                 )
         self.Obstime=Time('2015-11-3 06:10:00')
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        
+
         self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
         plt.show()
         return
-        
+
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
         name='Zenith'
@@ -1120,7 +1125,7 @@ class TCC(wx.Frame):
         return
 
     def setTelescopePosition(self,event):
-    
+
         return
 
     def onInit(self,event):
@@ -1148,7 +1153,7 @@ class TCC(wx.Frame):
 
     def timeCalc(self):
         t = Time(Time.now())
-       
+
         jdt=t.jd
         mjdt = t.mjd
         epoch = 1900.0 + ((float(jdt)-2415020.31352)/365.242198781)
@@ -1160,13 +1165,13 @@ class TCC(wx.Frame):
     def test(self,event):
         print 'this is a test event'
         return
-        
+
     def getFocus(self,event):
         num=self.focusNum.GetValue()
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
             self.focusLog.AppendText(l)
-    """Uses the astroplan package to plot a targets movement for a specified observing period"""        
+    """Uses the astroplan package to plot a targets movement for a specified observing period"""
     def target_plot(self,event):
         self.target=FixedTarget.from_name("Polaris")
         self.MRO = Observer(longitude = -120.7278 *u.deg,
@@ -1176,12 +1181,43 @@ class TCC(wx.Frame):
                     )
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        
+
         self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
+
+class DataForwardingProtocol(basic.LineReceiver):
+
+    def __init__(self):
+        self.output = None
+
+    def dataReceived(self, data):
+        gui = self.factory.gui
+        gui.protocol = self
+
+        if gui:
+            val = gui.text.GetValue()
+            gui.text.SetValue(val + data)
+            gui.text.SetInsertionPointEnd()
+
+    def connectionMade(self):
+        self.output = self.factory.gui.text  # redirect Twisted's output
+
+class ChatFactory(protocol.ClientFactory):
+
+    def __init__(self, gui):
+        self.gui = gui
+        self.protocol = DataForwardingProtocol
+
+    def clientConnectionLost(self, transport, reason):
+        reactor.stop()
+
+    def clientConnectionFailed(self, transport, reason):
+        reactor.stop()
+
 if __name__=="__main__":
+
   app = wx.App()
   app.frame = TCC()
   app.frame.Show()
+  reactor.registerWxApp(app)
+  reactor.connectTCP('localhost',5501,ChatFactory(app.frame))
   app.MainLoop()
-
-
