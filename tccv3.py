@@ -136,9 +136,11 @@ class Control(wx.Panel):
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
-        self.slewButton.Disable()
+        self.slewButton.Bind(wx.EVT_BUTTON,self.slewsend)
+        #self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
-        self.trackButton.Disable()
+        self.trackButton.Bind(wx.EVT_BUTTON,self.toggletracksend)
+        #self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
@@ -226,7 +228,13 @@ class Control(wx.Panel):
             # mouseover changes colour of button
             #self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
             #event.Skip()
-
+    def slewsend(self,evt):
+        self.protocol.sendLine(str(self.targetRaText.GetValue()))
+        self.protocol.sendLine(str(self.targetDecText.GetValue()))
+        return
+    def toggletracksend(self,evt):
+        self.protocol.sendLine(str("toggle track"))
+        return
 
 class Target(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -386,9 +394,9 @@ class ScienceFocus(wx.Panel):
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
-        self.slewButton.Disable()
+        #self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
-        self.trackButton.Disable()
+        #self.trackButton.Disable()
 
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
