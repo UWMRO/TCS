@@ -40,7 +40,10 @@ from twisted.protocols import basic
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-
+        
+        self.protocol = None
+        self.parent = parent
+        
         self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
@@ -887,7 +890,7 @@ class TCC(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
 
-        self.protocol = None
+        #self.protocol = None
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
@@ -1209,7 +1212,7 @@ class DataForwardingProtocol(basic.LineReceiver):
     def connectionMade(self):
         self.output = self.factory.gui.text  # redirect Twisted's output
 
-class ChatFactory(protocol.ClientFactory):
+class TCCClient(protocol.ClientFactory):
 
     def __init__(self, gui):
         self.gui = gui
@@ -1227,5 +1230,6 @@ if __name__=="__main__":
   app.frame = TCC()
   app.frame.Show()
   reactor.registerWxApp(app)
-  reactor.connectTCP('localhost',5501,ChatFactory(app.frame))
+  reactor.connectTCP('localhost',5501,TCCClient(app.frame))
+  reactor.run()
   app.MainLoop()
