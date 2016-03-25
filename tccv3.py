@@ -41,7 +41,7 @@ class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        self.protocol = None
+        #self.protocol = None
         self.parent = parent
         
         self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
@@ -1203,6 +1203,7 @@ class DataForwardingProtocol(basic.LineReceiver):
     def dataReceived(self, data):
         gui = self.factory.gui
         gui.protocol = self
+        gui.control.protocol= self
 
         if gui:
             val = gui.text.GetValue()

@@ -1,6 +1,6 @@
 """
-run me with twistd -y chatserver.py, and then connect with multiple
-telnet clients to port 5501
+run me with twistd -y TCCserver.py, and then connect with telnet 
+client to port 5501
 """
 
 from twisted.protocols import basic
@@ -76,6 +76,6 @@ class TCCParser(object):
 			return self.pmc.track_status()
 
 if __name__=="__main__":
-    reactor.listenTCP(5502,TCCClient())
+    reactor.listenTCP(5501,TCCClient())
     reactor.run()
 
