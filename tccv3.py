@@ -1206,12 +1206,12 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui.control.protocol= self
 
         if gui:
-            val = gui.text.GetValue()
-            gui.text.SetValue(val + data)
-            gui.text.SetInsertionPointEnd()
+            val = gui.control.logBox.GetValue()
+            gui.control.logBox.SetValue(val + data)
+            gui.control.logBox.SetInsertionPointEnd()
 
     def connectionMade(self):
-        self.output = self.factory.gui.text  # redirect Twisted's output
+        self.output = self.factory.gui.control.logBox
 
 class TCCClient(protocol.ClientFactory):
 
