@@ -41,7 +41,6 @@ class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        #self.protocol = None
         self.parent = parent
         
         self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
@@ -139,10 +138,8 @@ class Control(wx.Panel):
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
-        self.slewButton.Bind(wx.EVT_BUTTON,self.slewsend)
         #self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
-        self.trackButton.Bind(wx.EVT_BUTTON,self.toggletracksend)
         #self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
@@ -231,14 +228,7 @@ class Control(wx.Panel):
             # mouseover changes colour of button
             #self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
             #event.Skip()
-    def slewsend(self,evt):
-        self.protocol.sendLine(str(self.targetRaText.GetValue()))
-        self.protocol.sendLine(str(self.targetDecText.GetValue()))
-        return
-    def toggletracksend(self,evt):
-        self.protocol.sendLine(str("toggle track"))
-        return
-
+    
 class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -889,11 +879,13 @@ class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
-
-        #self.protocol = None
+        
+        #Tracking on boot is false
+        self.tracking=False
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
+        
         #Stores current time zone for whole GUI
         self.current_timezone=Time.now()
         self.mro=ephem.Observer()
@@ -901,6 +893,7 @@ class TCC(wx.Frame):
         debug=True
 
         self.dir=os.getcwd()
+        
         #setup notebook
         p=wx.Panel(self)
         nb=wx.Notebook(p)
@@ -938,8 +931,9 @@ class TCC(wx.Frame):
         self.nl=nb.GetPage(7)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
-
         self.Bind(wx.EVT_BUTTON, self.targetSelectSlew, self.target.selectButton)
+        self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
+        
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
         self.target.targetList.Bind(wx.EVT_LEFT_DCLICK,self.targetSelectSlew)
@@ -1053,12 +1047,28 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-
+        '''
+    def slewsend(self,evt):
+        self.protocol.sendLine(str(self.targetRaText.GetValue()))
+        self.protocol.sendLine(str(self.targetDecText.GetValue()))
+        return
+        '''
+    def toggletracksend(self,evt):
+        self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
+        if self.tracking==False:
+            self.control.trackButton.SetLabel('Stop Tracking')  
+        if self.tracking==True:
+            self.control.trackButton.SetLabel('Start Tracking')    
+        self.tracking= not self.tracking    
+        return
+    
     def startSlew(self,event):
         ra=self.control.targetRaText.GetValue()
         dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
         self.log([ra,dec,epoch])
+        self.protocol.sendLine(str(ra))
+        self.protocol.sendLine(str(dec))
         # add moving to that flashes or is in some intermmediate color that is independent of telescope feedback
         #also log the transformations
         return

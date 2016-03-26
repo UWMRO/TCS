@@ -5,12 +5,13 @@ client to port 5501
 
 from twisted.protocols import basic
 from twisted.internet import protocol, reactor
+import time
 
 #import pmc
 
 class TCCServer(basic.LineReceiver):
     def connectionMade(self):
-        self.sendLine("Successfully connected to the TCC Server")
+        self.sendLine(timestamp()+"Successfully connected to the TCC Server")
         self.factory.clients.append(self)
 
     def connectionLost(self, reason):
@@ -22,7 +23,7 @@ class TCCServer(basic.LineReceiver):
         parser=TCCParser()
         input=parser.parse(line)
         if input != None:
-            self.Message(input)
+            self.message(input)
 
     def message(self, message):
         for client in self.factory.clients:
@@ -58,13 +59,14 @@ class TCCParser(object):
 			logread="Jogging telescope by offset parameters"
 			return {'log':logread, 'offset':self.pmc.offset(RAjog, DECjog)}
 
-		if input[0]=='toggle track':
+		if input[0]=='toggletrack':
 			tracking=input[1]
-			if tracking==True:
-				logread= "Turning tracking on"
-			elif tracking==False:
-				logread= "Turning tracking off"
-			return {'log':logread,'track_toggle':self.pmc.track_set(tracking)}
+			if tracking=="False":
+				logread= timestamp()+"Turning tracking on"
+			elif tracking=="True":
+				logread= timestamp()+"Turning tracking off"
+                return logread
+			#return {'log':logread,'track_toggle':self.pmc.track_set(tracking)}
 
 		if input[0]=='set tracking rate':
 			RArate=input[1]
@@ -74,6 +76,13 @@ class TCCParser(object):
 
 		if input[0]=='tracking status':
 			return self.pmc.track_status()
+
+def timestamp():
+        today=time.strftime('%Y%m%d.log')
+        current_time_log=time.strftime('%Y%m%dT%H%M%S')
+        current_time=time.strftime('%Y%m%d  %H:%M:%S')
+        return current_time+':  '
+        
 
 if __name__=="__main__":
     reactor.listenTCP(5501,TCCClient())
