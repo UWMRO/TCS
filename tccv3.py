@@ -273,6 +273,7 @@ class Target(wx.Panel):
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
+        self.magText.SetLabel('3.43')
 
         self.enterButton = wx.Button(self, -1, "Add Item to List")
 
