@@ -41,7 +41,7 @@ class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        self.parent = parent
+        #self.parent = parent
         
         self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
@@ -342,7 +342,8 @@ class Target(wx.Panel):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.Obstime=Time('2015-11-3 06:10:00')
+        #self.Obstime=Time('2015-11-3 06:10:00')
+        self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
         self.target_style={'color':'SteelBlue'}
         self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
@@ -357,7 +358,8 @@ class Target(wx.Panel):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.Obstime=Time('2015-11-3 06:10:00')
+        #self.Obstime=Time('2015-11-3 06:10:00')
+        self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
         self.target_style={'color':'SteelBlue'}
         self.airmass=plot_airmass(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
@@ -371,7 +373,7 @@ class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         None
-
+'''
         self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
         self.currentFocusLabel.SetLabel('Focus: ')
         self.currentFocusPos = wx.StaticText(self,size=(75,-1))
@@ -390,7 +392,7 @@ class ScienceFocus(wx.Panel):
         #self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
         #self.trackButton.Disable()
-
+'''
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -931,12 +933,12 @@ class TCC(wx.Frame):
         self.nl=nb.GetPage(7)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
-        self.Bind(wx.EVT_BUTTON, self.targetSelectSlew, self.target.selectButton)
+        self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
         
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
-        self.target.targetList.Bind(wx.EVT_LEFT_DCLICK,self.targetSelectSlew)
+        
 
         self.Bind(wx.EVT_BUTTON, self.setTelescopeZenith, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
@@ -1047,18 +1049,15 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-        '''
-    def slewsend(self,evt):
-        self.protocol.sendLine(str(self.targetRaText.GetValue()))
-        self.protocol.sendLine(str(self.targetDecText.GetValue()))
-        return
-        '''
+
     def toggletracksend(self,evt):
         self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
         if self.tracking==False:
-            self.control.trackButton.SetLabel('Stop Tracking')  
+            self.control.trackButton.SetLabel('Stop Tracking')
+            self.sb.SetStatusText('Tracking: True',0)
         if self.tracking==True:
-            self.control.trackButton.SetLabel('Start Tracking')    
+            self.control.trackButton.SetLabel('Start Tracking')
+            self.sb.SetStatusText('Tracking: False',0)
         self.tracking= not self.tracking    
         return
     
@@ -1074,7 +1073,7 @@ class TCC(wx.Frame):
         return
 
     """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
-    def targetSelectSlew(self, event):
+    def set_target(self, event):
         name = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0)
         ra = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         dec = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
@@ -1089,7 +1088,10 @@ class TCC(wx.Frame):
         self.control.targetRaText.SetValue(ra)
         self.control.targetDecText.SetValue(dec)
         self.control.targetEpochText.SetValue(epoch)
-        self.control.targetEpochText.SetValue(mag)
+        self.control.targetMagText.SetValue(mag)
+        
+        self.log("Current target is '"+name+"'")
+        
         return
 
     """Add a manual text item from the target panel to the list control"""
@@ -1120,21 +1122,6 @@ class TCC(wx.Frame):
             self.target.targetList.SetStringItem(0,3,str(l[3]))
 
         f_in.close()
-        return
-
-    """Use Astroplan to plot the currently selected targets position over the next eight hours"""
-    def target_plot(self,event):
-        self.target=FixedTarget.from_name("m31")
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        self.Obstime=Time('2015-11-3 06:10:00')
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-
-        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
-        plt.show()
         return
 
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
@@ -1192,18 +1179,7 @@ class TCC(wx.Frame):
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
             self.focusLog.AppendText(l)
-    """Uses the astroplan package to plot a targets movement for a specified observing period"""
-    def target_plot(self,event):
-        self.target=FixedTarget.from_name("Polaris")
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                    latitude = 46.9528*u.deg,
-                    elevation = 1198*u.m,
-                    name = "Manastash Ridge Observatory"
-                    )
-        self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-
-        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times)
+   
 
 class DataForwardingProtocol(basic.LineReceiver):
 
