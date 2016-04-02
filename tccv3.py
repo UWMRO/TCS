@@ -885,6 +885,7 @@ class TCC(wx.Frame):
         
         #Tracking on boot is false
         self.tracking=False
+        self.slewing=False
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
@@ -1063,14 +1064,22 @@ class TCC(wx.Frame):
         return
     
     def startSlew(self,event):
+        
         ra=self.control.targetRaText.GetValue()
         dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
-        self.log([ra,dec,epoch])
-        self.protocol.sendLine(str(ra))
-        self.protocol.sendLine(str(dec))
+        if self.slewing==False:
+            self.log([ra,dec,epoch])
+            self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
         # add moving to that flashes or is in some intermmediate color that is independent of telescope feedback
         #also log the transformations
+            self.control.slewButton.SetLabel('Stop Slew')
+            self.sb.SetStatusText('Slewing: True',1)
+        if self.slewing==True:
+            self.protocol.sendLine("stop")
+            self.control.slewButton.SetLabel('Start Slew')
+            self.sb.SetStatusText('Slewing: False',1)
+        self.slewing= not self.slewing
         return
 
     """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
