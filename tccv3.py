@@ -253,27 +253,27 @@ class Target(wx.Panel):
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
-        self.nameText.SetLabel('M31')
+        #self.nameText.SetLabel('M31')
 
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
-        self.raText.SetLabel('00h42m44.330s')
+        #self.raText.SetLabel('00h42m44.330s')
 
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
-        self.decText.SetLabel('+41d16m07.50s')
+        #self.decText.SetLabel('+41d16m07.50s')
 
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
-        self.epochText.SetLabel('2000')
+        #self.epochText.SetLabel('2000')
 
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
-        self.magText.SetLabel('3.43')
+        #self.magText.SetLabel('3.43')
 
         self.enterButton = wx.Button(self, -1, "Add Item to List")
 
@@ -955,6 +955,12 @@ class TCC(wx.Frame):
         p.Layout()
 
         self.readConfig()
+        """Target testing parameters """
+        self.target.nameText.SetLabel('M31')
+        self.target.raText.SetLabel('00h42m44.330s')
+        self.target.decText.SetLabel('+41d16m07.50s')
+        self.target.epochText.SetLabel('2000')
+        self.target.magText.SetLabel('3.43')
 
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
