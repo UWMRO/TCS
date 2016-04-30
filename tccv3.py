@@ -34,7 +34,7 @@ import wcsaxes
 
 from twisted.internet import wxreactor
 wxreactor.install()
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 
 class Control(wx.Panel):
@@ -463,14 +463,14 @@ class GuiderControl(wx.Panel):
         #thread.start_new_thread(self.rotPaint,())
         self.current_target=None
 
+        img=wx.EmptyImage(320,320)
+        self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
+        
         self.fig = Figure((4,4))
         self.canvas = FigCanvas(self,-1, self.fig)
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-
-        img=wx.EmptyImage(320,320)
-        self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
 
         self.finderButton=wx.Button(self,-1,"Load Finder Chart")
         self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
@@ -537,6 +537,7 @@ class GuiderControl(wx.Panel):
 
     '''Load the finder chart for the current target'''
     def load_finder_chart(self,event):
+        
         self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
         self.ax1.set_axis_off()
         return
@@ -593,6 +594,7 @@ class GuiderControl(wx.Panel):
 
 
     def OnPaint(self, event):
+        
         self.InitBuffer()
         self.dc = wx.PaintDC(self)
         self.dc.DrawBitmap(self.Buffer, 0, 0)
@@ -994,13 +996,19 @@ class TCC(wx.Frame):
     """Exit in a graceful way so that the telescope information can be saved and used at a later time"""
     def on_exit(self, event):
         dlg = wx.MessageDialog(self,
-                               "Do you really want to exit the TCC?",
+                               "Exit the TCC?",
                                "Confirm Exit", wx.OK|wx.CANCEL|wx.ICON_QUESTION)
         result = dlg.ShowModal()
         dlg.Destroy()
         if result == wx.ID_OK:
+            if(self.protocol is not None):
+                d= self.protocol.sendCommand("shutdown")
+                d.addCallback(self.quit)
+    def quit(self):
+        self.Destroy()
+        reactor.stop()
             #add save coordinates
-            self.Destroy()
+            #self.Destroy()
 
     def on_night(self,event):
         if self.night:
@@ -1059,7 +1067,8 @@ class TCC(wx.Frame):
         return
 
     def toggletracksend(self,evt):
-        self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
+        #self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
+        self.protocol.sendCommand(str("toggletrack")+' '+str(self.tracking))
         if self.tracking==False:
             self.control.trackButton.SetLabel('Stop Tracking')
             self.sb.SetStatusText('Tracking: True',0)
@@ -1076,7 +1085,8 @@ class TCC(wx.Frame):
         epoch=self.control.targetEpochText.GetValue()
         if self.slewing==False:
             self.log([ra,dec,epoch])
-            self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
+            #self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
+            self.protocol.sendCommand("slew"+' '+str(ra)+ ' '+str(dec))
         # add moving to that flashes or is in some intermmediate color that is independent of telescope feedback
         #also log the transformations
             self.control.slewButton.SetLabel('Stop Slew')
@@ -1201,6 +1211,7 @@ class DataForwardingProtocol(basic.LineReceiver):
 
     def __init__(self):
         self.output = None
+        self._deferreds = {}
 
     def dataReceived(self, data):
         gui = self.factory.gui
@@ -1211,7 +1222,15 @@ class DataForwardingProtocol(basic.LineReceiver):
             val = gui.control.logBox.GetValue()
             gui.control.logBox.SetValue(val + data)
             gui.control.logBox.SetInsertionPointEnd()
+            sep_data= data.split(" ")
+            if sep_data[0] in self._deferreds:
+                self._deferreds.pop(sep_data[0]).callpack(sep_data[1])
 
+    def sendCommand(self, data):
+        self.sendLine(data)
+        d=self._deferreds[data.split(" ")[0]]=defer.Deferred()
+        return d
+    
     def connectionMade(self):
         self.output = self.factory.gui.control.logBox
 
