@@ -892,7 +892,7 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
-        
+        self.list_count=0
         #Stores current time zone for whole GUI
         self.current_timezone=Time.now()
         self.mro=ephem.Observer()
@@ -1138,8 +1138,8 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        
-        airmass=self.MRO.altaz(Time.now(),self.obstarget).secz
+        airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
+       
         
         #add transformation, the epoch should be current
         self.target.targetList.InsertStringItem(0,str(t_name))
@@ -1148,6 +1148,8 @@ class TCC(wx.Frame):
         self.target.targetList.SetStringItem(0,3,str(epoch))
         self.target.targetList.SetStringItem(0,4,str(mag))
         self.target.targetList.SetStringItem(0,5,str(airmass))
+        thread.start_new_thread(self.dyn_airmass,(t_name,ra,dec,self.obstarget,self.MRO,self.list_count,))
+        self.list_count+=1
         return
 
     """Read in a target list file to the ctrl list.
@@ -1164,7 +1166,14 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-
+        
+    def dyn_airmass(self,n,r,d,tgt,obs,count):
+        while True:
+            a= obs.altaz(Time.now(),tgt).secz
+            wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
+            #self.target.targetList.SetStringItem(count,5,str(a))
+            time.sleep(1)
+        
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
         name='Zenith'
