@@ -27,7 +27,7 @@ from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic
 from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
@@ -243,10 +243,11 @@ class Target(wx.Panel):
         #show list of targets with selection button.  When the target is highlighted the selection button will input the data into the Control window.
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
         self.targetList.InsertColumn(0,'Target Name',width=125)
-        self.targetList.InsertColumn(1,'RA',width=125)
-        self.targetList.InsertColumn(2,'DEC',width=125)
-        self.targetList.InsertColumn(3,'EPOCH',width=75)
-        self.targetList.InsertColumn(5,'V Mag',width=75)
+        self.targetList.InsertColumn(1,'RA',width=100)
+        self.targetList.InsertColumn(2,'DEC',width=100)
+        self.targetList.InsertColumn(3,'EPOCH',width=62.5)
+        self.targetList.InsertColumn(5,'V Mag',width=62.5)
+        self.targetList.InsertColumn(6,'Airmass',width=75)
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
@@ -1122,17 +1123,29 @@ class TCC(wx.Frame):
 
     """Add a manual text item from the target panel to the list control"""
     def addToList(self,event):
-        name = self.target.nameText.GetValue()
+        t_name = self.target.nameText.GetValue()
         ra = self.target.raText.GetValue()
         dec = self.target.decText.GetValue()
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
+        
+        self.coordinates=SkyCoord(ra,dec,frame='icrs')
+        self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        
+        airmass=self.MRO.altaz(Time.now(),self.obstarget).secz
+        
         #add transformation, the epoch should be current
-        self.target.targetList.InsertStringItem(0,str(name))
+        self.target.targetList.InsertStringItem(0,str(t_name))
         self.target.targetList.SetStringItem(0,1,str(ra))
         self.target.targetList.SetStringItem(0,2,str(dec))
         self.target.targetList.SetStringItem(0,3,str(epoch))
         self.target.targetList.SetStringItem(0,4,str(mag))
+        self.target.targetList.SetStringItem(0,5,str(airmass))
         return
 
     """Read in a target list file to the ctrl list.
