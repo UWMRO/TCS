@@ -348,8 +348,10 @@ class Target(wx.Panel):
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
         self.target_style={'color':'SteelBlue'}
-        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        self.initial_style={'color':'r'}
+        plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
+        plot_sky(self.target, self.MRO, self.Obstime,style_kwargs=self.initial_style)
         plt.show()
     '''Plot the selected targets airmass curve'''
     def airmass_plot(self,event):
