@@ -1144,11 +1144,11 @@ class TCC(wx.Frame):
        
         
         #add transformation, the epoch should be current
-        self.target.targetList.InsertStringItem(0,str(t_name))
-        self.target.targetList.SetStringItem(0,1,str(ra))
-        self.target.targetList.SetStringItem(0,2,str(dec))
-        self.target.targetList.SetStringItem(0,3,str(epoch))
-        self.target.targetList.SetStringItem(0,4,str(mag))
+        self.target.targetList.InsertStringItem(self.list_count,str(t_name))
+        self.target.targetList.SetStringItem(self.list_count,1,str(ra))
+        self.target.targetList.SetStringItem(self.list_count,2,str(dec))
+        self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
+        self.target.targetList.SetStringItem(self.list_count,4,str(mag))
         #self.target.targetList.SetStringItem(0,5,str(airmass))
         thread.start_new_thread(self.dyn_airmass,(t_name,ra,dec,self.obstarget,self.MRO,self.list_count,))
         self.list_count+=1
@@ -1174,7 +1174,7 @@ class TCC(wx.Frame):
             a= obs.altaz(Time.now(),tgt).secz
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
-            time.sleep(3)
+            time.sleep(10)
         
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
