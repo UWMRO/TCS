@@ -347,7 +347,7 @@ class Target(wx.Panel):
         #self.Obstime=Time('2015-11-3 06:10:00')
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        self.target_style={'color':'SteelBlue'}
+        self.target_style={'color':'Black'}
         self.initial_style={'color':'r'}
         plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
@@ -365,7 +365,7 @@ class Target(wx.Panel):
         #self.Obstime=Time('2015-11-3 06:10:00')
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
-        self.target_style={'color':'SteelBlue'}
+        self.target_style={'color':'Black'}
         self.airmass=plot_airmass(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.axhline(y=2,linestyle='--',color='orange')
         plt.axhline(y=2.5,linestyle='--',color='r')
@@ -1149,7 +1149,7 @@ class TCC(wx.Frame):
         self.target.targetList.SetStringItem(0,2,str(dec))
         self.target.targetList.SetStringItem(0,3,str(epoch))
         self.target.targetList.SetStringItem(0,4,str(mag))
-        self.target.targetList.SetStringItem(0,5,str(airmass))
+        #self.target.targetList.SetStringItem(0,5,str(airmass))
         thread.start_new_thread(self.dyn_airmass,(t_name,ra,dec,self.obstarget,self.MRO,self.list_count,))
         self.list_count+=1
         return
@@ -1174,7 +1174,7 @@ class TCC(wx.Frame):
             a= obs.altaz(Time.now(),tgt).secz
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
-            time.sleep(1)
+            time.sleep(3)
         
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
