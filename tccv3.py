@@ -27,7 +27,7 @@ from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK5
 from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
@@ -138,9 +138,9 @@ class Control(wx.Panel):
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
-        #self.slewButton.Disable()
+        self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
-        #self.trackButton.Disable()
+        self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
@@ -1084,6 +1084,8 @@ class TCC(wx.Frame):
         ra=self.control.targetRaText.GetValue()
         dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
+        
+        
         if self.slewing==False:
             self.log([ra,dec,epoch])
             #self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
@@ -1178,6 +1180,8 @@ class TCC(wx.Frame):
     def onInit(self,event):
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
+        self.control.slewButton.Enable()
+        self.control.trackButton.Enable()
         thread.start_new_thread(self.timer,())
         self.initState=True
         if self.initState==True:
