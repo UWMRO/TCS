@@ -371,8 +371,35 @@ class Target(wx.Panel):
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
         plt.show()
-
-
+'''
+class Image(wx.Panel):
+    def __init__(self,parent, debug, night):
+        wx.Panel.__init__(self,parent)
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        self.frame = parent
+        
+        self.fig = Figure((4,4))
+        self.canvas = FigCanvas(self,-1, self.fig)
+        self.ax1 = self.fig.add_subplot(111)
+        self.ax1.set_axis_off()
+        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        
+    def OnEraseBackground(self, evt):
+        """
+        Add a picture to the background
+        """
+        # yanked from ColourDB.py
+        dc = evt.GetDC()
+ 
+        if not dc:
+            dc = wx.ClientDC(self)
+            rect = self.GetUpdateRegion().GetBox()
+            dc.SetClippingRect(rect)
+        dc.Clear()
+        bmp = wx.Bitmap("testfinder.jpg")
+        dc.DrawBitmap(bmp, 0, 0)
+'''        
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -468,15 +495,16 @@ class GuiderControl(wx.Panel):
 
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
-        
+        '''
         self.fig = Figure((4,4))
         self.canvas = FigCanvas(self,-1, self.fig)
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-
+        '''
         self.finderButton=wx.Button(self,-1,"Load Finder Chart")
-        self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
+        #self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
+        
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars")
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding")
 
@@ -516,8 +544,9 @@ class GuiderControl(wx.Panel):
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
 
         #self.hbox2.Add(self.panel2,0,wx.ALIGN_RIGHT)
-        self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
-        self.hbox2.AddSpacer(133)
+        #self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
+        #self.hbox2.AddSpacer(133)
+        self.hbox2.AddSpacer(350)
         self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
 
         self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
@@ -538,13 +567,13 @@ class GuiderControl(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    '''Load the finder chart for the current target'''
+    '''Load the finder chart for the current target
     def load_finder_chart(self,event):
         
         self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
         self.ax1.set_axis_off()
         return
-
+    '''
 
     def InitBuffer(self):
         size=self.GetClientSize()
@@ -908,6 +937,7 @@ class TCC(wx.Frame):
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
+        #imagePage=Image(nb,debug,self.night)
         scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
@@ -923,6 +953,9 @@ class TCC(wx.Frame):
 
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(2)
+        
+        #nb.AddPage(imagePage,"Image")
+       # self.image=nb.GetPage(3)
 
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(3)
@@ -1082,24 +1115,28 @@ class TCC(wx.Frame):
         return
     
     def startSlew(self,event):
-        
+        name=self.control.targetNameText.GetValue()
         ra=self.control.targetRaText.GetValue()
         dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
         
-        
         if self.slewing==False:
+            
+            #self.targetcoords=SkyCoord
+            
             self.log([ra,dec,epoch])
-            #self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
             self.protocol.sendCommand("slew"+' '+str(ra)+ ' '+str(dec))
-        # add moving to that flashes or is in some intermmediate color that is independent of telescope feedback
-        #also log the transformations
             self.control.slewButton.SetLabel('Stop Slew')
             self.sb.SetStatusText('Slewing: True',1)
+            self.control.currentNamePos.SetLabel(name)
+            self.control.currentNamePos.SetForegroundColour((0,0,0))
+            
+            
         if self.slewing==True:
             self.protocol.sendLine("stop")
             self.control.slewButton.SetLabel('Start Slew')
             self.sb.SetStatusText('Slewing: False',1)
+            
         self.slewing= not self.slewing
         return
 
@@ -1113,6 +1150,8 @@ class TCC(wx.Frame):
 
         self.coordinates=SkyCoord(ra,dec,frame='icrs')
         self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.image.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.load_finder_chart()
 
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
@@ -1124,6 +1163,13 @@ class TCC(wx.Frame):
         self.log("Current target is '"+name+"'")
         
         return
+        
+    def load_finder_chart(self):
+        
+        self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
+        self.image.ax1.set_axis_off()
+        self.image.fig.savefig("testfinder.png")
+        image_file = 'testfinder.png'
 
     """Add a manual text item from the target panel to the list control"""
     def addToList(self,event):
@@ -1172,9 +1218,12 @@ class TCC(wx.Frame):
     def dyn_airmass(self,n,r,d,tgt,obs,count):
         while True:
             a= obs.altaz(Time.now(),tgt).secz
+            if a > 8 or a < 0:
+                a="N/A"
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
             time.sleep(10)
+            
         
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
