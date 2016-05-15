@@ -1122,10 +1122,12 @@ class TCC(wx.Frame):
         
         if self.slewing==False:
             
-            #self.targetcoords=SkyCoord
+            self.targetcoords=SkyCoord(ra=ra,dec=dec,frame='icrs')
+            self.decimalcoords=self.targetcoords.to_string('decimal')
+            
             
             self.log([ra,dec,epoch])
-            self.protocol.sendCommand("slew"+' '+str(ra)+ ' '+str(dec))
+            self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
             self.control.slewButton.SetLabel('Stop Slew')
             self.sb.SetStatusText('Slewing: True',1)
             self.control.currentNamePos.SetLabel(name)
