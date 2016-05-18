@@ -337,7 +337,23 @@ class Target(wx.Panel):
 
     '''Plot the selected targets position over the next 8 hours'''
     def target_plot(self,event):
-        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
+        input_ra=self.targetList.GetItemText(self.targetList.GetFocusedItem(),1)
+        input_dec=self.targetList.GetItemText(self.targetList.GetFocusedItem(),2)
+        
+        deg_input=True
+        
+        try:
+            val=float(input_ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+        elif 'h' in str(input_ra):
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+        elif ' ' in str(input_ra) or ':' in str(input_ra):
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
         self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
                 latitude = 46.9528*u.deg,
@@ -355,7 +371,23 @@ class Target(wx.Panel):
         plt.show()
     '''Plot the selected targets airmass curve'''
     def airmass_plot(self,event):
-        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
+        input_ra=self.targetList.GetItemText(self.targetList.GetFocusedItem(),1)
+        input_dec=self.targetList.GetItemText(self.targetList.GetFocusedItem(),2)
+        
+        deg_input=True
+        
+        try:
+            val=float(input_ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+        elif 'h' in str(input_ra):
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+        elif ' ' in str(input_ra) or ':' in str(input_ra):
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
         self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
                 latitude = 46.9528*u.deg,
