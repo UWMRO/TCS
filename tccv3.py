@@ -1176,12 +1176,25 @@ class TCC(wx.Frame):
     """Add a manual text item from the target panel to the list control"""
     def addToList(self,event):
         t_name = self.target.nameText.GetValue()
-        ra = self.target.raText.GetValue()
-        dec = self.target.decText.GetValue()
+        input_ra = self.target.raText.GetValue()
+        input_dec = self.target.decText.GetValue()
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
         
-        self.coordinates=SkyCoord(ra,dec,frame='icrs')
+        deg_input=True
+        
+        try:
+            val=float(input_ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+        elif 'h' in str(input_ra):
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+        elif ' ' in str(input_ra) or ':' in str(input_ra):
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
                 latitude = 46.9528*u.deg,
@@ -1193,12 +1206,12 @@ class TCC(wx.Frame):
         
         #add transformation, the epoch should be current
         self.target.targetList.InsertStringItem(self.list_count,str(t_name))
-        self.target.targetList.SetStringItem(self.list_count,1,str(ra))
-        self.target.targetList.SetStringItem(self.list_count,2,str(dec))
+        self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
+        self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
         self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
         self.target.targetList.SetStringItem(self.list_count,4,str(mag))
         #self.target.targetList.SetStringItem(0,5,str(airmass))
-        thread.start_new_thread(self.dyn_airmass,(t_name,ra,dec,self.obstarget,self.MRO,self.list_count,))
+        thread.start_new_thread(self.dyn_airmass,(t_name,input_ra,input_dec,self.obstarget,self.MRO,self.list_count,))
         self.list_count+=1
         return
 
