@@ -248,41 +248,34 @@ class Target(wx.Panel):
         self.targetList.InsertColumn(3,'EPOCH',width=62.5)
         self.targetList.InsertColumn(5,'V Mag',width=62.5)
         self.targetList.InsertColumn(6,'Airmass',width=75)
-        self.selectButton = wx.Button(self, -1, "Select as Current Target")
+        
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
-        #self.nameText.SetLabel('M31')
 
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
-        #self.raText.SetLabel('00h42m44.330s')
 
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
-        #self.decText.SetLabel('+41d16m07.50s')
 
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
-        #self.epochText.SetLabel('2000')
 
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
-        #self.magText.SetLabel('3.43')
-
+        
+        #Buttons
+        self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-
         self.plot_button=wx.Button(self,-1,'Plot Target')
-        self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
-
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
-        self.airmass_button.Bind(wx.EVT_BUTTON,self.airmass_plot)
 
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -331,78 +324,6 @@ class Target(wx.Panel):
         self.dir=os.getcwd()
 
 
-
-
-
-
-    '''Plot the selected targets position over the next 8 hours'''
-    def target_plot(self,event):
-        input_ra=self.targetList.GetItemText(self.targetList.GetFocusedItem(),1)
-        input_dec=self.targetList.GetItemText(self.targetList.GetFocusedItem(),2)
-        
-        deg_input=True
-        
-        try:
-            val=float(input_ra)
-        except ValueError:
-            deg_input=False
-        
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-        elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-        elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-            
-        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
-        self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        self.target_style={'color':'Black'}
-        self.initial_style={'color':'r'}
-        plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
-        plt.legend(shadow=True, loc=2)
-        plot_sky(self.target, self.MRO, self.Obstime,style_kwargs=self.initial_style)
-        plt.show()
-    '''Plot the selected targets airmass curve'''
-    def airmass_plot(self,event):
-        input_ra=self.targetList.GetItemText(self.targetList.GetFocusedItem(),1)
-        input_dec=self.targetList.GetItemText(self.targetList.GetFocusedItem(),2)
-        
-        deg_input=True
-        
-        try:
-            val=float(input_ra)
-        except ValueError:
-            deg_input=False
-        
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-        elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-        elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-            
-        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
-        self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
-        self.target_style={'color':'Black'}
-        self.airmass=plot_airmass(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
-        plt.axhline(y=2,linestyle='--',color='orange')
-        plt.axhline(y=2.5,linestyle='--',color='r')
-        plt.legend(shadow=True, loc=1)
-        plt.show()
 '''
 class Image(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -1005,11 +926,13 @@ class TCC(wx.Frame):
         self.nl=nb.GetPage(7)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
-        self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
         
+        self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
+        self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
+        self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
 
         self.Bind(wx.EVT_BUTTON, self.setTelescopeZenith, self.init.syncButton)
@@ -1284,6 +1207,75 @@ class TCC(wx.Frame):
             #self.target.targetList.SetStringItem(count,5,str(a))
             time.sleep(10)
             
+    '''Plot the selected targets position over the next 8 hours'''
+    def target_plot(self,event):
+        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
+        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        
+        deg_input=True
+        
+        try:
+            val=float(input_ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+        elif 'h' in str(input_ra):
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+        elif ' ' in str(input_ra) or ':' in str(input_ra):
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        #self.Obstime=Time('2015-11-3 06:10:00')
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        self.target_style={'color':'Black'}
+        self.initial_style={'color':'r'}
+        plot_sky(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.legend(shadow=True, loc=2)
+        plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
+        plt.show()
+        
+    '''Plot the selected targets airmass curve'''
+    def airmass_plot(self,event):
+        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
+        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        
+        deg_input=True
+        
+        try:
+            val=float(input_ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+        elif 'h' in str(input_ra):
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+        elif ' ' in str(input_ra) or ':' in str(input_ra):
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
+        #self.Obstime=Time('2015-11-3 06:10:00')
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
+        self.target_style={'color':'Black'}
+        self.airmass=plot_airmass(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.axhline(y=2,linestyle='--',color='orange')
+        plt.axhline(y=2.5,linestyle='--',color='r')
+        plt.legend(shadow=True, loc=1)
+        plt.show()
         
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
