@@ -1148,17 +1148,30 @@ class TCC(wx.Frame):
     
     def startSlew(self,event):
         name=self.control.targetNameText.GetValue()
-        ra=self.control.targetRaText.GetValue()
-        dec=self.control.targetDecText.GetValue()
+        input_ra=self.control.targetRaText.GetValue()
+        input_dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
         
         if self.slewing==False:
             
-            self.targetcoords=SkyCoord(ra=ra,dec=dec,frame='icrs')
+            deg_input=True
+        
+            try:
+                val=float(input_ra)
+            except ValueError:
+                deg_input=False
+        
+            if deg_input==True:
+                self.targetcoords=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+            elif 'h' in str(input_ra):
+                self.targetcoords=SkyCoord(input_ra,input_dec,frame='icrs')
+            elif ' ' in str(input_ra) or ':' in str(input_ra):
+                self.targetcoords=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            
             self.decimalcoords=self.targetcoords.to_string('decimal')
             
             
-            self.log([ra,dec,epoch])
+            self.log([input_ra,input_dec,epoch])
             self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
             self.control.slewButton.SetLabel('Stop Slew')
             self.sb.SetStatusText('Slewing: True',1)
@@ -1182,8 +1195,8 @@ class TCC(wx.Frame):
         epoch = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
 
-        self.coordinates=SkyCoord(ra,dec,frame='icrs')
-        self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.coordinates=SkyCoord(ra,dec,frame='icrs')
+        #self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
         #self.image.current_target=FixedTarget(name=None,coord=self.coordinates)
         #self.load_finder_chart()
 
