@@ -952,7 +952,7 @@ class TCC(wx.Frame):
         self.target.nameText.SetLabel('M31')
         self.target.raText.SetLabel('00h42m44.330s')
         self.target.decText.SetLabel('+41d16m07.50s')
-        self.target.epochText.SetLabel('2000')
+        self.target.epochText.SetLabel('J2000')
         self.target.magText.SetLabel('3.43')
 
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
@@ -1073,7 +1073,8 @@ class TCC(wx.Frame):
         name=self.control.targetNameText.GetValue()
         input_ra=self.control.targetRaText.GetValue()
         input_dec=self.control.targetDecText.GetValue()
-        epoch=self.control.targetEpochText.GetValue()
+        input_epoch=self.control.targetEpochText.GetValue()
+        current_epoch=self.control.currentEpochPos.GetLabel()
         
         if self.slewing==False:
             
@@ -1085,16 +1086,16 @@ class TCC(wx.Frame):
                 deg_input=False
         
             if deg_input==True:
-                self.targetcoords=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+                self.targetcoords=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
             elif 'h' in str(input_ra):
-                self.targetcoords=SkyCoord(input_ra,input_dec,frame='icrs')
+                self.targetcoords=SkyCoord(input_ra,input_dec,frame='icrs',obstime=str(current_epoch),equinox='J'+str(input_epoch))
             elif ' ' in str(input_ra) or ':' in str(input_ra):
-                self.targetcoords=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+                self.targetcoords=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime='J'+str(current_epoch),equinox=str(input_epoch))
             
             self.decimalcoords=self.targetcoords.to_string('decimal')
             
             
-            self.log([input_ra,input_dec,epoch])
+            self.log([input_ra,input_dec,current_epoch])
             self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
             self.control.slewButton.SetLabel('Stop Slew')
             self.sb.SetStatusText('Slewing: True',1)
@@ -1211,6 +1212,8 @@ class TCC(wx.Frame):
     def target_plot(self,event):
         input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        current_epoch=self.control.currentEpochPos.GetLabel()
         
         deg_input=True
         
@@ -1220,11 +1223,11 @@ class TCC(wx.Frame):
             deg_input=False
         
         if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
         elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
         elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime='J'+str(current_epoch),equinox=str(input_epoch))
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
@@ -1246,6 +1249,8 @@ class TCC(wx.Frame):
     def airmass_plot(self,event):
         input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        current_epoch=self.control.currentEpochPos.GetLabel()
         
         deg_input=True
         
@@ -1255,11 +1260,11 @@ class TCC(wx.Frame):
             deg_input=False
         
         if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime=str(current_epoch),equinox=str(input_epoch))
         elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs',obstime=str(current_epoch),equinox=str(input_epoch))
         elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime=str(current_epoch),equinox=str(input_epoch))
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
