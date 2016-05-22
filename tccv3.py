@@ -614,8 +614,8 @@ class Initialization(wx.Panel):
 
         # add line to separate the different sections
 
-        self.atZenithButton = wx.Button(self, -1, "Telescope at Zenith")
-        self.atZenithButton.Bind(wx.EVT_BUTTON,self.onZenith)
+        self.atZenithButton = wx.Button(self, -1, "Set Telescope at Zenith")
+        
 
 
         #self.zenith = wx.PopupWindow("um r u sure")
@@ -721,10 +721,6 @@ class Initialization(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    def onZenith(self, event):
-        self.second_window = wx.Frame(None)
-        text = wx.StaticText(self.second_window, -1, "r u sure ._.")
-        self.second_window.Show()
 
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
@@ -919,7 +915,7 @@ class TCC(wx.Frame):
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(5)
 
-        nb.AddPage(initPage,"Initiailization Parameters")
+        nb.AddPage(initPage,"Initialization Parameters")
         self.init=nb.GetPage(6)
 
         nb.AddPage(logPage,"Night Log")
@@ -935,6 +931,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
 
+        self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopeZenith, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
 
@@ -1068,6 +1065,22 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Tracking: False',0)
         self.tracking= not self.tracking    
         return
+        
+    def inputcoordSorter(self,ra,dec,epoch_now,epoch):
+        deg_input=True
+        
+        try:
+            val=float(ra)
+        except ValueError:
+            deg_input=False
+        
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+        elif 'h' in str(ra):
+            self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+        elif ' ' in str(ra) or ':' in str(ra):
+            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+        return self.coordinates
     
     def startSlew(self,event):
         name=self.control.targetNameText.GetValue()
@@ -1078,21 +1091,9 @@ class TCC(wx.Frame):
         
         if self.slewing==False:
             
-            deg_input=True
-        
-            try:
-                val=float(input_ra)
-            except ValueError:
-                deg_input=False
-        
-            if deg_input==True:
-                self.targetcoords=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
-            elif 'h' in str(input_ra):
-                self.targetcoords=SkyCoord(input_ra,input_dec,frame='icrs',obstime=str(current_epoch),equinox='J'+str(input_epoch))
-            elif ' ' in str(input_ra) or ':' in str(input_ra):
-                self.targetcoords=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime='J'+str(current_epoch),equinox=str(input_epoch))
+            self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
             
-            self.decimalcoords=self.targetcoords.to_string('decimal')
+            self.decimalcoords=self.coordinates.to_string('decimal')
             
             
             self.log([input_ra,input_dec,current_epoch])
@@ -1170,7 +1171,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
+        #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        
         
         #add transformation, the epoch should be current
@@ -1215,19 +1216,7 @@ class TCC(wx.Frame):
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         current_epoch=self.control.currentEpochPos.GetLabel()
         
-        deg_input=True
-        
-        try:
-            val=float(input_ra)
-        except ValueError:
-            deg_input=False
-        
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
-        elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs',obstime='J'+str(current_epoch),equinox=str(input_epoch))
-        elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime='J'+str(current_epoch),equinox=str(input_epoch))
+        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
@@ -1252,19 +1241,7 @@ class TCC(wx.Frame):
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         current_epoch=self.control.currentEpochPos.GetLabel()
         
-        deg_input=True
-        
-        try:
-            val=float(input_ra)
-        except ValueError:
-            deg_input=False
-        
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs',obstime=str(current_epoch),equinox=str(input_epoch))
-        elif 'h' in str(input_ra):
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs',obstime=str(current_epoch),equinox=str(input_epoch))
-        elif ' ' in str(input_ra) or ':' in str(input_ra):
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg),obstime=str(current_epoch),equinox=str(input_epoch))
+        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.MRO = Observer(longitude = -120.7278 *u.deg,
@@ -1285,11 +1262,24 @@ class TCC(wx.Frame):
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
         name='Zenith'
-        ra='' #set to current LST
-        dec=''#set to LAT
-        epoch=''#define as current epoch
-        return
-
+        ra=self.control.currentLSTPos.GetLabel() #set to current LST
+        dec='+46:57:10.08' #set to LAT
+        epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
+        if self.slewing==False:
+            self.slewing=True
+            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+            
+            self.decimalcoords=self.coordinates.to_string('decimal')
+            
+            
+            self.log('Setting Telescope to Zenith Position')
+            self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
+            self.control.slewButton.SetLabel('Stop Slew')
+            self.sb.SetStatusText('Slewing: True',1)
+            self.control.currentNamePos.SetLabel(name)
+            self.control.currentNamePos.SetForegroundColour((0,0,0))
+            
+            
     def setTelescopePosition(self,event):
 
         return
