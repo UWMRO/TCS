@@ -122,11 +122,17 @@ class Control(wx.Panel):
         self.currentFocusPos.SetLabel('Unknown')
         self.currentFocusPos.SetForegroundColour((255,0,0))
 
-        self.currentTRLabel = wx.StaticText(self, size=(125,-1))
-        self.currentTRLabel.SetLabel('Tracking Rate: ')
-        self.currentTRPos = wx.StaticText(self,size=(75,-1))
-        self.currentTRPos.SetLabel('Unknown')
-        self.currentTRPos.SetForegroundColour((255,0,0))
+        self.currentRATRLabel = wx.StaticText(self, size=(125,-1))
+        self.currentRATRLabel.SetLabel('RA Tracking Rate: ')
+        self.currentRATRPos = wx.StaticText(self,size=(75,-1))
+        self.currentRATRPos.SetLabel('Unknown')
+        self.currentRATRPos.SetForegroundColour((255,0,0))
+        
+        self.currentDECTRLabel = wx.StaticText(self, size=(125,-1))
+        self.currentDECTRLabel.SetLabel('DEC Tracking Rate: ')
+        self.currentDECTRPos = wx.StaticText(self,size=(75,-1))
+        self.currentDECTRPos.SetLabel('Unknown')
+        self.currentDECTRPos.SetForegroundColour((255,0,0))
 
 
         #Focus Change
@@ -160,7 +166,7 @@ class Control(wx.Panel):
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=10, cols=2, hgap=5, vgap=5)
+        self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=5, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
 
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
@@ -196,8 +202,10 @@ class Control(wx.Panel):
         self.gbox2.Add(self.currentLSTPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentFocusLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentFocusPos, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.currentTRLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.currentTRPos, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.currentRATRLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.currentRATRPos, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
 
         self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
@@ -615,6 +623,7 @@ class Initialization(wx.Panel):
         # add line to separate the different sections
 
         self.atZenithButton = wx.Button(self, -1, "Set Telescope at Zenith")
+        self.atZenithButton.Disable()
         
 
 
@@ -878,6 +887,7 @@ class TCC(wx.Frame):
         self.mro=ephem.Observer()
         #self.mro = None
         debug=True
+        
 
         self.dir=os.getcwd()
         
@@ -1289,6 +1299,7 @@ class TCC(wx.Frame):
         self.mro.lat=self.dict['lat']
         self.control.slewButton.Enable()
         self.control.trackButton.Enable()
+        self.init.atZenithButton.Enable()
         thread.start_new_thread(self.timer,())
         self.initState=True
         if self.initState==True:
