@@ -1104,10 +1104,21 @@ class TCC(wx.Frame):
         input_epoch=self.control.targetEpochText.GetValue()
         current_epoch=self.control.currentEpochPos.GetLabel()
         
+        
+        
         if self.slewing==False:
             
+            self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
             self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
+            self.obstarget=FixedTarget(name=name,coord=self.coordinates)
+            self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
+
+            self.alt=str("{0.alt:.2}".format(self.target_altaz))
+            self.split_alt=self.alt.split(' ')
+            self.slew_altitude=self.split_alt[0]
+            print self.slew_altitude
             
+            ''' Debug code
             self.decimalcoords=self.coordinates.to_string('decimal')
             
             
@@ -1117,14 +1128,32 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Slewing: True',1)
             self.control.currentNamePos.SetLabel(name)
             self.control.currentNamePos.SetForegroundColour((0,0,0))
+            '''
+            if float(self.slew_altitude) >= 20.0:
+
+                self.decimalcoords=self.coordinates.to_string('decimal')
             
             
-        if self.slewing==True:
+                self.log([input_ra,input_dec,current_epoch])
+                self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
+                self.control.slewButton.SetLabel('Stop Slew')
+                self.sb.SetStatusText('Slewing: True',1)
+                self.control.currentNamePos.SetLabel(name)
+                self.control.currentNamePos.SetForegroundColour((0,0,0))
+            
+                self.slewing= not self.slewing
+            
+            if float(self.slew_altitude) < 20.0:
+                self.log("Error: Attempted slew altitude below 20 degrees.")
+                return
+                
+        elif self.slewing==True:
             self.protocol.sendLine("stop")
             self.control.slewButton.SetLabel('Start Slew')
             self.sb.SetStatusText('Slewing: False',1)
             
-        self.slewing= not self.slewing
+            self.slewing= not self.slewing
+            
         return
 
     """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
@@ -1265,6 +1294,12 @@ class TCC(wx.Frame):
         ra=self.control.currentLSTPos.GetLabel() #set to current LST
         dec='+46:57:10.08' #set to LAT
         epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
+        
+        if self.slewing==True:
+            self.second_window = wx.Frame(None)
+            text = wx.StaticText(self.second_window, -1, "Error: Telescope is currently slewing.")
+            self.second_window.Show()
+        
         if self.slewing==False:
             self.slewing=True
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
@@ -1278,6 +1313,7 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Slewing: True',1)
             self.control.currentNamePos.SetLabel(name)
             self.control.currentNamePos.SetForegroundColour((0,0,0))
+        
             
             
     def setTelescopePosition(self,event):
