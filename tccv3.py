@@ -885,7 +885,12 @@ class TCC(wx.Frame):
         #Stores current time zone for whole GUI
         self.current_timezone=Time.now()
         self.mro=ephem.Observer()
-        #self.mro = None
+        
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
         debug=True
         
 
@@ -1176,11 +1181,6 @@ class TCC(wx.Frame):
             self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
             
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        
         
@@ -1229,16 +1229,11 @@ class TCC(wx.Frame):
         self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
         self.target_style={'color':'Black'}
         self.initial_style={'color':'r'}
+        
         plot_sky(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
         plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
@@ -1254,12 +1249,7 @@ class TCC(wx.Frame):
         self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
+        
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
         self.target_style={'color':'Black'}
