@@ -622,7 +622,7 @@ class Initialization(wx.Panel):
 
         # add line to separate the different sections
 
-        self.atZenithButton = wx.Button(self, -1, "Set Telescope at Zenith")
+        self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates")
         self.atZenithButton.Disable()
         
 
@@ -947,7 +947,7 @@ class TCC(wx.Frame):
         
 
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
-        self.Bind(wx.EVT_BUTTON, self.setTelescopeZenith, self.init.syncButton)
+        self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
 
         self.createMenu()
@@ -1295,29 +1295,33 @@ class TCC(wx.Frame):
         dec='+46:57:10.08' #set to LAT
         epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
         
-        if self.slewing==True:
-            self.second_window = wx.Frame(None)
-            text = wx.StaticText(self.second_window, -1, "Error: Telescope is currently slewing.")
-            self.second_window.Show()
+        self.init.targetNameText.SetValue(name)
+        self.init.targetRaText.SetValue(ra)
+        self.init.targetDecText.SetValue(dec)
+        self.init.targetEpochText.SetValue(epoch)
         
-        if self.slewing==False:
-            self.slewing=True
-            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
-            
-            self.decimalcoords=self.coordinates.to_string('decimal')
-            
-            
-            self.log('Setting Telescope to Zenith Position')
-            self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
-            self.control.slewButton.SetLabel('Stop Slew')
-            self.sb.SetStatusText('Slewing: True',1)
-            self.control.currentNamePos.SetLabel(name)
-            self.control.currentNamePos.SetForegroundColour((0,0,0))
+        return
         
             
             
     def setTelescopePosition(self,event):
-
+        target_name=self.init.targetNameText.GetValue()
+        target_ra=self.init.targetRaText.GetValue()
+        target_dec=self.init.targetDecText.GetValue()
+        target_epoch=self.init.targetEpochText.GetValue()
+        
+        if target_name=='':
+            self.control.currentNamePos.SetLabel('Unknown')
+            self.control.currentNamePos.SetForegroundColour((255,0,0))
+        else:
+            self.control.currentNamePos.SetLabel(str(target_name))
+            self.control.currentNamePos.SetForegroundColour('black')   
+        
+        self.control.currentRaPos.SetLabel(str(target_ra))
+        self.control.currentRaPos.SetForegroundColour('black')
+        self.control.currentDecPos.SetLabel(str(target_dec))
+        self.control.currentDecPos.SetForegroundColour('black')
+        
         return
 
     def onInit(self,event):
