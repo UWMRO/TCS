@@ -949,7 +949,9 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
-
+        self.Bind(wx.EVT_BUTTON, self.setRATrackingRate,self.init.rateRAButton)
+        self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
+        
         self.createMenu()
 
         self.sb = self.CreateStatusBar(5)
@@ -1322,8 +1324,48 @@ class TCC(wx.Frame):
         self.control.currentDecPos.SetLabel(str(target_dec))
         self.control.currentDecPos.SetForegroundColour('black')
         
+        self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
+        
         return
-
+    
+    def setRATrackingRate(self,event):
+        RArate=self.init.trackingRateRAText.GetValue()
+        
+        valid_input=True
+        
+        try:
+            val=float(RArate)
+        except ValueError:
+            valid_input=False
+        
+        if valid_input==True:
+            self.control.currentRATRPos.SetLabel(RArate)
+            self.control.currentRATRPos.SetForegroundColour('black')
+        else:
+            self.second_window = wx.Frame(None)
+            text = wx.StaticText(self.second_window, -1, "Please input an integer or float number")
+            self.second_window.Show()
+        return
+        
+    def setDECTrackingRate(self,event):
+        DECrate=self.init.trackingRateDECText.GetValue()
+        
+        valid_input=True
+        
+        try:
+            val=float(DECrate)
+        except ValueError:
+            valid_input=False
+        
+        if valid_input==True:
+            self.control.currentDECTRPos.SetLabel(DECrate)
+            self.control.currentDECTRPos.SetForegroundColour('black')
+        else:
+            self.second_window = wx.Frame(None)
+            text = wx.StaticText(self.second_window, -1, "Please input an integer or float number")
+            self.second_window.Show()
+        return
+        
     def onInit(self,event):
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
