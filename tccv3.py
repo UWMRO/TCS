@@ -939,6 +939,10 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
         self.Bind(wx.EVT_BUTTON,self.haltmotion,self.control.stopButton)
+        self.Bind(wx.EVT_BUTTON,self.Noffset,self.control.jogNButton)
+        self.Bind(wx.EVT_BUTTON,self.Soffset,self.control.jogSButton)
+        self.Bind(wx.EVT_BUTTON,self.Eoffset,self.control.jogEButton)
+        self.Bind(wx.EVT_BUTTON,self.Woffset,self.control.jogWButton)
         
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
@@ -1071,7 +1075,21 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-    
+        
+    '''Jog Commands; apply a coordinate offset in the direction of preference'''
+    def Noffset(self,event):
+        self.protocol.sendCommand("offset 1 positive")
+        return
+    def Woffset(self,event):
+        self.protocol.sendCommand("offset 0 negative")
+        return
+    def Eoffset(self,event):
+        self.protocol.sendCommand("offset 0 positive")
+        return
+    def Soffset(self,event):
+        self.protocol.sendCommand("offset 1 negative")
+        return
+        
     '''Halt Telescope motion, emergency button, use stop slew during slewing if possible'''
     def haltmotion(self,event):
         self.protocol.sendCommand("halt")
@@ -1112,9 +1130,11 @@ class TCC(wx.Frame):
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
             return self.coordinates
         else:
-            self.second_window = wx.Frame(None)
-            text = wx.StaticText(self.second_window, -1, "Error: Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ")
-            self.second_window.Show()
+            dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
             return
         
     
@@ -1138,7 +1158,6 @@ class TCC(wx.Frame):
             self.alt=str("{0.alt:.2}".format(self.target_altaz))
             self.split_alt=self.alt.split(' ')
             self.slew_altitude=self.split_alt[0]
-            print self.slew_altitude
             
             ''' Debug code
             self.decimalcoords=self.coordinates.to_string('decimal')
@@ -1151,7 +1170,7 @@ class TCC(wx.Frame):
             self.control.currentNamePos.SetLabel(name)
             self.control.currentNamePos.SetForegroundColour((0,0,0))
             '''
-            if float(self.slew_altitude) >= 20.0:
+            if float(self.slew_altitude) >= self.horizonlimit:
 
                 self.decimalcoords=self.coordinates.to_string('decimal')
             
@@ -1165,7 +1184,12 @@ class TCC(wx.Frame):
             
                 self.slewing= not self.slewing
             
-            if float(self.slew_altitude) < 20.0:
+            if float(self.slew_altitude) < self.horizonlimit:
+                dlg = wx.MessageDialog(self,
+                               "Target is below current minimum altitude, cannot slew.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy()
                 self.log("Error: Attempted slew altitude below 20 degrees.")
                 return
                 
@@ -1233,9 +1257,11 @@ class TCC(wx.Frame):
         elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
             self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
         else:
-            self.second_window = wx.Frame(None)
-            text = wx.StaticText(self.second_window, -1, "Error: Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ")
-            self.second_window.Show()
+            dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()  
             return
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
@@ -1368,9 +1394,11 @@ class TCC(wx.Frame):
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
         else:
-            self.second_window = wx.Frame(None)
-            text = wx.StaticText(self.second_window, -1, "Please input an integer or float number")
-            self.second_window.Show()
+            dlg = wx.MessageDialog(self,
+                               "Please input an integer or float number.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
         return
         
     def setDECTrackingRate(self,event):
@@ -1387,14 +1415,17 @@ class TCC(wx.Frame):
             self.control.currentDECTRPos.SetLabel(DECrate)
             self.control.currentDECTRPos.SetForegroundColour('black')
         else:
-            self.second_window = wx.Frame(None)
-            text = wx.StaticText(self.second_window, -1, "Please input an integer or float number")
-            self.second_window.Show()
+            dlg = wx.MessageDialog(self,
+                               "Please input an integer or float number.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
         return
         
     def onInit(self,event):
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
+        self.horizonlimit=self.dict['horizonLimit']
         self.control.slewButton.Enable()
         self.control.trackButton.Enable()
         self.init.atZenithButton.Enable()
