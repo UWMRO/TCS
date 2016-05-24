@@ -943,6 +943,9 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.Soffset,self.control.jogSButton)
         self.Bind(wx.EVT_BUTTON,self.Eoffset,self.control.jogEButton)
         self.Bind(wx.EVT_BUTTON,self.Woffset,self.control.jogWButton)
+        self.Bind(wx.EVT_BUTTON,self.focusIncPlus,self.control.focusIncPlusButton)
+        self.Bind(wx.EVT_BUTTON,self.focusIncNeg,self.control.focusIncNegButton)
+        self.Bind(wx.EVT_BUTTON,self.setfocus,self.control.focusAbsMove)
         
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
@@ -1088,6 +1091,26 @@ class TCC(wx.Frame):
         return
     def Soffset(self,event):
         self.protocol.sendCommand("offset 1 negative")
+        return
+        
+    def focusIncPlus(self,event):
+        val=self.control.focusAbsText.GetValue()
+        val=float(val)+1500.0
+        val=int(val)
+        self.control.focusAbsText.SetValue(str(val))
+        return
+    def focusIncNeg(self,event):
+        val=self.control.focusAbsText.GetValue()
+        val=float(val)-1500.0
+        val=int(val)
+        self.control.focusAbsText.SetValue(str(val))
+        return
+        
+    def setfocus(self,event):
+        val=self.control.focusAbsText.GetValue()
+        self.control.currentFocusPos.SetLabel(val)
+        self.control.currentFocusPos.SetForegroundColour('black')
+        self.protocol.sendCommand(str("focus")+' '+str(val))
         return
         
     '''Halt Telescope motion, emergency button, use stop slew during slewing if possible'''

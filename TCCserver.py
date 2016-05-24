@@ -52,8 +52,9 @@ class TCCParser(object):
 
         if input[0]=='focus':
             value=input[1]
-            logread= "Focusing telescope"
-            return {'log':logread, 'focus':self.pmc.slew(value)}
+            logread= "Focusing telescope to" + " " + value
+            #return {'log':logread, 'focus':self.pmc.slew(value)}
+            return
         '''
         if input[0]=='offset':
             RAjog=input[1]
