@@ -938,6 +938,7 @@ class TCC(wx.Frame):
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
+        self.Bind(wx.EVT_BUTTON,self.haltmotion,self.control.stopButton)
         
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
@@ -1070,7 +1071,13 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-
+    
+    '''Halt Telescope motion, emergency button, use stop slew during slewing if possible'''
+    def haltmotion(self,event):
+        self.protocol.sendCommand("halt")
+        return
+        
+    '''Passes a command to the telescope to toggle tracking'''
     def toggletracksend(self,evt):
         #self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
         self.protocol.sendCommand(str("toggletrack")+' '+str(self.tracking))
@@ -1082,7 +1089,8 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Tracking: False',0)
         self.tracking= not self.tracking    
         return
-        
+    
+    '''Take in any valid RA/DEC format and read it into a SkyCoord object'''    
     def inputcoordSorter(self,ra,dec,epoch_now,epoch):
         deg_input=True
         
@@ -1093,12 +1101,24 @@ class TCC(wx.Frame):
         
         if deg_input==True:
             self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
-        elif 'h' in str(ra):
+            return self.coordinates
+        elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
             self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
-        elif ' ' in str(ra) or ':' in str(ra):
+            return self.coordinates
+        elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
-        return self.coordinates
+            return self.coordinates
+        elif str(ra)[2]== ':' and str(ra)[5]== ':':
+            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+            return self.coordinates
+        else:
+            self.second_window = wx.Frame(None)
+            text = wx.StaticText(self.second_window, -1, "Error: Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ")
+            self.second_window.Show()
+            return
+        
     
+    '''Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing'''
     def startSlew(self,event):
         name=self.control.targetNameText.GetValue()
         input_ra=self.control.targetRaText.GetValue()
@@ -1206,11 +1226,17 @@ class TCC(wx.Frame):
         
         if deg_input==True:
             self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-        elif 'h' in str(input_ra):
+        elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
             self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-        elif ' ' in str(input_ra) or ':' in str(input_ra):
+        elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
             self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-            
+        elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
+            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+        else:
+            self.second_window = wx.Frame(None)
+            text = wx.StaticText(self.second_window, -1, "Error: Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ")
+            self.second_window.Show()
+            return
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        

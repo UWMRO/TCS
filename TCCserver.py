@@ -81,7 +81,9 @@ class TCCParser(object):
         if input[0]=='stop':
             logread=timestamp()+'Bringing Telescope to a safe stopping point'
             return logread
-
+        if input[0]=='halt':
+            logread=timestamp()+'Halting Telescope Motion'
+            return logread
            
 def timestamp():
         today=time.strftime('%Y%m%d.log')
