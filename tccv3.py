@@ -1141,16 +1141,20 @@ class TCC(wx.Frame):
             deg_input=False
         
         if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+            self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
             return self.coordinates
         elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
             self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
             return self.coordinates
         elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
             return self.coordinates
         elif str(ra)[2]== ':' and str(ra)[5]== ':':
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
             return self.coordinates
         else:
             dlg = wx.MessageDialog(self,
@@ -1193,7 +1197,7 @@ class TCC(wx.Frame):
             self.control.currentNamePos.SetLabel(name)
             self.control.currentNamePos.SetForegroundColour((0,0,0))
             '''
-            if float(self.slew_altitude) >= self.horizonlimit:
+            if float(self.slew_altitude) > float(self.horizonlimit):
 
                 self.decimalcoords=self.coordinates.to_string('decimal')
             
@@ -1207,7 +1211,7 @@ class TCC(wx.Frame):
             
                 self.slewing= not self.slewing
             
-            if float(self.slew_altitude) < self.horizonlimit:
+            elif float(self.slew_altitude) < float(self.horizonlimit):
                 dlg = wx.MessageDialog(self,
                                "Target is below current minimum altitude, cannot slew.",
                                "Error", wx.OK|wx.ICON_ERROR)
@@ -1263,6 +1267,7 @@ class TCC(wx.Frame):
         input_dec = self.target.decText.GetValue()
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
+        epoch_now = self.control.currentEpochPos.GetLabel()
         
         deg_input=True
         
@@ -1273,12 +1278,16 @@ class TCC(wx.Frame):
         
         if deg_input==True:
             self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
         elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
             self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
         elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
             self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
         elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
             self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
         else:
             dlg = wx.MessageDialog(self,
                                "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
