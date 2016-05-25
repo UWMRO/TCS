@@ -27,7 +27,7 @@ from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK5
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
 from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
@@ -1140,25 +1140,59 @@ class TCC(wx.Frame):
         except ValueError:
             deg_input=False
         
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            return self.coordinates
-        elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
-            self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            return self.coordinates
-        elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
-            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            return self.coordinates
-        elif str(ra)[2]== ':' and str(ra)[5]== ':':
-            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            return self.coordinates
+        if str(epoch)=='J2000':
+    
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ':' and str(ra)[5]== ':':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            else:
+                dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy() 
+            return
+        elif epoch=='J1950':
+    
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ':' and str(ra)[5]== ':':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            else:
+                dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy() 
+            return
         else:
             dlg = wx.MessageDialog(self,
-                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
                                "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy() 
@@ -1275,25 +1309,53 @@ class TCC(wx.Frame):
             val=float(input_ra)
         except ValueError:
             deg_input=False
-        
-        if deg_input==True:
-            self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-        elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
-            self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-        elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-        elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
-            self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-            self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-        else:
-            dlg = wx.MessageDialog(self,
+        if str(epoch)=='J2000' or str(epoch)=='':
+            
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
+                self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
+                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+            else:
+                dlg = wx.MessageDialog(self,
                                "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
                                "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy()  
+            return
+        elif str(epoch)=='J1950':
+            
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
+                self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+            elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
+                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+            else:
+                dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy()  
+        else:
+            dlg = wx.MessageDialog(self,
+                               "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
+                               "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy()  
+            dlg.Destroy() 
             return
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
