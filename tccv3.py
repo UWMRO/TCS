@@ -1139,6 +1139,8 @@ class TCC(wx.Frame):
             val=float(ra)
         except ValueError:
             deg_input=False
+            
+        self.validity=True
         
         if str(epoch)=='J2000':
     
@@ -1147,18 +1149,19 @@ class TCC(wx.Frame):
                 self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
-                self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== ':' and str(ra)[5]== ':':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
                 return self.coordinates
             else:
+                self.validity=False
                 dlg = wx.MessageDialog(self,
                                "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
                                "Error", wx.OK|wx.ICON_ERROR)
@@ -1172,18 +1175,19 @@ class TCC(wx.Frame):
                 self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
-                self.coordinates=SkyCoord(ra,dec,frame='icrs',obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
                 return self.coordinates
             elif str(ra)[2]== ':' and str(ra)[5]== ':':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),obstime=str(epoch_now),equinox=str(epoch))
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
                 self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
                 return self.coordinates
             else:
+                self.validity=False
                 dlg = wx.MessageDialog(self,
                                "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
                                "Error", wx.OK|wx.ICON_ERROR)
@@ -1191,6 +1195,7 @@ class TCC(wx.Frame):
                 dlg.Destroy() 
             return
         else:
+            self.validity=False
             dlg = wx.MessageDialog(self,
                                "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
                                "Error", wx.OK|wx.ICON_ERROR)
@@ -1303,75 +1308,24 @@ class TCC(wx.Frame):
         mag  = self.target.magText.GetValue()
         epoch_now = self.control.currentEpochPos.GetLabel()
         
-        deg_input=True
-        
-        try:
-            val=float(input_ra)
-        except ValueError:
-            deg_input=False
-        if str(epoch)=='J2000' or str(epoch)=='':
-            
-            if deg_input==True:
-                self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
-                self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
-                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-            else:
-                dlg = wx.MessageDialog(self,
-                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
-                               "Error", wx.OK|wx.ICON_ERROR)
-                dlg.ShowModal()
-                dlg.Destroy()  
-            return
-        elif str(epoch)=='J1950':
-            
-            if deg_input==True:
-                self.coordinates=SkyCoord(ra=float(input_ra)*u.degree,dec=float(input_dec)*u.degree,frame='icrs')
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== 'h' and str(input_ra)[5]== 'm':
-                self.coordinates=SkyCoord(input_ra,input_dec,frame='icrs')
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== ' ' and str(input_ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-            elif str(input_ra)[2]== ':' and str(input_ra)[5]== ':':    
-                self.coordinates=SkyCoord(str(input_ra)+' '+str(input_dec), unit=(u.hourangle,u.deg))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-            else:
-                dlg = wx.MessageDialog(self,
-                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
-                               "Error", wx.OK|wx.ICON_ERROR)
-                dlg.ShowModal()
-                dlg.Destroy()  
-        else:
-            dlg = wx.MessageDialog(self,
-                               "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
-                               "Error", wx.OK|wx.ICON_ERROR)
-            dlg.ShowModal()
-            dlg.Destroy() 
-            return
+        self.inputcoordSorter(input_ra,input_dec,epoch_now,epoch)
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        
         
         #add transformation, the epoch should be current
-        self.target.targetList.InsertStringItem(self.list_count,str(t_name))
-        self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
-        self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
-        self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
-        self.target.targetList.SetStringItem(self.list_count,4,str(mag))
-        #self.target.targetList.SetStringItem(0,5,str(airmass))
-        thread.start_new_thread(self.dyn_airmass,(t_name,input_ra,input_dec,self.obstarget,self.MRO,self.list_count,))
-        self.list_count+=1
+        if self.validity==True:
+            
+            self.target.targetList.InsertStringItem(self.list_count,str(t_name))
+            self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
+            self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
+            self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
+            self.target.targetList.SetStringItem(self.list_count,4,str(mag))
+            #self.target.targetList.SetStringItem(0,5,str(airmass))
+            thread.start_new_thread(self.dyn_airmass,(t_name,input_ra,input_dec,self.obstarget,self.MRO,self.list_count,))
+            self.list_count+=1
         return
-
+        
     """Read in a target list file to the ctrl list.
     Format is: name;ra;dec;epoch"""
     def readToList(self,event):
