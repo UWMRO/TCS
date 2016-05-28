@@ -1142,6 +1142,7 @@ class TCC(wx.Frame):
             
         self.validity=True
         
+        
         if str(epoch)=='J2000':
     
             if deg_input==True:
