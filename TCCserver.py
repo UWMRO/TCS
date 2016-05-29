@@ -52,15 +52,16 @@ class TCCParser(object):
 
         if input[0]=='focus':
             value=input[1]
-            logread= "Focusing telescope"
-            return {'log':logread, 'focus':self.pmc.slew(value)}
-
+            logread= "Focusing telescope to" + " " + value
+            #return {'log':logread, 'focus':self.pmc.slew(value)}
+            return
+        '''
         if input[0]=='offset':
             RAjog=input[1]
             DECjog=input[2]
             logread="Jogging telescope by offset parameters"
             return {'log':logread, 'offset':self.pmc.offset(RAjog, DECjog)}
-
+        '''
         if input[0]=='toggletrack':
             tracking=input[1]
             if tracking=="False":
@@ -81,7 +82,19 @@ class TCCParser(object):
         if input[0]=='stop':
             logread=timestamp()+'Bringing Telescope to a safe stopping point'
             return logread
-
+        if input[0]=='halt':
+            logread=timestamp()+'Halting Telescope Motion'
+            return logread
+        if input[0]=='offset':
+            if input[1]=='1' and input[2]=='positive':
+                logread=timestamp()+'North Jog: Applying DEC offset'
+            if input[1]=='1' and input[2]=='negative':
+                logread=timestamp()+'South Jog: Applying DEC offset'
+            if input[1]=='0' and input[2]=='positive':
+                logread=timestamp()+'East Jog: Applying RA offset'
+            if input[1]=='0' and input[2]=='negative':
+                logread=timestamp()+'West Jog: Applying RA offset'
+            return logread
            
 def timestamp():
         today=time.strftime('%Y%m%d.log')

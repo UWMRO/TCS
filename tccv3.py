@@ -27,7 +27,7 @@ from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
 from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
@@ -122,11 +122,17 @@ class Control(wx.Panel):
         self.currentFocusPos.SetLabel('Unknown')
         self.currentFocusPos.SetForegroundColour((255,0,0))
 
-        self.currentTRLabel = wx.StaticText(self, size=(125,-1))
-        self.currentTRLabel.SetLabel('Tracking Rate: ')
-        self.currentTRPos = wx.StaticText(self,size=(75,-1))
-        self.currentTRPos.SetLabel('Unknown')
-        self.currentTRPos.SetForegroundColour((255,0,0))
+        self.currentRATRLabel = wx.StaticText(self, size=(125,-1))
+        self.currentRATRLabel.SetLabel('RA Tracking Rate: ')
+        self.currentRATRPos = wx.StaticText(self,size=(75,-1))
+        self.currentRATRPos.SetLabel('Unknown')
+        self.currentRATRPos.SetForegroundColour((255,0,0))
+        
+        self.currentDECTRLabel = wx.StaticText(self, size=(125,-1))
+        self.currentDECTRLabel.SetLabel('DEC Tracking Rate: ')
+        self.currentDECTRPos = wx.StaticText(self,size=(75,-1))
+        self.currentDECTRPos.SetLabel('Unknown')
+        self.currentDECTRPos.SetForegroundColour((255,0,0))
 
 
         #Focus Change
@@ -138,9 +144,9 @@ class Control(wx.Panel):
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
-        #self.slewButton.Disable()
+        self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
-        #self.trackButton.Disable()
+        self.trackButton.Disable()
 
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
@@ -160,7 +166,7 @@ class Control(wx.Panel):
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=10, cols=2, hgap=5, vgap=5)
+        self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=5, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
 
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
@@ -196,8 +202,10 @@ class Control(wx.Panel):
         self.gbox2.Add(self.currentLSTPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentFocusLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentFocusPos, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.currentTRLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.currentTRPos, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.currentRATRLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.currentRATRPos, 0, wx.ALIGN_LEFT)
+        self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
 
         self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
@@ -243,45 +251,39 @@ class Target(wx.Panel):
         #show list of targets with selection button.  When the target is highlighted the selection button will input the data into the Control window.
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
         self.targetList.InsertColumn(0,'Target Name',width=125)
-        self.targetList.InsertColumn(1,'RA',width=125)
-        self.targetList.InsertColumn(2,'DEC',width=125)
-        self.targetList.InsertColumn(3,'EPOCH',width=75)
-        self.targetList.InsertColumn(5,'V Mag',width=75)
-        self.selectButton = wx.Button(self, -1, "Select as Current Target")
+        self.targetList.InsertColumn(1,'RA',width=100)
+        self.targetList.InsertColumn(2,'DEC',width=100)
+        self.targetList.InsertColumn(3,'EPOCH',width=62.5)
+        self.targetList.InsertColumn(5,'V Mag',width=62.5)
+        self.targetList.InsertColumn(6,'Airmass',width=75)
+        
 
         #Input individual target, use astropy and a lot of error checking to solve format failures
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
-        #self.nameText.SetLabel('M31')
 
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
-        #self.raText.SetLabel('00h42m44.330s')
 
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
-        #self.decText.SetLabel('+41d16m07.50s')
 
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
-        #self.epochText.SetLabel('2000')
 
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
-        #self.magText.SetLabel('3.43')
-
+        
+        #Buttons
+        self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-
         self.plot_button=wx.Button(self,-1,'Plot Target')
-        self.plot_button.Bind(wx.EVT_BUTTON,self.target_plot)
-
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
-        self.airmass_button.Bind(wx.EVT_BUTTON,self.airmass_plot)
 
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -330,46 +332,35 @@ class Target(wx.Panel):
         self.dir=os.getcwd()
 
 
-
-
-
-
-    '''Plot the selected targets position over the next 8 hours'''
-    def target_plot(self,event):
-        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
-        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
-        self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
-        self.target_style={'color':'SteelBlue'}
-        self.sky_plot=plot_sky(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
-        plt.legend(shadow=True, loc=2)
-        plt.show()
-    '''Plot the selected targets airmass curve'''
-    def airmass_plot(self,event):
-        self.coordinates=SkyCoord(self.targetList.GetItemText(self.targetList.GetFocusedItem(),1),self.targetList.GetItemText(self.targetList.GetFocusedItem(),2),frame='icrs')
-        self.target=FixedTarget(name=self.targetList.GetItemText(self.targetList.GetFocusedItem(),0),coord=self.coordinates)
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
-                latitude = 46.9528*u.deg,
-                elevation = 1198*u.m,
-                name = "Manastash Ridge Observatory"
-                )
-        #self.Obstime=Time('2015-11-3 06:10:00')
-        self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
-        self.target_style={'color':'SteelBlue'}
-        self.airmass=plot_airmass(self.target, self.MRO, self.plot_times,style_kwargs=self.target_style)
-        plt.axhline(y=2,linestyle='--',color='orange')
-        plt.axhline(y=2.5,linestyle='--',color='r')
-        plt.legend(shadow=True, loc=1)
-        plt.show()
-
-
+'''
+class Image(wx.Panel):
+    def __init__(self,parent, debug, night):
+        wx.Panel.__init__(self,parent)
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        self.frame = parent
+        
+        self.fig = Figure((4,4))
+        self.canvas = FigCanvas(self,-1, self.fig)
+        self.ax1 = self.fig.add_subplot(111)
+        self.ax1.set_axis_off()
+        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        
+    def OnEraseBackground(self, evt):
+        """
+        Add a picture to the background
+        """
+        # yanked from ColourDB.py
+        dc = evt.GetDC()
+ 
+        if not dc:
+            dc = wx.ClientDC(self)
+            rect = self.GetUpdateRegion().GetBox()
+            dc.SetClippingRect(rect)
+        dc.Clear()
+        bmp = wx.Bitmap("testfinder.jpg")
+        dc.DrawBitmap(bmp, 0, 0)
+'''        
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -465,15 +456,16 @@ class GuiderControl(wx.Panel):
 
         img=wx.EmptyImage(320,320)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
-        
+        '''
         self.fig = Figure((4,4))
         self.canvas = FigCanvas(self,-1, self.fig)
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-
+        '''
         self.finderButton=wx.Button(self,-1,"Load Finder Chart")
-        self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
+        #self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
+        
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars")
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding")
 
@@ -513,8 +505,9 @@ class GuiderControl(wx.Panel):
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
 
         #self.hbox2.Add(self.panel2,0,wx.ALIGN_RIGHT)
-        self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
-        self.hbox2.AddSpacer(133)
+        #self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
+        #self.hbox2.AddSpacer(133)
+        self.hbox2.AddSpacer(350)
         self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
 
         self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
@@ -535,13 +528,13 @@ class GuiderControl(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    '''Load the finder chart for the current target'''
+    '''Load the finder chart for the current target
     def load_finder_chart(self,event):
         
         self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
         self.ax1.set_axis_off()
         return
-
+    '''
 
     def InitBuffer(self):
         size=self.GetClientSize()
@@ -629,8 +622,9 @@ class Initialization(wx.Panel):
 
         # add line to separate the different sections
 
-        self.atZenithButton = wx.Button(self, -1, "Telescope at Zenith")
-        self.atZenithButton.Bind(wx.EVT_BUTTON,self.onZenith)
+        self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates")
+        self.atZenithButton.Disable()
+        
 
 
         #self.zenith = wx.PopupWindow("um r u sure")
@@ -736,10 +730,6 @@ class Initialization(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    def onZenith(self, event):
-        self.second_window = wx.Frame(None)
-        text = wx.StaticText(self.second_window, -1, "r u sure ._.")
-        self.second_window.Show()
 
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
@@ -891,12 +881,18 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
-        
+        self.list_count=0
         #Stores current time zone for whole GUI
         self.current_timezone=Time.now()
         self.mro=ephem.Observer()
-        #self.mro = None
+        
+        self.MRO = Observer(longitude = -120.7278 *u.deg,
+                latitude = 46.9528*u.deg,
+                elevation = 1198*u.m,
+                name = "Manastash Ridge Observatory"
+                )
         debug=True
+        
 
         self.dir=os.getcwd()
         
@@ -905,6 +901,7 @@ class TCC(wx.Frame):
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
+        #imagePage=Image(nb,debug,self.night)
         scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
@@ -920,6 +917,9 @@ class TCC(wx.Frame):
 
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(2)
+        
+        #nb.AddPage(imagePage,"Image")
+       # self.image=nb.GetPage(3)
 
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(3)
@@ -930,23 +930,36 @@ class TCC(wx.Frame):
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(5)
 
-        nb.AddPage(initPage,"Initiailization Parameters")
+        nb.AddPage(initPage,"Initialization Parameters")
         self.init=nb.GetPage(6)
 
         nb.AddPage(logPage,"Night Log")
         self.nl=nb.GetPage(7)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
-        self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
+        self.Bind(wx.EVT_BUTTON,self.haltmotion,self.control.stopButton)
+        self.Bind(wx.EVT_BUTTON,self.Noffset,self.control.jogNButton)
+        self.Bind(wx.EVT_BUTTON,self.Soffset,self.control.jogSButton)
+        self.Bind(wx.EVT_BUTTON,self.Eoffset,self.control.jogEButton)
+        self.Bind(wx.EVT_BUTTON,self.Woffset,self.control.jogWButton)
+        self.Bind(wx.EVT_BUTTON,self.focusIncPlus,self.control.focusIncPlusButton)
+        self.Bind(wx.EVT_BUTTON,self.focusIncNeg,self.control.focusIncNegButton)
+        self.Bind(wx.EVT_BUTTON,self.setfocus,self.control.focusAbsMove)
         
+        self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
+        self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
+        self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
 
-        self.Bind(wx.EVT_BUTTON, self.setTelescopeZenith, self.init.syncButton)
+        self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
+        self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
-
+        self.Bind(wx.EVT_BUTTON, self.setRATrackingRate,self.init.rateRAButton)
+        self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
+        
         self.createMenu()
 
         self.sb = self.CreateStatusBar(5)
@@ -961,7 +974,7 @@ class TCC(wx.Frame):
         self.target.nameText.SetLabel('M31')
         self.target.raText.SetLabel('00h42m44.330s')
         self.target.decText.SetLabel('+41d16m07.50s')
-        self.target.epochText.SetLabel('2000')
+        self.target.epochText.SetLabel('J2000')
         self.target.magText.SetLabel('3.43')
 
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
@@ -1065,7 +1078,47 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-
+        
+    '''Jog Commands; apply a coordinate offset in the direction of preference'''
+    def Noffset(self,event):
+        self.protocol.sendCommand("offset 1 positive")
+        return
+    def Woffset(self,event):
+        self.protocol.sendCommand("offset 0 negative")
+        return
+    def Eoffset(self,event):
+        self.protocol.sendCommand("offset 0 positive")
+        return
+    def Soffset(self,event):
+        self.protocol.sendCommand("offset 1 negative")
+        return
+        
+    def focusIncPlus(self,event):
+        val=self.control.focusAbsText.GetValue()
+        val=float(val)+1500.0
+        val=int(val)
+        self.control.focusAbsText.SetValue(str(val))
+        return
+    def focusIncNeg(self,event):
+        val=self.control.focusAbsText.GetValue()
+        val=float(val)-1500.0
+        val=int(val)
+        self.control.focusAbsText.SetValue(str(val))
+        return
+        
+    def setfocus(self,event):
+        val=self.control.focusAbsText.GetValue()
+        self.control.currentFocusPos.SetLabel(val)
+        self.control.currentFocusPos.SetForegroundColour('black')
+        self.protocol.sendCommand(str("focus")+' '+str(val))
+        return
+        
+    '''Halt Telescope motion, emergency button, use stop slew during slewing if possible'''
+    def haltmotion(self,event):
+        self.protocol.sendCommand("halt")
+        return
+        
+    '''Passes a command to the telescope to toggle tracking'''
     def toggletracksend(self,evt):
         #self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
         self.protocol.sendCommand(str("toggletrack")+' '+str(self.tracking))
@@ -1078,24 +1131,142 @@ class TCC(wx.Frame):
         self.tracking= not self.tracking    
         return
     
-    def startSlew(self,event):
+    '''Take in any valid RA/DEC format and read it into a SkyCoord object'''    
+    def inputcoordSorter(self,ra,dec,epoch_now,epoch):
+        deg_input=True
         
-        ra=self.control.targetRaText.GetValue()
-        dec=self.control.targetDecText.GetValue()
-        epoch=self.control.targetEpochText.GetValue()
+        try:
+            val=float(ra)
+        except ValueError:
+            deg_input=False
+            
+        self.validity=True
+        
+        
+        if str(epoch)=='J2000':
+    
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ':' and str(ra)[5]== ':':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
+                return self.coordinates
+            else:
+                self.validity=False
+                dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy() 
+            return
+        elif epoch=='J1950':
+    
+            if deg_input==True:
+                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
+                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            elif str(ra)[2]== ':' and str(ra)[5]== ':':
+                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
+                return self.coordinates
+            else:
+                self.validity=False
+                dlg = wx.MessageDialog(self,
+                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy() 
+            return
+        else:
+            self.validity=False
+            dlg = wx.MessageDialog(self,
+                               "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
+            return
+        
+    
+    '''Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing'''
+    def startSlew(self,event):
+        name=self.control.targetNameText.GetValue()
+        input_ra=self.control.targetRaText.GetValue()
+        input_dec=self.control.targetDecText.GetValue()
+        input_epoch=self.control.targetEpochText.GetValue()
+        current_epoch=self.control.currentEpochPos.GetLabel()
+        
+        
+        
         if self.slewing==False:
-            self.log([ra,dec,epoch])
-            #self.protocol.sendLine("slew"+' '+str(ra)+ ' '+str(dec))
-            self.protocol.sendCommand("slew"+' '+str(ra)+ ' '+str(dec))
-        # add moving to that flashes or is in some intermmediate color that is independent of telescope feedback
-        #also log the transformations
+            
+            self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
+            self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
+            self.obstarget=FixedTarget(name=name,coord=self.coordinates)
+            self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
+
+            self.alt=str("{0.alt:.2}".format(self.target_altaz))
+            self.split_alt=self.alt.split(' ')
+            self.slew_altitude=self.split_alt[0]
+            
+            ''' Debug code
+            self.decimalcoords=self.coordinates.to_string('decimal')
+            
+            
+            self.log([input_ra,input_dec,current_epoch])
+            self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
             self.control.slewButton.SetLabel('Stop Slew')
             self.sb.SetStatusText('Slewing: True',1)
-        if self.slewing==True:
+            self.control.currentNamePos.SetLabel(name)
+            self.control.currentNamePos.SetForegroundColour((0,0,0))
+            '''
+            if float(self.slew_altitude) > float(self.horizonlimit):
+
+                self.decimalcoords=self.coordinates.to_string('decimal')
+            
+            
+                self.log([input_ra,input_dec,current_epoch])
+                self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
+                self.control.slewButton.SetLabel('Stop Slew')
+                self.sb.SetStatusText('Slewing: True',1)
+                self.control.currentNamePos.SetLabel(name)
+                self.control.currentNamePos.SetForegroundColour((0,0,0))
+            
+                self.slewing= not self.slewing
+            
+            elif float(self.slew_altitude) < float(self.horizonlimit):
+                dlg = wx.MessageDialog(self,
+                               "Target is below current minimum altitude, cannot slew.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+                dlg.ShowModal()
+                dlg.Destroy()
+                self.log("Error: Attempted slew altitude below 20 degrees.")
+                return
+                
+        elif self.slewing==True:
             self.protocol.sendLine("stop")
             self.control.slewButton.SetLabel('Start Slew')
             self.sb.SetStatusText('Slewing: False',1)
-        self.slewing= not self.slewing
+            
+            self.slewing= not self.slewing
+            
         return
 
     """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
@@ -1106,8 +1277,10 @@ class TCC(wx.Frame):
         epoch = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
 
-        self.coordinates=SkyCoord(ra,dec,frame='icrs')
-        self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.coordinates=SkyCoord(ra,dec,frame='icrs')
+        #self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.image.current_target=FixedTarget(name=None,coord=self.coordinates)
+        #self.load_finder_chart()
 
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
@@ -1119,22 +1292,41 @@ class TCC(wx.Frame):
         self.log("Current target is '"+name+"'")
         
         return
+        
+    def load_finder_chart(self):
+        
+        self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
+        self.image.ax1.set_axis_off()
+        self.image.fig.savefig("testfinder.png")
+        image_file = 'testfinder.png'
 
     """Add a manual text item from the target panel to the list control"""
     def addToList(self,event):
-        name = self.target.nameText.GetValue()
-        ra = self.target.raText.GetValue()
-        dec = self.target.decText.GetValue()
+        t_name = self.target.nameText.GetValue()
+        input_ra = self.target.raText.GetValue()
+        input_dec = self.target.decText.GetValue()
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
+        epoch_now = self.control.currentEpochPos.GetLabel()
+        
+        self.inputcoordSorter(input_ra,input_dec,epoch_now,epoch)
+        self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
+        #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
+       
+        
         #add transformation, the epoch should be current
-        self.target.targetList.InsertStringItem(0,str(name))
-        self.target.targetList.SetStringItem(0,1,str(ra))
-        self.target.targetList.SetStringItem(0,2,str(dec))
-        self.target.targetList.SetStringItem(0,3,str(epoch))
-        self.target.targetList.SetStringItem(0,4,str(mag))
+        if self.validity==True:
+            
+            self.target.targetList.InsertStringItem(self.list_count,str(t_name))
+            self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
+            self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
+            self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
+            self.target.targetList.SetStringItem(self.list_count,4,str(mag))
+            #self.target.targetList.SetStringItem(0,5,str(airmass))
+            thread.start_new_thread(self.dyn_airmass,(t_name,input_ra,input_dec,self.obstarget,self.MRO,self.list_count,))
+            self.list_count+=1
         return
-
+        
     """Read in a target list file to the ctrl list.
     Format is: name;ra;dec;epoch"""
     def readToList(self,event):
@@ -1149,22 +1341,143 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-
+        
+    def dyn_airmass(self,n,r,d,tgt,obs,count):
+        while True:
+            a= obs.altaz(Time.now(),tgt).secz
+            if a > 8 or a < 0:
+                a="N/A"
+            wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
+            #self.target.targetList.SetStringItem(count,5,str(a))
+            time.sleep(10)
+            
+    '''Plot the selected targets position over the next 8 hours'''
+    def target_plot(self,event):
+        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
+        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        current_epoch=self.control.currentEpochPos.GetLabel()
+        
+        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
+            
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        self.target_style={'color':'Black'}
+        self.initial_style={'color':'r'}
+        
+        plot_sky(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.legend(shadow=True, loc=2)
+        plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
+        plt.show()
+        
+    '''Plot the selected targets airmass curve'''
+    def airmass_plot(self,event):
+        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
+        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
+        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        current_epoch=self.control.currentEpochPos.GetLabel()
+        
+        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
+            
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        
+        self.Obstime=Time.now()
+        self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
+        self.target_style={'color':'Black'}
+        self.airmass=plot_airmass(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
+        plt.axhline(y=2,linestyle='--',color='orange')
+        plt.axhline(y=2.5,linestyle='--',color='r')
+        plt.legend(shadow=True, loc=1)
+        plt.show()
+        
     """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
     def setTelescopeZenith(self, event):
         name='Zenith'
-        ra='' #set to current LST
-        dec=''#set to LAT
-        epoch=''#define as current epoch
+        ra=self.control.currentLSTPos.GetLabel() #set to current LST
+        dec='+46:57:10.08' #set to LAT
+        epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
+        
+        self.init.targetNameText.SetValue(name)
+        self.init.targetRaText.SetValue(ra)
+        self.init.targetDecText.SetValue(dec)
+        self.init.targetEpochText.SetValue(epoch)
+        
         return
-
+        
+            
+            
     def setTelescopePosition(self,event):
-
+        target_name=self.init.targetNameText.GetValue()
+        target_ra=self.init.targetRaText.GetValue()
+        target_dec=self.init.targetDecText.GetValue()
+        target_epoch=self.init.targetEpochText.GetValue()
+        
+        if target_name=='':
+            self.control.currentNamePos.SetLabel('Unknown')
+            self.control.currentNamePos.SetForegroundColour((255,0,0))
+        else:
+            self.control.currentNamePos.SetLabel(str(target_name))
+            self.control.currentNamePos.SetForegroundColour('black')   
+        
+        self.control.currentRaPos.SetLabel(str(target_ra))
+        self.control.currentRaPos.SetForegroundColour('black')
+        self.control.currentDecPos.SetLabel(str(target_dec))
+        self.control.currentDecPos.SetForegroundColour('black')
+        
+        self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
+        
         return
-
+    
+    def setRATrackingRate(self,event):
+        RArate=self.init.trackingRateRAText.GetValue()
+        
+        valid_input=True
+        
+        try:
+            val=float(RArate)
+        except ValueError:
+            valid_input=False
+        
+        if valid_input==True:
+            self.control.currentRATRPos.SetLabel(RArate)
+            self.control.currentRATRPos.SetForegroundColour('black')
+        else:
+            dlg = wx.MessageDialog(self,
+                               "Please input an integer or float number.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
+        return
+        
+    def setDECTrackingRate(self,event):
+        DECrate=self.init.trackingRateDECText.GetValue()
+        
+        valid_input=True
+        
+        try:
+            val=float(DECrate)
+        except ValueError:
+            valid_input=False
+        
+        if valid_input==True:
+            self.control.currentDECTRPos.SetLabel(DECrate)
+            self.control.currentDECTRPos.SetForegroundColour('black')
+        else:
+            dlg = wx.MessageDialog(self,
+                               "Please input an integer or float number.",
+                               "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
+        return
+        
     def onInit(self,event):
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
+        self.horizonlimit=self.dict['horizonLimit']
+        self.control.slewButton.Enable()
+        self.control.trackButton.Enable()
+        self.init.atZenithButton.Enable()
         thread.start_new_thread(self.timer,())
         self.initState=True
         if self.initState==True:
