@@ -4,13 +4,16 @@
 #define __BCT30__
 
 #include <iostream>
-//#include "mcapi.h"
-#include "mcapi_standin.h"
+#include "mcapi.h"
 #include "indiapi.h"
 
 //#define Ra 1	// PMC board axis n assigned to <name> servo
 //#define Dec 2
 //#definse Focus 3
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 using namespace std;
 
@@ -62,7 +65,7 @@ public:
 	bool IsStopped(int AxisNumber);
 	void GetFollowingError(int AxisNumber, double *error);
 	void reportLimitSwitches(void);
-	void getStatus(int AxisNumber, DWORD *stat);
+	void getStatus(int AxisNumber, int *stat);
 	void getMode(int AxisNumber, int *mode);	// 0-vel, 1-position
    
 private:
@@ -99,4 +102,8 @@ private:
 
 
 };
+
+#ifdef __cplusplus
+}
+#endif
 #endif

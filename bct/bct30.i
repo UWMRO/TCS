@@ -4,7 +4,7 @@
 #include "indicom.h"
 #include "globals.h"
 #include "iomappings.h"
-#include "mcapi_standin.h"
+#include "mcapi.h"
 %}
 
 /* TODO: figure out how to handle pass-by-reference function args */

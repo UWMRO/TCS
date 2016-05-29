@@ -18,8 +18,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#include "mcapi.h"
-#include "mcapi_standin.h"
+#include "mcapi.h"
 
 #ifndef INDI_DEVAPI_H
 #include "indicom.h"
@@ -35,11 +34,6 @@
 #endif
 
 using namespace std;
-
-
-
-
-
 
 bct30::bct30(void)
 {
@@ -698,7 +692,7 @@ void bct30::Reset(int AxisNumber)
    MCEnableAxis(hCtlr, AxisNumber, TRUE);
 }
 
-void bct30::getStatus(int AxisNumber, DWORD *stat)
+void bct30::getStatus(int AxisNumber, int *stat)
 {
 
 // read out status 
