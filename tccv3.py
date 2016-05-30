@@ -1250,6 +1250,8 @@ class TCC(wx.Frame):
                 self.control.currentNamePos.SetForegroundColour((0,0,0))
             
                 self.slewing= not self.slewing
+                
+                return
             
             elif float(self.slew_altitude) < float(self.horizonlimit):
                 dlg = wx.MessageDialog(self,
@@ -1530,6 +1532,7 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui = self.factory.gui
         gui.protocol = self
         gui.control.protocol= self
+        print "data recieved from server" ,data
 
         if gui:
             val = gui.control.logBox.GetValue()
@@ -1540,11 +1543,13 @@ class DataForwardingProtocol(basic.LineReceiver):
                 self._deferreds.pop(sep_data[0]).callpack(sep_data[1])
 
     def sendCommand(self, data):
-        self.sendLine(data)
+        self.transport.write(data)
         d=self._deferreds[data.split(" ")[0]]=defer.Deferred()
         return d
     
     def connectionMade(self):
+        gui=self.factory.gui
+        gui.protocol=self
         self.output = self.factory.gui.control.logBox
 
 class TCCClient(protocol.ClientFactory):
@@ -1561,10 +1566,12 @@ class TCCClient(protocol.ClientFactory):
 
 if __name__=="__main__":
 
-  app = wx.App()
+  app = wx.App(False)
   app.frame = TCC()
   app.frame.Show()
   reactor.registerWxApp(app)
+  thread.start_new_thread(os.system,("./parsercode/test",))
+  time.sleep(3)
   reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   reactor.run()
   app.MainLoop()
