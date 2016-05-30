@@ -32,6 +32,7 @@ const char *parser(std::string input)
 	if(tokens[0]=="slew")
 	{
 		std::cout << "slew " << tokens[1] << " "<< tokens[2] <<std::endl;
+		/*
 		double ra = ::atof(tokens[1].c_str());
 		double dec = ::atof(tokens[2].c_str());
 		pmc.moveTo(0,&ra);
@@ -48,8 +49,6 @@ const char *parser(std::string input)
    		bool ok;
    		//QString L;  		
 
-		/* compute how many Ra and Dec degrees the precessed target is from
-   		where the scope is currently pointed */
 
    		// positive degrees == East
    		RAmove_2_deg = (tokens[1] - LST)*15.0; 
@@ -89,7 +88,7 @@ const char *parser(std::string input)
 
 
 		}
-		
+		*/
 		return 0;
 		
 	}
