@@ -984,6 +984,14 @@ class TCC(wx.Frame):
 
 
     def createMenu(self):
+        '''
+        Generates the menu bar for the WX application.
+        
+         Args: 
+                self: points function towards WX application
+         Returns:
+                None
+        '''
         self.menubar = wx.MenuBar()
 
         menu_file = wx.Menu()
@@ -1006,8 +1014,19 @@ class TCC(wx.Frame):
 
         self.SetMenuBar(self.menubar)
 
-    """Exit in a graceful way so that the telescope information can be saved and used at a later time"""
+   
     def on_exit(self, event):
+        """
+        Exit in a graceful way so that the telescope information can be saved and used at a later time.
+        
+         Args:
+                self: points function towards WX application
+                event: handler to allow function to be tethered to a wx widget
+                
+         Returns:
+                None
+         
+        """
         dlg = wx.MessageDialog(self,
                                "Exit the TCC?",
                                "Confirm Exit", wx.OK|wx.CANCEL|wx.ICON_QUESTION)
@@ -1024,6 +1043,16 @@ class TCC(wx.Frame):
             #self.Destroy()
 
     def on_night(self,event):
+        """
+        Event handle for the night mode option in the menu. Aesthetic change to make the GUI background color redder.
+        
+         Args:
+                self: points function towards WX application
+                event: handler to allow function to be tethered to a wx widget
+         Returns:
+                None
+        
+        """
         if self.night:
             self.SetBackgroundColour((176,23,23))
             self.night=False
@@ -1033,17 +1062,47 @@ class TCC(wx.Frame):
             self.SetBackgroundColour(color)
         return
     def on_UTC(self,event):
+        """
+        Event handle for the UTC time zone option. Changes time to the current UTC time representation.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.current_timezone=Time.now()
         self.sb.SetStatusText('Timezone: UTC',4)
         return
     def on_Pacific(self,event):
+        """
+        Event handle for the Pacific time zone option. Changes time to the current Pacific time representation.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.current_timezone=Time.now()-7*u.h
         self.sb.SetStatusText('Timezone: Pacific',4)
         return
 
-    """Take input from the any system and log both on screen and to a file.
-    Necessary to define command structure for easy expansion"""
     def log(self, input):
+        """
+        Take input from the any system and log both on screen and to a file.
+        Necessary to define command structure for easy expansion.
+        
+         Args:
+                self: points function towards WX application.
+                input (string): The desired message to be logged.
+                
+         Returns:
+                None
+        
+        """
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
@@ -1054,8 +1113,17 @@ class TCC(wx.Frame):
         return
 
 
-    """Get the basic telescope information if it is available.  It would be nice if the dictionary was defined external to the program."""
     def readConfig(self):
+        """
+        Get the basic telescope information if it is available.  It would be nice if the dictionary was defined external to the program.
+        
+         Args:
+                self: points function towards WX application.
+                input (string): The desired message to be logged.
+                
+         Returns:
+                None
+        """
         self.log('==== Initializing Parameters ====')
         self.log('Reading in config file ....')
         f_in=open('tcc.conf','r')
@@ -1079,27 +1147,86 @@ class TCC(wx.Frame):
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
         
-    '''Jog Commands; apply a coordinate offset in the direction of preference'''
     def Noffset(self,event):
+        """
+        Jog Command; apply a coordinate offset in the North direction.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.protocol.sendCommand("offset 1 positive")
         return
     def Woffset(self,event):
+        """
+        Jog Command; apply a coordinate offset in the West direction.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.protocol.sendCommand("offset 0 negative")
         return
     def Eoffset(self,event):
+        """
+        Jog Command; apply a coordinate offset in the East direction.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.protocol.sendCommand("offset 0 positive")
         return
     def Soffset(self,event):
+        """
+        Jog Command; apply a coordinate offset in the South direction.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         self.protocol.sendCommand("offset 1 negative")
         return
         
     def focusIncPlus(self,event):
+        """
+        Focus Increment; apply a positive focus increment of 1500.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         val=self.control.focusAbsText.GetValue()
         val=float(val)+1500.0
         val=int(val)
         self.control.focusAbsText.SetValue(str(val))
         return
     def focusIncNeg(self,event):
+        """
+        Focus Increment; apply a negative focus increment of 1500.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         val=self.control.focusAbsText.GetValue()
         val=float(val)-1500.0
         val=int(val)
@@ -1107,19 +1234,50 @@ class TCC(wx.Frame):
         return
         
     def setfocus(self,event):
+        """
+        Focus Command; set current TCC focus to the value entered in the WX textctrl box.
+        Overwrites current TCC focus value and sends value to drivers.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
         val=self.control.focusAbsText.GetValue()
         self.control.currentFocusPos.SetLabel(val)
         self.control.currentFocusPos.SetForegroundColour('black')
         self.protocol.sendCommand(str("focus")+' '+str(val))
         return
         
-    '''Halt Telescope motion, emergency button, use stop slew during slewing if possible'''
     def haltmotion(self,event):
+        '''
+        Halt Telescope motion, emergency button, use stop slew during slewing if possible.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+         
+        '''
         self.protocol.sendCommand("halt")
         return
         
-    '''Passes a command to the telescope to toggle tracking'''
+    
     def toggletracksend(self,evt):
+        '''
+        Passes a command to the telescope to toggle tracking.
+        
+         Args:
+                self: points function towards WX application.
+                evt: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        '''
         #self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
         self.protocol.sendCommand(str("toggletrack")+' '+str(self.tracking))
         if self.tracking==False:
@@ -1131,8 +1289,21 @@ class TCC(wx.Frame):
         self.tracking= not self.tracking    
         return
     
-    '''Take in any valid RA/DEC format and read it into a SkyCoord object'''    
+       
     def inputcoordSorter(self,ra,dec,epoch_now,epoch):
+        '''
+        Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC.
+        
+        Args:
+                self: points function towards WX application.
+                ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss and XXhXXmXXs
+                dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss and XXdXXmXXs
+                epoch_now (string): The current epoch.
+                epoch (string): The epoch that the RA/DEC are specific to.
+                
+         Returns:
+                None
+        '''
         deg_input=True
         
         try:
@@ -1205,8 +1376,17 @@ class TCC(wx.Frame):
             return
         
     
-    '''Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing'''
     def startSlew(self,event):
+        '''
+        Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+        Returns:
+                None
+        '''
         name=self.control.targetNameText.GetValue()
         input_ra=self.control.targetRaText.GetValue()
         input_dec=self.control.targetDecText.GetValue()
