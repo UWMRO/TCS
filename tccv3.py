@@ -1298,8 +1298,8 @@ class TCC(wx.Frame):
                 self: points function towards WX application.
                 ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss and XXhXXmXXs
                 dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss and XXdXXmXXs
-                epoch_now (string): The current epoch.
-                epoch (string): The epoch that the RA/DEC are specific to.
+                epoch_now (string): The current epoch, displayed upon initialization of the GUI.
+                epoch (string): The epoch that the RA/DEC are specific to (usually J2000). Currently support J2000 and J1950.
                 
          Returns:
                 None
@@ -1378,7 +1378,8 @@ class TCC(wx.Frame):
     
     def startSlew(self,event):
         '''
-        Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing.
+        Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing. Stop slewing command acts as the ideal
+        method for stopping the telescope. Halt Motion is the alternative intended for emergencies only.
         
         Args:
                 self: points function towards WX application.
@@ -1451,8 +1452,18 @@ class TCC(wx.Frame):
             
         return
 
-    """Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guidercontrol tab for finder charts"""
+    
     def set_target(self, event):
+        """
+        Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guider control tab for finder charts
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+        Returns:
+                None
+        """
         name = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0)
         ra = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         dec = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
@@ -1476,14 +1487,35 @@ class TCC(wx.Frame):
         return
         
     def load_finder_chart(self):
+        """
+        Use Astroplan's plot_finder_image function to plot the finder image of the current target. Current location of finder chart is an axes object on the guider control tab.
+        
+        Args:
+                self: points function towards WX application.
+                
+        Returns:
+                None
+        """
         
         self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
         self.image.ax1.set_axis_off()
         self.image.fig.savefig("testfinder.png")
         image_file = 'testfinder.png'
 
-    """Add a manual text item from the target panel to the list control"""
+    
     def addToList(self,event):
+        """
+        Add a manual text item from the target panel to the list control. Requires valid inputs for coordinate sorter. This includes valid formats for RA and DEC which are consistent with one another.
+        Epoch should be inputted as J2000 or J1950. addToList runs a dynamic airmass calculation as per these inputs.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+        Returns:
+                None
+        
+        """
         t_name = self.target.nameText.GetValue()
         input_ra = self.target.raText.GetValue()
         input_dec = self.target.decText.GetValue()
@@ -1505,13 +1537,23 @@ class TCC(wx.Frame):
             self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
             self.target.targetList.SetStringItem(self.list_count,4,str(mag))
             #self.target.targetList.SetStringItem(0,5,str(airmass))
-            thread.start_new_thread(self.dyn_airmass,(t_name,input_ra,input_dec,self.obstarget,self.MRO,self.list_count,))
+            thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
             self.list_count+=1
         return
         
-    """Read in a target list file to the ctrl list.
-    Format is: name;ra;dec;epoch"""
     def readToList(self,event):
+        """
+        Read in a target list file to the ctrl list.
+        Format is: name;ra;dec;epoch
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+        Returns:
+                None
+        
+        """
         f_in=open(self.target.fileText.GetValue())
         for line in f_in:
             l = line.split(';')
@@ -1524,7 +1566,20 @@ class TCC(wx.Frame):
         f_in.close()
         return
         
-    def dyn_airmass(self,n,r,d,tgt,obs,count):
+    def dyn_airmass(self,tgt,obs,count):
+        """
+        Continuously calculates the airmass using observer information and target information. Airmass is calculated using the secz function in astropy. 
+        Dynamically updates in the target list and allows a quick read of the airmass for any given target.
+        
+        Args:
+                tgt (FixedTarget): Astroplan FixedTarget object for the target, details target name and RA/DEC coordinates.
+                obs (astroplan.Observer): Astroplan Observer object for observer location, details longitude, latitude and elevation of observer.
+                count (integer): list counter that tracks the position of the target in the wx listctrl object, used to append airmass to correct row.
+                
+        Returns:
+                a (float): airmass at current time.
+        
+        """
         while True:
             a= obs.altaz(Time.now(),tgt).secz
             if a > 8 or a < 0:
