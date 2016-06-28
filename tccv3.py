@@ -1663,7 +1663,7 @@ class TCC(wx.Frame):
     
     def setRATrackingRate(self,event):
         """
-        Sents telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
+        Sets telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
         
         Args:
                 self: points function towards WX application.
@@ -1693,6 +1693,16 @@ class TCC(wx.Frame):
         return
         
     def setDECTrackingRate(self,event):
+        """
+        Sets telescope DEC tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Set DEC Tracking Rate" button in the initialization tab.
+                
+        Returns:
+                None
+        """
         DECrate=self.init.trackingRateDECText.GetValue()
         
         valid_input=True
@@ -1714,6 +1724,16 @@ class TCC(wx.Frame):
         return
         
     def onInit(self,event):
+        """
+        Initialize telescope systems according to values set in the TCC config file. Enables buttons throughout the GUI that depend on initialized systems to function.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Initialize Telescope Systems" button in the initialization tab.
+                
+        Returns:
+                None
+        """
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
         self.horizonlimit=self.dict['horizonLimit']
@@ -1731,6 +1751,15 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
 
     def timer(self):
+        """
+        Dynamically updates Julian Date, LST, UTC, Local Time and current Epoch in the telescope control tab.
+        
+        Args:
+                self: points function towards WX application.
+                
+        Returns:
+                None
+        """
         while True:
             t = self.timeCalc()
             wx.CallAfter(self.control.currentJDPos.SetLabel,( '%.2f' % t['mjd']))
@@ -1741,6 +1770,15 @@ class TCC(wx.Frame):
             time.sleep(1)
 
     def timeCalc(self):
+        """
+       Calculates current time values for Julian Date, Epoch, Local Time and LST.
+        
+        Args:
+                self: points function towards WX application.
+                
+        Returns:
+                None
+        """
         t = Time(Time.now())
 
         jdt=t.jd
