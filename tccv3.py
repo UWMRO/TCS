@@ -232,10 +232,6 @@ class Control(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    #def onMouseOver(self, event):
-            # mouseover changes colour of button
-            #self.info.SetLabel("Stops all motion of the telescope (slewing and tracking).")
-            #event.Skip()
     
 class Target(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -332,35 +328,6 @@ class Target(wx.Panel):
         self.dir=os.getcwd()
 
 
-'''
-class Image(wx.Panel):
-    def __init__(self,parent, debug, night):
-        wx.Panel.__init__(self,parent)
-        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
-        self.frame = parent
-        
-        self.fig = Figure((4,4))
-        self.canvas = FigCanvas(self,-1, self.fig)
-        self.ax1 = self.fig.add_subplot(111)
-        self.ax1.set_axis_off()
-        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-        
-    def OnEraseBackground(self, evt):
-        """
-        Add a picture to the background
-        """
-        # yanked from ColourDB.py
-        dc = evt.GetDC()
- 
-        if not dc:
-            dc = wx.ClientDC(self)
-            rect = self.GetUpdateRegion().GetBox()
-            dc.SetClippingRect(rect)
-        dc.Clear()
-        bmp = wx.Bitmap("testfinder.jpg")
-        dc.DrawBitmap(bmp, 0, 0)
-'''        
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -504,9 +471,6 @@ class GuiderControl(wx.Panel):
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
         self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
 
-        #self.hbox2.Add(self.panel2,0,wx.ALIGN_RIGHT)
-        #self.hbox2.Add(self.canvas,0,wx.ALIGN_RIGHT)
-        #self.hbox2.AddSpacer(133)
         self.hbox2.AddSpacer(350)
         self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
 
@@ -527,14 +491,6 @@ class GuiderControl(wx.Panel):
 
 
         self.SetSizer(self.vbox)
-
-    '''Load the finder chart for the current target
-    def load_finder_chart(self,event):
-        
-        self.finder_chart=plot_finder_image(self.current_target, fov_radius=2*u.degree,ax=self.ax1)
-        self.ax1.set_axis_off()
-        return
-    '''
 
     def InitBuffer(self):
         size=self.GetClientSize()
@@ -625,9 +581,6 @@ class Initialization(wx.Panel):
         self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates")
         self.atZenithButton.Disable()
         
-
-
-        #self.zenith = wx.PopupWindow("um r u sure")
 
         #Set current telescope position
         self.targetNameLabel=wx.StaticText(self, size=(75,-1))
@@ -814,7 +767,6 @@ class NightLog(wx.ScrolledWindow):
         self.foclog.InsertColumn(12,'FWHM',width=50)
 
         self.focusButton=wx.Button(self,label="Number of Focus Lines")
-       # self.Bind(wx.EVT_BUTTON,self.getFocus,self.focusButton)
         self.focusNum=wx.TextCtrl(self,size=(30,-1))
         self.focusNum.AppendText('1')
 
@@ -854,12 +806,10 @@ class NightLog(wx.ScrolledWindow):
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.failheader, 0, wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
-        #self.vbox.Add(self.failinfo,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.faillog,0, wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.focheader,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
-        #self.vbox.Add(self.focinfo,0,wx.ALIGN_CENTER)
         self.vbox.Add(self.foclog,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.hbox6,0,wx.ALIGN_CENTER)
@@ -901,7 +851,6 @@ class TCC(wx.Frame):
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
-        #imagePage=Image(nb,debug,self.night)
         scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
@@ -918,9 +867,6 @@ class TCC(wx.Frame):
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(2)
         
-        #nb.AddPage(imagePage,"Image")
-       # self.image=nb.GetPage(3)
-
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(3)
 
@@ -1119,7 +1065,6 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                input (string): The desired message to be logged.
                 
          Returns:
                 None
@@ -1153,7 +1098,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "N" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1166,7 +1111,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "W" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1179,7 +1124,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget.Tethered to the "E" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1192,7 +1137,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget.Tethered to the "S" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1206,7 +1151,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget.Tethered to the "Increment Positive" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1222,7 +1167,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Increment Negative" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1240,7 +1185,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Move Absolute" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1257,7 +1202,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "HALT MOTION" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1273,7 +1218,7 @@ class TCC(wx.Frame):
         
          Args:
                 self: points function towards WX application.
-                evt: handler to allow function to be tethered to a wx widget.
+                evt: handler to allow function to be tethered to a wx widget. Tethered to the "Start Tracking" button in the telescope control tab.
                 
          Returns:
                 None
@@ -1379,11 +1324,12 @@ class TCC(wx.Frame):
     def startSlew(self,event):
         '''
         Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing. Stop slewing command acts as the ideal
-        method for stopping the telescope. Halt Motion is the alternative intended for emergencies only.
+        method for stopping the telescope. Halt Motion is the alternative intended for emergencies only. Before sending a slew command, startslew() checks the altitude of the
+        target. If the altitude is below the altitude set in the configuration file, it will only return an error.
         
         Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Slew to Target" button in the telescope control tab.
                 
         Returns:
                 None
@@ -1459,7 +1405,7 @@ class TCC(wx.Frame):
         
         Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Select as Current Target" button in the target list tab.
                 
         Returns:
                 None
@@ -1510,7 +1456,7 @@ class TCC(wx.Frame):
         
         Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Add Item to List" button in the target list tab.
                 
         Returns:
                 None
@@ -1548,7 +1494,7 @@ class TCC(wx.Frame):
         
         Args:
                 self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
                 
         Returns:
                 None
@@ -1588,8 +1534,22 @@ class TCC(wx.Frame):
             #self.target.targetList.SetStringItem(count,5,str(a))
             time.sleep(10)
             
-    '''Plot the selected targets position over the next 8 hours'''
+    
     def target_plot(self,event):
+        '''
+        Plot the selected targets position over the next 8 hours utilizing astroplan's plot_sky() method. This method plot with respect to target selected in
+        the target list tab and not the GUI-set current target. Individual points are plotted with 1 hour cadence. Red point indicates current position 
+        to specify direction of target trajectory. Note: Using this while a currentplot is being displayed will overwrite the current plot, this 
+        overplotting has complications between radial and cartesian plots and will produce strange results. Exit the working plot before sending a new plot command.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Plot Target" button in the target list tab.
+                
+        Returns:
+                Radial plot of target altitude and azimuth in new window or current plotting window (overplotting not advised).
+        
+        '''
         input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
@@ -1599,7 +1559,7 @@ class TCC(wx.Frame):
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.Obstime=Time.now()
-        self.plot_times = self.Obstime + np.linspace(0, 8, 10)*u.hour
+        self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
         self.target_style={'color':'Black'}
         self.initial_style={'color':'r'}
         
@@ -1608,8 +1568,21 @@ class TCC(wx.Frame):
         plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
         plt.show()
         
-    '''Plot the selected targets airmass curve'''
     def airmass_plot(self,event):
+        '''
+        Plot the selected targets airmass curve over the next 10 hours utilizing astroplan's plot_airmass() method. This method plot with respect to target selected in
+        the target list tab and not the GUI-set current target. Airmass warning limits at 2 and 2.5 are given as yellow and red lines respectively. Note: Using this while a current
+        plot is being displayed will overwrite the current plot, this overplotting has complications between radial and cartesian plots and will produce strange results. Exit the working plot
+        before sending a new plot command.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Airmass Curve" button in the target list tab.
+                
+        Returns:
+                Airmass curve of target in new window or current plotting window (overplotting not advised).
+        
+        '''
         input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
         input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
@@ -1627,9 +1600,20 @@ class TCC(wx.Frame):
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
         plt.show()
-        
-    """This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position.  When the telescope is at Zenith the RA is the current LST, the DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch"""
+            
     def setTelescopeZenith(self, event):
+        """
+        This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position. When the telescope is at Zenith the RA is the current LST, the 
+        DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch. setTelescopeZenith() produces these parameters and writes them to the
+        initialization text boxes. Pushing these to the telescope is then accomplished by Set Telescope Position.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Load Zenith Coordinates" button in the initialization tab.
+                
+        Returns:
+                None
+        """
         name='Zenith'
         ra=self.control.currentLSTPos.GetLabel() #set to current LST
         dec='+46:57:10.08' #set to LAT
@@ -1645,6 +1629,17 @@ class TCC(wx.Frame):
             
             
     def setTelescopePosition(self,event):
+        """
+        Sends contents of the name, RA, DEC and EPOCH text boxes in the initialization tab to the control tab. Overwrites current control tab values in the status column with the sent values.
+        Used to sync TCC values with physical position of telescope.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Telescope Position" button in the initialization tab.
+                
+        Returns:
+                None
+        """
         target_name=self.init.targetNameText.GetValue()
         target_ra=self.init.targetRaText.GetValue()
         target_dec=self.init.targetDecText.GetValue()
@@ -1667,6 +1662,16 @@ class TCC(wx.Frame):
         return
     
     def setRATrackingRate(self,event):
+        """
+        Sents telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Set RA Tracking Rate" button in the initialization tab.
+                
+        Returns:
+                None
+        """
         RArate=self.init.trackingRateRAText.GetValue()
         
         valid_input=True
@@ -1805,8 +1810,8 @@ if __name__=="__main__":
   app.frame = TCC()
   app.frame.Show()
   reactor.registerWxApp(app)
-  thread.start_new_thread(os.system,("./parsercode/test",))
-  time.sleep(3)
-  reactor.connectTCP('localhost',5501,TCCClient(app.frame))
+  #thread.start_new_thread(os.system,("./parsercode/test",))
+  #time.sleep(3)
+  #reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   reactor.run()
   app.MainLoop()
