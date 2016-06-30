@@ -852,36 +852,36 @@ class TCC(wx.Frame):
         nb=wx.Notebook(p)
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
-        scienceFocusPage=ScienceFocus(nb, debug, self.night)
+        #scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
-        guiderFocusPage=GuiderFocus(nb,debug,self.night)
+        #guiderFocusPage=GuiderFocus(nb,debug,self.night)
         initPage=Initialization(nb, debug, self.night)
         logPage=NightLog(nb, debug, self.night)
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
-
+        '''
         nb.AddPage(scienceFocusPage, "Science Focus")
         self.scienceFocus=nb.GetPage(1)
-
+        '''
         nb.AddPage(targetPage,"Target List")
-        self.target=nb.GetPage(2)
+        self.target=nb.GetPage(1)
         
         nb.AddPage(guiderControlPage,"Guider Control")
-        self.guiderControl=nb.GetPage(3)
-
+        self.guiderControl=nb.GetPage(2)
+        '''
         nb.AddPage(guiderFocusPage, "Guider Focus")
         self.guiderFocus=nb.GetPage(4)
-
+        '''
         nb.AddPage(guiderPage,"Guider Performance Monitor")
-        self.guider=nb.GetPage(5)
+        self.guider=nb.GetPage(3)
 
         nb.AddPage(initPage,"Initialization Parameters")
-        self.init=nb.GetPage(6)
+        self.init=nb.GetPage(4)
 
         nb.AddPage(logPage,"Night Log")
-        self.nl=nb.GetPage(7)
+        self.nl=nb.GetPage(5)
 
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
@@ -943,18 +943,15 @@ class TCC(wx.Frame):
 
         menu_file = wx.Menu()
         m_exit = menu_file.Append(-1, "E&xit\tCtrl-X", "Exit")
-        self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
-
+    
         tool_file = wx.Menu()
         m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
-        self.Bind(wx.EVT_MENU, self.on_night, m_night)
-
-        self.tz_choice=wx.Menu()
-        tz_UTC=self.tz_choice.Append(-1,'UTC')
-        self.Bind(wx.EVT_MENU, self.on_UTC, tz_UTC)
-        tz_P=self.tz_choice.Append(-1,'Pacific')
-        self.Bind(wx.EVT_MENU, self.on_Pacific, tz_P)
-        tool_file.AppendMenu(-1,'Time Zone',self.tz_choice)
+        
+        tz_choice = wx.Menu()
+        tz_choice.Append(1110, "UTC", "Set Time Zone", kind=wx.ITEM_RADIO)
+        tz_choice.Append(1111, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
+        tz_choice.Check(id=1110, check=True)
+        tool_file.AppendMenu(1110,'Time Zone',tz_choice)
         
         precess = wx.Menu()
         precess.Append(1120, "On", "Set Precession", kind=wx.ITEM_RADIO)
@@ -962,6 +959,10 @@ class TCC(wx.Frame):
         precess.Check(id=1120, check=True)
         tool_file.AppendMenu(1120,'Precession',precess)
         
+        self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
+        self.Bind(wx.EVT_MENU, self.on_night, m_night)
+        self.Bind(wx.EVT_MENU, self.on_UTC, id=1110)
+        self.Bind(wx.EVT_MENU, self.on_Pacific, id=1111)
         self.Bind(wx.EVT_MENU, self.pre_on, id=1120)
         self.Bind(wx.EVT_MENU, self.pre_off, id=1121)
 
