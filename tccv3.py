@@ -826,6 +826,7 @@ class TCC(wx.Frame):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
         
         #Tracking on boot is false
+        self.precession=True
         self.tracking=False
         self.slewing=False
         self.night=True
@@ -954,6 +955,15 @@ class TCC(wx.Frame):
         tz_P=self.tz_choice.Append(-1,'Pacific')
         self.Bind(wx.EVT_MENU, self.on_Pacific, tz_P)
         tool_file.AppendMenu(-1,'Time Zone',self.tz_choice)
+        
+        precess = wx.Menu()
+        precess.Append(1120, "On", "Set Precession", kind=wx.ITEM_RADIO)
+        precess.Append(1121, "Off", "Set Precession", kind=wx.ITEM_RADIO)
+        precess.Check(id=1120, check=True)
+        tool_file.AppendMenu(1120,'Precession',precess)
+        
+        self.Bind(wx.EVT_MENU, self.pre_on, id=1120)
+        self.Bind(wx.EVT_MENU, self.pre_off, id=1121)
 
         self.menubar.Append(menu_file, "&File")
         self.menubar.Append(tool_file, "&Tools")
@@ -1035,7 +1045,34 @@ class TCC(wx.Frame):
         self.current_timezone=Time.now()-7*u.h
         self.sb.SetStatusText('Timezone: Pacific',4)
         return
-
+    def pre_on(self,event):
+        """
+        Turns precession on for the entire GUI. Note that this is on by default when the GUI is initialized.
+            Args:
+                    self: points function towards WX application.
+                    event: handler to allow function to be tethered to a wx widget.
+                
+            Returns:
+                    self.precession: Sets self.precession = True
+        """
+        self.precession=True
+        self.log("Precession enabled")
+        return
+        
+    def pre_off(self,event):
+        """
+        Turns precession off for the entire GUI.
+            Args:
+                    self: points function towards WX application.
+                    event: handler to allow function to be tethered to a wx widget.
+                
+            Returns:
+                    self.precession: Sets self.precession = True
+        """
+        self.precession=False
+        self.log("Precession disabled")
+        return
+        
     def log(self, input):
         """
         Take input from the any system and log both on screen and to a file.
@@ -1352,7 +1389,10 @@ class TCC(wx.Frame):
             self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
             self.inputcoordSorter(input_ra,input_dec,input_epoch)
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
-            self.coordprecess(self.coordinates,current_epoch,input_epoch)
+            
+            if self.precession==True:
+                self.coordprecess(self.coordinates,current_epoch,input_epoch)
+                
             self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
 
             self.alt=str("{0.alt:.2}".format(self.target_altaz))
@@ -1476,7 +1516,10 @@ class TCC(wx.Frame):
         epoch_now = self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,epoch)
-        self.coordprecess(self.coordinates,epoch_now,epoch)
+        
+        if self.precession==True:
+            self.coordprecess(self.coordinates,epoch_now,epoch)
+            
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        
@@ -1563,7 +1606,10 @@ class TCC(wx.Frame):
         current_epoch=self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
-        self.coordprecess(self.coordinates,current_epoch,input_epoch)    
+        
+        if self.precession==True:
+            self.coordprecess(self.coordinates,current_epoch,input_epoch) 
+            
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
@@ -1596,7 +1642,10 @@ class TCC(wx.Frame):
         current_epoch=self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
-        self.coordprecess(self.coordinates,current_epoch,input_epoch)    
+        
+        if self.precession==True:
+            self.coordprecess(self.coordinates,current_epoch,input_epoch) 
+            
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         
         self.Obstime=Time.now()
