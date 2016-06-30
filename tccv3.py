@@ -1235,7 +1235,7 @@ class TCC(wx.Frame):
         return
     
        
-    def inputcoordSorter(self,ra,dec,epoch_now,epoch):
+    def inputcoordSorter(self,ra,dec,epoch):
         '''
         Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC.
         
@@ -1243,7 +1243,6 @@ class TCC(wx.Frame):
                 self: points function towards WX application.
                 ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss and XXhXXmXXs
                 dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss and XXdXXmXXs
-                epoch_now (string): The current epoch, displayed upon initialization of the GUI.
                 epoch (string): The epoch that the RA/DEC are specific to (usually J2000). Currently support J2000 and J1950.
                 
          Returns:
@@ -1258,59 +1257,28 @@ class TCC(wx.Frame):
             
         self.validity=True
         
-        
-        if str(epoch)=='J2000':
     
-            if deg_input==True:
-                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
-                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== ':' and str(ra)[5]== ':':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK5(equinox='J'+epoch_now))
-                return self.coordinates
-            else:
-                self.validity=False
-                dlg = wx.MessageDialog(self,
-                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
-                               "Error", wx.OK|wx.ICON_ERROR)
-                dlg.ShowModal()
-                dlg.Destroy() 
+        if deg_input==True:
+            self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+            return self.coordinates
+        elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
+            self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
+            return self.coordinates
+        elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
+            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+            return self.coordinates
+        elif str(ra)[2]== ':' and str(ra)[5]== ':':
+            self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+            return self.coordinates
+        else:
+            self.validity=False
+            dlg = wx.MessageDialog(self,
+                           "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
+                           "error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
             return
-        elif epoch=='J1950':
-    
-            if deg_input==True:
-                self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
-                self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-                return self.coordinates
-            elif str(ra)[2]== ':' and str(ra)[5]== ':':
-                self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
-                self.coordinates=self.coordinates.transform_to(FK4(equinox='J'+epoch_now))
-                return self.coordinates
-            else:
-                self.validity=False
-                dlg = wx.MessageDialog(self,
-                               "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
-                               "Error", wx.OK|wx.ICON_ERROR)
-                dlg.ShowModal()
-                dlg.Destroy() 
-            return
+        '''
         else:
             self.validity=False
             dlg = wx.MessageDialog(self,
@@ -1319,7 +1287,44 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy() 
             return
-        
+        '''
+    def coordprecess(self,coords,epoch_now,epoch):
+        '''
+        coordprecess() generates an astropy skycoord object with RA/DEC precessed to the current epoch.
+        Precession is calculated using astronomical precession approximations centered on J2000. Note that
+        while this function allows flexibility in coordinate epoch, it may fail at arbitrary coordinate epochs.
+        It is recommended that when using an epoch that is not J2000, that the user transform to J2000 first.
+    
+            Args:
+                      coords(astropy.skycoord): astropy.skycoord object containing the unprecessed coordinates.
+                      epoch_now(string): The epoch of the date the user desires precession to. Usually the current epoch.
+                      epoch(string): The epoch of the coordinates. J2000 is recommended.
+            Returns:
+                     self.coordinates(astropy.skycoord): astropy.skycoord object containing the new precessed coordinates.
+    
+        '''
+    
+        ra_in=coords.ra.deg
+        dec_in=coords.dec.deg
+        ep_in=float(epoch[1:])
+        ep_now_in=float(epoch_now)
+        print ra_in, dec_in, ep_in, ep_now_in
+    
+        T=(ep_now_in - ep_in)/100.0
+        M=1.2812323*T+0.0003879*(T**2)+0.0000101*(T**3)
+        N=0.5567530*T-0.0001185*(T**2)-0.0000116*(T**3)
+        #print T, M, N
+    
+        d_ra= M + N*np.cos(ra_in* np.pi / 180.)*np.tan(dec_in* np.pi / 180.)
+        d_dec=N*np.cos(ra_in* np.pi / 180.)
+        #print d_ra, d_dec
+    
+        ra_out=ra_in+d_ra
+        dec_out=dec_in+d_dec
+        print ra_out,dec_out
+    
+        self.coordinates=SkyCoord(ra=float(ra_out)*u.degree,dec=float(dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
+        return self.coordinates
     
     def startSlew(self,event):
         '''
@@ -1345,8 +1350,9 @@ class TCC(wx.Frame):
         if self.slewing==False:
             
             self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
-            self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
+            self.inputcoordSorter(input_ra,input_dec,input_epoch)
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
+            self.coordprecess(self.coordinates,current_epoch,input_epoch)
             self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
 
             self.alt=str("{0.alt:.2}".format(self.target_altaz))
@@ -1469,7 +1475,8 @@ class TCC(wx.Frame):
         mag  = self.target.magText.GetValue()
         epoch_now = self.control.currentEpochPos.GetLabel()
         
-        self.inputcoordSorter(input_ra,input_dec,epoch_now,epoch)
+        self.inputcoordSorter(input_ra,input_dec,epoch)
+        self.coordprecess(self.coordinates,epoch_now,epoch)
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
        
@@ -1555,8 +1562,8 @@ class TCC(wx.Frame):
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         current_epoch=self.control.currentEpochPos.GetLabel()
         
-        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
-            
+        self.inputcoordSorter(input_ra,input_dec,input_epoch)
+        self.coordprecess(self.coordinates,current_epoch,input_epoch)    
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
@@ -1588,8 +1595,8 @@ class TCC(wx.Frame):
         input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
         current_epoch=self.control.currentEpochPos.GetLabel()
         
-        self.inputcoordSorter(input_ra,input_dec,current_epoch,input_epoch)
-            
+        self.inputcoordSorter(input_ra,input_dec,input_epoch)
+        self.coordprecess(self.coordinates,current_epoch,input_epoch)    
         self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
         
         self.Obstime=Time.now()
