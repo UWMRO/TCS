@@ -1275,44 +1275,58 @@ class TCC(wx.Frame):
        
     def inputcoordSorter(self,ra,dec,epoch):
         '''
-        Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC.
+        Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC. Supports galactic coordinates as well, to
+        input galactic coordinates, set the ra argument to be l=00h00m00s and the dec argument to be b=+00h00m00s. These will be put into a galactic skycoord frame which will then
+        be transformed into an fk5 skycoord object.
         
         Args:
                 self: points function towards WX application.
-                ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss and XXhXXmXXs
-                dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss and XXdXXmXXs
-                epoch (string): The epoch that the RA/DEC are specific to (usually J2000). Currently support J2000 and J1950.
+                ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss ,XXhXXmXXs and l=XXhXXmXXs
+                dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss, XXdXXmXXs and b=XXdXXmXXs
+                epoch (string): The epoch that the RA/DEC are specific to (usually J2000).
                 
          Returns:
                 None
         '''
+        
+        self.validity=False
+        self.galactic_coords=False
+        
+        #first check to see if galactic coordinates
+        if str(ra)[0:2]== 'l=' or str(ra)[0:2] == 'L=':
+            self.galactic_coords=True
+            self.galcoordinates = SkyCoord("galactic", l=str(ra)[2:], b=str(dec)[2:])
+            self.coordinates=self.galcoordinates.transform_to('fk5')
+            self.validity=True
+            return self.coordinates
+                
         deg_input=True
         
         try:
             val=float(ra)
         except ValueError:
             deg_input=False
-            
-        self.validity=True
         
-    
         if deg_input==True:
             self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
+            self.validity=True
             return self.coordinates
         elif str(ra)[2]== 'h' and str(ra)[5]== 'm':
             self.coordinates=SkyCoord(ra,dec,frame='icrs',equinox=str(epoch))
+            self.validity=True
             return self.coordinates
         elif str(ra)[2]== ' ' and str(ra)[5]== ' ':
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+            self.validity=True
             return self.coordinates
         elif str(ra)[2]== ':' and str(ra)[5]== ':':
             self.coordinates=SkyCoord(str(ra)+' '+str(dec), unit=(u.hourangle,u.deg),equinox=str(epoch))
+            self.validity=True
             return self.coordinates
-        else:
-            self.validity=False
+        elif self.validity==False:
             dlg = wx.MessageDialog(self,
-                           "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00 ",
-                           "error", wx.OK|wx.ICON_ERROR)
+                           "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00. If attempting to input galactic coordinates\n please enter in form l=00h00m00s and b=+00d00m00s in RA and DEC fields.",
+                           "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy() 
             return
@@ -1517,6 +1531,10 @@ class TCC(wx.Frame):
         epoch_now = self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,epoch)
+        
+        if self.galactic_coords==True:
+            input_ra=self.coordinates.ra.degree
+            input_dec=self.coordinates.dec.degree
         
         if self.precession==True:
             self.coordprecess(self.coordinates,epoch_now,epoch)
