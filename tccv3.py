@@ -279,6 +279,7 @@ class Target(wx.Panel):
         #Buttons
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
+        self.removeButton=wx.Button(self,-1,"Remove Item from List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
 
@@ -309,11 +310,13 @@ class Target(wx.Panel):
         self.hbox2.Add(self.gbox,0,wx.ALIGN_CENTER)
 
         self.hbox3.Add(self.selectButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(50)
+        self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(50)
+        self.hbox3.AddSpacer(25)
+        self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(50)
+        self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.airmass_button,0,wx.ALIGN_CENTER)
 
         self.vbox.Add(self.hbox1,0, wx.ALIGN_CENTER,5)
@@ -898,6 +901,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
+        self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
@@ -1574,13 +1578,51 @@ class TCC(wx.Frame):
         for line in f_in:
             l = line.split(';')
             print l
-            self.target.targetList.InsertStringItem(0,str(l[0]))
-            self.target.targetList.SetStringItem(0,1,str(l[1]))
-            self.target.targetList.SetStringItem(0,2,str(l[2]))
-            self.target.targetList.SetStringItem(0,3,str(l[3]))
+            t_name = l[0]
+            input_ra = l[1]
+            input_dec = l[2]
+            epoch = l[3]
+            mag=l[4]
+            epoch_now = self.control.currentEpochPos.GetLabel()
+            
+            self.inputcoordSorter(input_ra,input_dec,epoch)
+        
+            if self.galactic_coords==True:
+                input_ra=self.coordinates.ra.degree
+                input_dec=self.coordinates.dec.degree
+        
+            if self.precession==True:
+                self.coordprecess(self.coordinates,epoch_now,epoch)
+            
+            self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
+       
+            if self.validity==True:
+            
+                self.target.targetList.InsertStringItem(self.list_count,str(t_name))
+                self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
+                self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
+                self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
+                self.target.targetList.SetStringItem(self.list_count,4,str(mag))
+                #self.target.targetList.SetStringItem(0,5,str(airmass))
+                thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
+                self.list_count+=1
 
         f_in.close()
         return
+        
+    def removeFromList(self,event):
+        """
+        Remove selected object from the target list. Currently buggy due to airmass thread running for each object.
+        
+        Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
+                
+        Returns:
+                None
+        
+        """
+        self.target.targetList.DeleteItem(self.target.targetList.GetFocusedItem())
         
     def dyn_airmass(self,tgt,obs,count):
         """
