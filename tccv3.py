@@ -952,13 +952,13 @@ class TCC(wx.Frame):
         tz_choice.Append(1110, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
         tz_choice.Append(1111, "Mountain", "Set Time Zone", kind=wx.ITEM_RADIO)
         tz_choice.Check(id=1110, check=True)
-        tool_file.AppendMenu(1110,'Time Zone',tz_choice)
+        tool_file.AppendMenu(1112,'Time Zone',tz_choice)
         
         precess = wx.Menu()
         precess.Append(1120, "On", "Set Precession", kind=wx.ITEM_RADIO)
         precess.Append(1121, "Off", "Set Precession", kind=wx.ITEM_RADIO)
         precess.Check(id=1120, check=True)
-        tool_file.AppendMenu(1120,'Precession',precess)
+        tool_file.AppendMenu(1122,'Precession',precess)
         
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
         self.Bind(wx.EVT_MENU, self.on_night, m_night)
@@ -1864,7 +1864,10 @@ class TCC(wx.Frame):
         if self.current_timezone=="PST":
             local = time.strftime('%Y/%m/%d %H:%M:%S')
         if self.current_timezone=="MST":
-            local = datetime.now() + timedelta(hours=1)
+            MST = datetime.now() + timedelta(hours=1)
+            local=MST.strftime("%Y/%m/%d %H:%M:%S")
+            #MST_rounded=MST.split('.')[0]
+            #local=MST_rounded.replace("-","/")
         self.mro.date=dati.datetime.utcnow()
         lst = self.mro.sidereal_time()
         return {'mjd':mjdt,'utc':self.mro.date,'local':local,'epoch':epoch, 'lst':lst}
