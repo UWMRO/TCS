@@ -9,7 +9,8 @@ from astropy.time import Time
 import thread
 import ephem
 import matplotlib
-import datetime
+import datetime as dati
+from datetime import datetime, timedelta
 import math
 matplotlib.use('WXAgg')
 import matplotlib.pyplot as plt
@@ -834,7 +835,7 @@ class TCC(wx.Frame):
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
         self.list_count=0
         #Stores current time zone for whole GUI
-        self.current_timezone=Time.now()
+        self.current_timezone="PST"
         self.mro=ephem.Observer()
         
         self.MRO = Observer(longitude = -120.7278 *u.deg,
@@ -948,8 +949,8 @@ class TCC(wx.Frame):
         m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
         
         tz_choice = wx.Menu()
-        tz_choice.Append(1110, "UTC", "Set Time Zone", kind=wx.ITEM_RADIO)
-        tz_choice.Append(1111, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
+        tz_choice.Append(1110, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
+        tz_choice.Append(1111, "Mountain", "Set Time Zone", kind=wx.ITEM_RADIO)
         tz_choice.Check(id=1110, check=True)
         tool_file.AppendMenu(1110,'Time Zone',tz_choice)
         
@@ -961,8 +962,8 @@ class TCC(wx.Frame):
         
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
         self.Bind(wx.EVT_MENU, self.on_night, m_night)
-        self.Bind(wx.EVT_MENU, self.on_UTC, id=1110)
-        self.Bind(wx.EVT_MENU, self.on_Pacific, id=1111)
+        self.Bind(wx.EVT_MENU, self.on_Pacific, id=1110)
+        self.Bind(wx.EVT_MENU, self.on_Mountain, id=1111)
         self.Bind(wx.EVT_MENU, self.pre_on, id=1120)
         self.Bind(wx.EVT_MENU, self.pre_off, id=1121)
 
@@ -1018,23 +1019,9 @@ class TCC(wx.Frame):
             color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
             self.SetBackgroundColour(color)
         return
-    def on_UTC(self,event):
-        """
-        Event handle for the UTC time zone option. Changes time to the current UTC time representation.
-        
-         Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
-                
-         Returns:
-                None
-        """
-        self.current_timezone=Time.now()
-        self.sb.SetStatusText('Timezone: UTC',4)
-        return
     def on_Pacific(self,event):
         """
-        Event handle for the Pacific time zone option. Changes time to the current Pacific time representation.
+        Event handle for the pacific time zone option. Changes time to the current pacific time representation.
         
          Args:
                 self: points function towards WX application.
@@ -1043,8 +1030,22 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        self.current_timezone=Time.now()-7*u.h
-        self.sb.SetStatusText('Timezone: Pacific',4)
+        self.current_timezone="PST"
+        self.sb.SetStatusText('Timezone: PST',4)
+        return
+    def on_Mountain(self,event):
+        """
+        Event handle for the Mountain time zone option. Changes time to the current Mountain time representation.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget.
+                
+         Returns:
+                None
+        """
+        self.current_timezone="MST"
+        self.sb.SetStatusText('Timezone: MST',4)
         return
     def pre_on(self,event):
         """
@@ -1859,8 +1860,12 @@ class TCC(wx.Frame):
         jdt=t.jd
         mjdt = t.mjd
         epoch = 1900.0 + ((float(jdt)-2415020.31352)/365.242198781)
-        local = time.strftime('%Y/%m/%d %H:%M:%S')
-        self.mro.date=datetime.datetime.utcnow()
+        
+        if self.current_timezone=="PST":
+            local = time.strftime('%Y/%m/%d %H:%M:%S')
+        if self.current_timezone=="MST":
+            local = datetime.now() + timedelta(hours=1)
+        self.mro.date=dati.datetime.utcnow()
         lst = self.mro.sidereal_time()
         return {'mjd':mjdt,'utc':self.mro.date,'local':local,'epoch':epoch, 'lst':lst}
 
