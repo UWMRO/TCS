@@ -154,18 +154,20 @@ class Control(wx.Panel):
 
         #need to reposition these, they're all on top of each other in the
         #top left
-        self.jogNButton = wx.Button(self, -1, 'N', pos = (650, 175))
-        self.jogSButton = wx.Button(self, -1, 'S', pos = (650, 225))
-        self.jogWButton = wx.Button(self, -1, 'W', pos = (600, 200))
-        self.jogEButton = wx.Button(self, -1, 'E', pos = (700, 200))
+        self.jogNButton = wx.Button(self, -1, 'N')
+        self.jogSButton = wx.Button(self, -1, 'S')
+        self.jogWButton = wx.Button(self, -1, 'W')
+        self.jogEButton = wx.Button(self, -1, 'E')
         #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
 
 
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
+        self.vbox2=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=5, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
@@ -212,12 +214,24 @@ class Control(wx.Panel):
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsMove, 0, wx.ALIGN_LEFT)
+        
+        self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
+        self.hbox3.AddSpacer(5)
+        self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
+        
+        self.vbox2.Add(self.gbox3,0,wx.ALIGN_CENTER)
+        self.vbox2.AddSpacer(5)
+        self.vbox2.Add(self.jogNButton,0,wx.ALIGN_CENTER)
+        self.vbox2.AddSpacer(5)
+        self.vbox2.Add(self.hbox3,0,wx.ALIGN_CENTER)
+        self.vbox2.AddSpacer(5)
+        self.vbox2.Add(self.jogSButton,0,wx.ALIGN_CENTER)
 
         self.hbox1.Add(self.gbox2, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
         self.hbox1.Add(self.vbox1, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
-        self.hbox1.Add(self.gbox3, 0, wx.ALIGN_CENTER)
+        self.hbox1.Add(self.vbox2, 0, wx.ALIGN_CENTER)
 
         self.hbox2.Add(self.slewButton, 0, wx.ALIGN_CENTER)
         self.hbox2.AddSpacer(25)
