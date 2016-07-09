@@ -171,7 +171,19 @@ class Control(wx.Panel):
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=5, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
-
+        
+        self.ctlabel = wx.StaticBox(self,label="Current Target")
+        self.vbox3 = wx.StaticBoxSizer(self.ctlabel, wx.VERTICAL)
+        
+        self.TCCstatus=wx.StaticBox(self,label="TCC Status")
+        self.vbox4= wx.StaticBoxSizer(self.TCCstatus, wx.VERTICAL)
+        
+        self.flabel=wx.StaticBox(self,label="Focus")
+        self.vbox5= wx.StaticBoxSizer(self.flabel, wx.VERTICAL)
+        
+        self.jlabel=wx.StaticBox(self,label="Jog Telescope")
+        self.vbox6= wx.StaticBoxSizer(self.jlabel, wx.VERTICAL)
+        
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetRaLabel, 0, wx.ALIGN_RIGHT)
@@ -182,9 +194,9 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
-
-        self.vbox1.Add(self.gbox,0,wx.ALIGN_CENTER)
-
+        
+        self.vbox3.Add(self.gbox,0,wx.ALIGN_CENTER)
+        self.vbox1.Add(self.vbox3,0,wx.ALIGN_CENTER)
 
 
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
@@ -209,25 +221,32 @@ class Control(wx.Panel):
         self.gbox2.Add(self.currentRATRPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
+        
+        self.vbox4.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
         self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsMove, 0, wx.ALIGN_LEFT)
         
+        self.vbox5.Add(self.gbox3,0,wx.ALIGN_CENTER)
+        
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
         
-        self.vbox2.Add(self.gbox3,0,wx.ALIGN_CENTER)
+        self.vbox6.Add(self.jogNButton,0,wx.ALIGN_CENTER)
+        self.vbox6.AddSpacer(5)
+        self.vbox6.Add(self.hbox3,0,wx.ALIGN_CENTER)
+        self.vbox6.AddSpacer(5)
+        self.vbox6.Add(self.jogSButton,0,wx.ALIGN_CENTER)
+        
+        self.vbox2.Add(self.vbox5,0,wx.ALIGN_CENTER)
         self.vbox2.AddSpacer(5)
-        self.vbox2.Add(self.jogNButton,0,wx.ALIGN_CENTER)
-        self.vbox2.AddSpacer(5)
-        self.vbox2.Add(self.hbox3,0,wx.ALIGN_CENTER)
-        self.vbox2.AddSpacer(5)
-        self.vbox2.Add(self.jogSButton,0,wx.ALIGN_CENTER)
+        self.vbox2.Add(self.vbox6,0,wx.ALIGN_CENTER)
+    
 
-        self.hbox1.Add(self.gbox2, 0, wx.ALIGN_CENTER)
+        self.hbox1.Add(self.vbox4, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
         self.hbox1.Add(self.vbox1, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
