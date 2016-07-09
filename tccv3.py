@@ -94,7 +94,7 @@ class Control(wx.Panel):
 
         self.currentUTCLabel = wx.StaticText(self, size=(75,-1))
         self.currentUTCLabel.SetLabel('UTC: ')
-        self.currentUTCPos = wx.StaticText(self,size=(100,-1))
+        self.currentUTCPos = wx.StaticText(self,size=(125,-1))
         self.currentUTCPos.SetLabel('Unknown')
         self.currentUTCPos.SetForegroundColour((255,0,0))
 
@@ -106,7 +106,7 @@ class Control(wx.Panel):
 
         self.currentLocalLabel = wx.StaticText(self, size=(75,-1))
         self.currentLocalLabel.SetLabel('Local: ')
-        self.currentLocalPos = wx.StaticText(self,size=(100,-1))
+        self.currentLocalPos = wx.StaticText(self,size=(125,-1))
         self.currentLocalPos.SetLabel('Unknown')
         self.currentLocalPos.SetForegroundColour((255,0,0))
 
