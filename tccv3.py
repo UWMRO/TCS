@@ -94,19 +94,19 @@ class Control(wx.Panel):
 
         self.currentUTCLabel = wx.StaticText(self, size=(75,-1))
         self.currentUTCLabel.SetLabel('UTC: ')
-        self.currentUTCPos = wx.StaticText(self,size=(75,-1))
+        self.currentUTCPos = wx.StaticText(self,size=(100,-1))
         self.currentUTCPos.SetLabel('Unknown')
         self.currentUTCPos.SetForegroundColour((255,0,0))
 
         self.currentLSTLabel = wx.StaticText(self, size=(75,-1))
         self.currentLSTLabel.SetLabel('LST: ')
-        self.currentLSTPos = wx.StaticText(self,size=(75,-1))
+        self.currentLSTPos = wx.StaticText(self,size=(100,-1))
         self.currentLSTPos.SetLabel('Unknown')
         self.currentLSTPos.SetForegroundColour((255,0,0))
 
         self.currentLocalLabel = wx.StaticText(self, size=(75,-1))
         self.currentLocalLabel.SetLabel('Local: ')
-        self.currentLocalPos = wx.StaticText(self,size=(75,-1))
+        self.currentLocalPos = wx.StaticText(self,size=(100,-1))
         self.currentLocalPos.SetLabel('Unknown')
         self.currentLocalPos.SetForegroundColour((255,0,0))
 
@@ -169,7 +169,7 @@ class Control(wx.Panel):
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=5, vgap=5)
+        self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
         
         self.ctlabel = wx.StaticBox(self,label="Current Target")
