@@ -313,6 +313,7 @@ class Target(wx.Panel):
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
         self.removeButton=wx.Button(self,-1,"Remove Item from List")
+        self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
 
@@ -347,6 +348,8 @@ class Target(wx.Panel):
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(25)
+        self.hbox3.Add(self.exportButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
@@ -868,6 +871,7 @@ class TCC(wx.Frame):
         self.slewing=False
         self.night=True
         self.initState=False
+        self.export_active=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
         self.list_count=0
         #Stores current time zone for whole GUI
@@ -935,6 +939,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
         self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
+        self.Bind(wx.EVT_BUTTON, self.ExportOpen,self.target.exportButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
@@ -1428,6 +1433,8 @@ class TCC(wx.Frame):
                 
         Returns:
                 None
+                
+        Information needed by Server: RA (Degrees), DEC (Degrees), 
         '''
         name=self.control.targetNameText.GetValue()
         input_ra=self.control.targetRaText.GetValue()
@@ -1542,10 +1549,11 @@ class TCC(wx.Frame):
                 None
         """
         
-        self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
-        self.image.ax1.set_axis_off()
-        self.image.fig.savefig("testfinder.png")
-        image_file = 'testfinder.png'
+        
+        #self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
+        #self.image.ax1.set_axis_off()
+        #self.image.fig.savefig("testfinder.png")
+        #image_file = 'testfinder.png'
 
     
     def addToList(self,event):
@@ -1656,6 +1664,27 @@ class TCC(wx.Frame):
         
         """
         self.target.targetList.DeleteItem(self.target.targetList.GetFocusedItem())
+        
+    def ExportOpen(self,event):  
+        self.window=TargetExportWindow(self)
+        self.window.Show()
+        
+        self.window.list=[]
+        
+        self.listrange=np.arange(0,self.target.targetList.GetItemCount())
+
+        for row in self.listrange:
+            name=self.target.targetList.GetItem(itemId=row, col=0).GetText()
+            ra=self.target.targetList.GetItem(itemId=row, col=1).GetText()
+            dec=self.target.targetList.GetItem(itemId=row, col=2).GetText()
+            epoch=self.target.targetList.GetItem(itemId=row, col=3).GetText()
+            vmag=self.target.targetList.GetItem(itemId=row, col=4).GetText()
+            
+            objectdata=str(name)+';'+str(ra)+';'+str(dec)+';'+str(epoch)+';'+str(vmag)
+            self.window.list.append(objectdata)
+            
+        
+        self.export_active=True
         
     def dyn_airmass(self,tgt,obs,count):
         """
@@ -1946,6 +1975,7 @@ class TCC(wx.Frame):
         self.mro.date=dati.datetime.utcnow()
         lst = self.mro.sidereal_time()
         return {'mjd':mjdt,'utc':self.mro.date,'local':local,'epoch':epoch, 'lst':lst}
+        
 
     def test(self,event):
         print 'this is a test event'
@@ -1956,8 +1986,93 @@ class TCC(wx.Frame):
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
             self.focusLog.AppendText(l)
-   
+            
+'''
+Additional Frames called during GUI operation
+'''
 
+class FinderImageWindow(wx.Frame):
+    
+    def __init__(self, parent):
+        wx.Frame.__init__(self, parent, -1, "Image Window", size=(650,550))
+
+        #self.image = 'example.fit'  # for debugging
+        self.parent = parent
+        
+class TargetExportWindow(wx.Frame):
+    def __init__(self,parent):
+        wx.Frame.__init__(self, parent, -1, "Export to Target List File", size=(300,200))
+        
+        self.parent=parent
+        self.defaultdirectory='targetlists'
+        
+        self.panel=Export(self)
+        
+        self.panel.pathText.SetValue(self.defaultdirectory)
+        
+        self.Bind(wx.EVT_BUTTON, self.onExport, self.panel.ExButton)
+        self.Bind(wx.EVT_BUTTON, self.onCancel, self.panel.CancelButton)
+        
+    def onExport(self,event):
+        f = open(str(self.panel.pathText.GetValue()+'/'+self.panel.filenameText.GetValue()), 'w')
+        for item in self.list:
+            f.write(str(item)+'\n')
+        f.close()
+        self.Close()
+        
+    def onCancel(self, event):
+        self.Close()
+
+class Export(wx.Panel): 
+    def __init__(self,parent):
+        wx.Panel.__init__(self,parent)
+        
+        self.parent=parent
+        
+        self.pathLabel = wx.StaticText(self, size=(75,-1))
+        self.pathLabel.SetLabel('Output Path: ')
+        self.pathText = wx.TextCtrl(self,size=(-1,-1))
+        
+        self.filenameLabel = wx.StaticText(self, size=(75,-1))
+        self.filenameLabel.SetLabel('File Name: ')
+        self.filenameText = wx.TextCtrl(self,size=(-1,-1))
+        
+        self.ExButton=wx.Button(self,-1,"Export")
+        self.CancelButton=wx.Button(self,-1,"Cancel")
+        
+        self.vbox=wx.BoxSizer(wx.VERTICAL)
+        self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.hbox1.AddSpacer(15)
+        self.hbox1.Add(self.pathLabel,0,wx.ALIGN_LEFT)
+        self.hbox1.Add(self.pathText,1,wx.ALIGN_LEFT)
+        self.hbox1.AddSpacer(15)
+        
+        self.hbox2.AddSpacer(15)
+        self.hbox2.Add(self.filenameLabel,0,wx.ALIGN_LEFT)
+        self.hbox2.Add(self.filenameText,1,wx.ALIGN_LEFT)
+        self.hbox2.AddSpacer(15)
+        
+        self.hbox3.Add(self.CancelButton,0,wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(20)
+        self.hbox3.Add(self.ExButton,1,wx.ALIGN_CENTER)
+        
+        
+        self.vbox.Add(self.hbox1,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(15)
+        self.vbox.Add(self.hbox2,0,wx.ALIGN_LEFT|wx.EXPAND)
+        self.vbox.AddSpacer(15)
+        self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(15)
+        
+        self.SetSizer(self.vbox)
+        
+        
+'''
+Twisted Python
+'''
 class DataForwardingProtocol(basic.LineReceiver):
 
     def __init__(self):
