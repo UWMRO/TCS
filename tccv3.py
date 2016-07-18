@@ -313,7 +313,7 @@ class Target(wx.Panel):
         self.listButton = wx.Button(self, -1, "Retrieve List")
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-        self.removeButton=wx.Button(self,-1,"Remove Item from List")
+        #self.removeButton=wx.Button(self,-1,"Remove Item from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
@@ -321,7 +321,7 @@ class Target(wx.Panel):
         self.listButton.Disable()
         self.selectButton.Disable()
         self.enterButton.Disable()
-        self.removeButton.Disable()
+        #self.removeButton.Disable()
         self.exportButton.Disable()
         self.plot_button.Disable()
         self.airmass_button.Disable()
@@ -356,8 +356,8 @@ class Target(wx.Panel):
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
-        self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        #self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
+        #self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.exportButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
@@ -875,6 +875,7 @@ class TCC(wx.Frame):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
         
         #Tracking on boot is false
+        self.calculate=True
         self.precession=True
         self.tracking=False
         self.slewing=False
@@ -884,6 +885,7 @@ class TCC(wx.Frame):
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
         self.list_count=0
         self.active_threads={}
+        self.thread_to_close=-1
         #Stores current time zone for whole GUI
         self.current_timezone="PST"
         self.mro=ephem.Observer()
@@ -948,7 +950,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
-        self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
+        #self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
         self.Bind(wx.EVT_BUTTON, self.ExportOpen,self.target.exportButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
@@ -1677,10 +1679,10 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-        
+    '''        
     def removeFromList(self,event):
         """
-        Remove selected object from the target list. Currently buggy due to airmass thread running for each object.
+        Clears list of all entries.
         
         Args:
                 self: points function towards WX application.
@@ -1690,9 +1692,22 @@ class TCC(wx.Frame):
                 None
         
         """
-        self.target.targetList.DeleteItem(self.target.targetList.GetFocusedItem())
-        self.list_count-=1
-        
+        #row=self.target.targetList.GetFocusedItem()
+        #self.thread_to_close=row
+        #t = self.active_threads.pop("airmass_"+str(row))
+        self.calculate==False
+        for key in self.active_threads:
+            print key
+            self.active_threads.pop(key).join()
+        self.target.targetList.DeleteAllItems()
+        #self.target.targetList.DeleteItem(row)
+        #for key in self.active_threads:
+            #if int(key[8:]) > row:
+               # print key[8:], ' ',row
+                #self.active_threads["airmass_"+str(int(key[8:])-1)]=self.active_threads.pop(key)
+       # self.list_count-=1
+        self.list_count=0
+    '''
     def ExportOpen(self,event):  
         self.window=TargetExportWindow(self)
         self.window.Show()
@@ -1728,13 +1743,14 @@ class TCC(wx.Frame):
                 a (float): airmass at current time.
         
         """
-        while True:
+        while self.calculate==True:
             a= obs.altaz(Time.now(),tgt).secz
             if a > 8 or a < 0:
                 a="N/A"
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
             time.sleep(10)
+        return
             
     
     def target_plot(self,event):
@@ -1954,7 +1970,7 @@ class TCC(wx.Frame):
         self.target.listButton.Enable()
         self.target.selectButton.Enable()
         self.target.enterButton.Enable()
-        self.target.removeButton.Enable()
+        #self.target.removeButton.Enable()
         self.target.exportButton.Enable()
         self.target.plot_button.Enable()
         self.target.airmass_button.Enable()
