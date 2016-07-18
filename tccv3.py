@@ -1623,7 +1623,16 @@ class TCC(wx.Frame):
                 None
         
         """
-        f_in=open(self.target.fileText.GetValue())
+        try:
+            f_in=open(self.target.fileText.GetValue())
+        except IOError:
+            dlg = wx.MessageDialog(self,
+                           "Path Error: File not Found.",
+                           "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy() 
+            return
+        #f_in=open(self.target.fileText.GetValue())
         for line in f_in:
             l = line.split(';')
             print l
