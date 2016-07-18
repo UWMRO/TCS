@@ -313,7 +313,7 @@ class Target(wx.Panel):
         self.listButton = wx.Button(self, -1, "Retrieve List")
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
-        #self.removeButton=wx.Button(self,-1,"Remove Item from List")
+        self.removeButton=wx.Button(self,-1,"Remove Item from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
@@ -321,7 +321,7 @@ class Target(wx.Panel):
         self.listButton.Disable()
         self.selectButton.Disable()
         self.enterButton.Disable()
-        #self.removeButton.Disable()
+        self.removeButton.Disable()
         self.exportButton.Disable()
         self.plot_button.Disable()
         self.airmass_button.Disable()
@@ -356,8 +356,8 @@ class Target(wx.Panel):
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
-        #self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
-        #self.hbox3.AddSpacer(25)
+        self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.exportButton,0, wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
@@ -950,7 +950,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
-        #self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
+        self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
         self.Bind(wx.EVT_BUTTON, self.ExportOpen,self.target.exportButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
@@ -1679,7 +1679,7 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-    '''        
+            
     def removeFromList(self,event):
         """
         Clears list of all entries.
@@ -1695,11 +1695,13 @@ class TCC(wx.Frame):
         #row=self.target.targetList.GetFocusedItem()
         #self.thread_to_close=row
         #t = self.active_threads.pop("airmass_"+str(row))
-        self.calculate==False
+        self.calculate=False
+        
         for key in self.active_threads:
             print key
-            self.active_threads.pop(key).join()
+            self.active_threads[key].join()
         self.target.targetList.DeleteAllItems()
+        self.calculate=True
         #self.target.targetList.DeleteItem(row)
         #for key in self.active_threads:
             #if int(key[8:]) > row:
@@ -1707,7 +1709,6 @@ class TCC(wx.Frame):
                 #self.active_threads["airmass_"+str(int(key[8:])-1)]=self.active_threads.pop(key)
        # self.list_count-=1
         self.list_count=0
-    '''
     def ExportOpen(self,event):  
         self.window=TargetExportWindow(self)
         self.window.Show()
@@ -1749,8 +1750,7 @@ class TCC(wx.Frame):
                 a="N/A"
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
-            time.sleep(10)
-        return
+            time.sleep(1)
             
     
     def target_plot(self,event):
@@ -1970,7 +1970,7 @@ class TCC(wx.Frame):
         self.target.listButton.Enable()
         self.target.selectButton.Enable()
         self.target.enterButton.Enable()
-        #self.target.removeButton.Enable()
+        self.target.removeButton.Enable()
         self.target.exportButton.Enable()
         self.target.plot_button.Enable()
         self.target.airmass_button.Enable()
