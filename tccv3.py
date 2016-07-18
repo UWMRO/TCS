@@ -276,7 +276,6 @@ class Target(wx.Panel):
         self.fileLabel.SetLabel('Target List Path: ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
 
-        self.listButton = wx.Button(self, -1, "Retrieve List")
 
         #show list of targets with selection button.  When the target is highlighted the selection button will input the data into the Control window.
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
@@ -310,12 +309,21 @@ class Target(wx.Panel):
         self.magText=wx.TextCtrl(self,size=(100,-1))
         
         #Buttons
+        self.listButton = wx.Button(self, -1, "Retrieve List")
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
         self.enterButton = wx.Button(self, -1, "Add Item to List")
         self.removeButton=wx.Button(self,-1,"Remove Item from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
+        
+        self.listButton.Disable()
+        self.selectButton.Disable()
+        self.enterButton.Disable()
+        self.removeButton.Disable()
+        self.exportButton.Disable()
+        self.plot_button.Disable()
+        self.airmass_button.Disable()
 
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -1917,9 +1925,20 @@ class TCC(wx.Frame):
         self.mro.lon=self.dict['lon']
         self.mro.lat=self.dict['lat']
         self.horizonlimit=self.dict['horizonLimit']
+        
+        
         self.control.slewButton.Enable()
         self.control.trackButton.Enable()
         self.init.atZenithButton.Enable()
+        
+        self.target.listButton.Enable()
+        self.target.selectButton.Enable()
+        self.target.enterButton.Enable()
+        self.target.removeButton.Enable()
+        self.target.exportButton.Enable()
+        self.target.plot_button.Enable()
+        self.target.airmass_button.Enable()
+        
         thread.start_new_thread(self.timer,())
         self.initState=True
         if self.initState==True:
@@ -2059,7 +2078,7 @@ class Export(wx.Panel):
         self.hbox3.AddSpacer(20)
         self.hbox3.Add(self.ExButton,1,wx.ALIGN_CENTER)
         
-        
+        self.vbox.AddSpacer(15)
         self.vbox.Add(self.hbox1,0,wx.ALIGN_LEFT|wx.EXPAND)
         self.vbox.AddSpacer(15)
         self.vbox.Add(self.hbox2,0,wx.ALIGN_LEFT|wx.EXPAND)
