@@ -7,6 +7,7 @@ import re
 import astropy
 from astropy.time import Time
 import thread
+import threading
 import ephem
 import matplotlib
 import datetime as dati
@@ -882,6 +883,7 @@ class TCC(wx.Frame):
         self.export_active=False
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
         self.list_count=0
+        self.active_threads={}
         #Stores current time zone for whole GUI
         self.current_timezone="PST"
         self.mro=ephem.Observer()
@@ -1606,7 +1608,11 @@ class TCC(wx.Frame):
             self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
             self.target.targetList.SetStringItem(self.list_count,4,str(mag))
             #self.target.targetList.SetStringItem(0,5,str(airmass))
-            thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
+            #thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
+            t = threading.Thread(target=self.dyn_airmass, args=(self.obstarget,self.MRO,self.list_count,), name="airmass_"+str(self.list_count))
+            t.daemon = True
+            t.start()
+            self.active_threads["airmass_"+str(self.list_count)] = t
             self.list_count+=1
         return
         
@@ -1662,7 +1668,11 @@ class TCC(wx.Frame):
                 self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
                 self.target.targetList.SetStringItem(self.list_count,4,str(mag))
                 #self.target.targetList.SetStringItem(0,5,str(airmass))
-                thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
+                #thread.start_new_thread(self.dyn_airmass,(self.obstarget,self.MRO,self.list_count,))
+                t = threading.Thread(target=self.dyn_airmass, args=(self.obstarget,self.MRO,self.list_count,), name="airmass_"+str(self.list_count))
+                t.daemon = True
+                t.start()
+                self.active_threads["airmass_"+str(self.list_count)] = t
                 self.list_count+=1
 
         f_in.close()
@@ -1681,6 +1691,7 @@ class TCC(wx.Frame):
         
         """
         self.target.targetList.DeleteItem(self.target.targetList.GetFocusedItem())
+        self.list_count-=1
         
     def ExportOpen(self,event):  
         self.window=TargetExportWindow(self)
