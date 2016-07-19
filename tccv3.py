@@ -1682,7 +1682,7 @@ class TCC(wx.Frame):
             
     def removeFromList(self,event):
         """
-        Clears list of all entries.
+        Remove selected item from list. Operates by clearing list and then regenerating surviving entries.
         
         Args:
                 self: points function towards WX application.
@@ -1692,23 +1692,55 @@ class TCC(wx.Frame):
                 None
         
         """
-        #row=self.target.targetList.GetFocusedItem()
-        #self.thread_to_close=row
-        #t = self.active_threads.pop("airmass_"+str(row))
-        self.calculate=False
-        
+        del_item=self.target.targetList.GetFocusedItem()
+        self.calculate=False        
         for key in self.active_threads:
-            print key
             self.active_threads[key].join()
+            
+        self.object_list=[]
+        self.listrange=np.arange(0,self.target.targetList.GetItemCount())
+        for row in self.listrange:
+            if row!=del_item:
+                name=self.target.targetList.GetItem(itemId=row, col=0).GetText()
+                ra=self.target.targetList.GetItem(itemId=row, col=1).GetText()
+                dec=self.target.targetList.GetItem(itemId=row, col=2).GetText()
+                epoch=self.target.targetList.GetItem(itemId=row, col=3).GetText()
+                vmag=self.target.targetList.GetItem(itemId=row, col=4).GetText()
+            
+                objectdata=str(name)+';'+str(ra)+';'+str(dec)+';'+str(epoch)+';'+str(vmag)
+                self.object_list.append(objectdata)
+            
         self.target.targetList.DeleteAllItems()
-        self.calculate=True
-        #self.target.targetList.DeleteItem(row)
-        #for key in self.active_threads:
-            #if int(key[8:]) > row:
-               # print key[8:], ' ',row
-                #self.active_threads["airmass_"+str(int(key[8:])-1)]=self.active_threads.pop(key)
-       # self.list_count-=1
+        self.active_threads={} 
         self.list_count=0
+        self.calculate=True
+        
+        for entry in self.object_list:
+            l=entry.split(';')
+            t_name = l[0]
+            input_ra = l[1]
+            input_dec = l[2]
+            epoch = l[3]
+            mag=l[4]
+            epoch_now = self.control.currentEpochPos.GetLabel()
+                
+            self.inputcoordSorter(input_ra,input_dec,epoch)
+                
+            if self.precession==True:
+                self.coordprecess(self.coordinates,epoch_now,epoch)
+            
+            self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
+            self.target.targetList.InsertStringItem(self.list_count,str(t_name))
+            self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
+            self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
+            self.target.targetList.SetStringItem(self.list_count,3,str(epoch))
+            self.target.targetList.SetStringItem(self.list_count,4,str(mag))
+            t = threading.Thread(target=self.dyn_airmass, args=(self.obstarget,self.MRO,self.list_count,), name="airmass_"+str(self.list_count))
+            t.daemon = True
+            t.start()
+            self.active_threads["airmass_"+str(self.list_count)] = t
+            self.list_count+=1
+        
     def ExportOpen(self,event):  
         self.window=TargetExportWindow(self)
         self.window.Show()
