@@ -159,7 +159,8 @@ class Control(wx.Panel):
         self.jogSButton = wx.Button(self, -1, 'S')
         self.jogWButton = wx.Button(self, -1, 'W')
         self.jogEButton = wx.Button(self, -1, 'E')
-        #self.jogIncrement = wx.TextCtrl(self,size=(20,-1), pos = )
+        self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
+        self.jogIncrement.SetValue('5.0')
 
 
         #setup sizers
@@ -233,6 +234,8 @@ class Control(wx.Panel):
         self.vbox5.Add(self.gbox3,0,wx.ALIGN_CENTER)
         
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
+        self.hbox3.AddSpacer(5)
+        self.hbox3.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
         
@@ -684,6 +687,11 @@ class Initialization(wx.Panel):
 
         self.syncButton = wx.Button(self, -1, "Set Telescope Position")
         self.initButton = wx.Button(self, -1, "Initialize Telescope Systems")
+        self.parkButton= wx.Button(self, -1, "Park Telescope")
+        self.coverposButton=wx.Button(self,-1,"Slew to Cover Position")
+        
+        self.parkButton.Disable()
+        self.coverposButton.Disable()
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
@@ -716,12 +724,13 @@ class Initialization(wx.Panel):
         self.gbox2.Add(self.maxdDECText, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.dDECButton, 0, wx.ALIGN_LEFT)
 
-
+        self.hbox1.Add(self.parkButton,0,wx.ALIGN_CENTER)
         self.hbox1.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.hbox1.Add(self.initButton,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.hbox1.Add(self.syncButton, 0, wx.ALIGN_RIGHT)
+        self.hbox1.Add(self.coverposButton,0,wx.ALIGN_CENTER)
 
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox1,0,wx.ALIGN_CENTER)
