@@ -235,6 +235,7 @@ class Control(wx.Panel):
         
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
+        #Not conviced this is the best place for increment. Clunky and doesn't allow for labeling. Underneath seems better
         self.hbox3.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
@@ -944,7 +945,8 @@ class TCC(wx.Frame):
 
         nb.AddPage(logPage,"Night Log")
         self.nl=nb.GetPage(5)
-
+        
+        #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
         self.Bind(wx.EVT_BUTTON,self.haltmotion,self.control.stopButton)
@@ -956,6 +958,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.focusIncNeg,self.control.focusIncNegButton)
         self.Bind(wx.EVT_BUTTON,self.setfocus,self.control.focusAbsMove)
         
+        #Target Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
@@ -964,7 +967,9 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
-
+        #Guider Control Tab Bindings
+        self.Bind(wx.EVT_BUTTON, self.FinderOpen, self.guiderControl.finderButton)
+        
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
@@ -1435,12 +1440,12 @@ class TCC(wx.Frame):
         d_dec=N*np.cos(ra_in* np.pi / 180.)
         #print d_ra, d_dec
     
-        ra_out=ra_in+d_ra
-        dec_out=dec_in+d_dec
-        print ra_out,dec_out
+        self.ra_out=ra_in+d_ra
+        self.dec_out=dec_in+d_dec
+        #print ra_out,dec_out
     
-        self.coordinates=SkyCoord(ra=float(ra_out)*u.degree,dec=float(dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
-        return self.coordinates
+        self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
+        return self.coordinates, self.ra_out, self.dec_out
     
     def startSlew(self,event):
         '''
@@ -1571,7 +1576,7 @@ class TCC(wx.Frame):
         """
         
         
-        #self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=2*u.degree,ax=self.image.ax1)
+        #self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=9*u.arcmin,ax=self.image.ax1)
         #self.image.ax1.set_axis_off()
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
@@ -1749,8 +1754,34 @@ class TCC(wx.Frame):
             t.start()
             self.active_threads["airmass_"+str(self.list_count)] = t
             self.list_count+=1
+    
+    def FinderOpen(self,event):
         
+        name=self.control.targetNameText.GetValue()
+        ra=self.control.targetRaText.GetValue()
+        dec=self.control.targetDecText.GetValue()
+        epoch=self.control.targetEpochText.GetValue()
+        
+        self.window=FinderImageWindow(self, Finder_name=name)
+        self.window.Show()
+        
+        self.inputcoordSorter(ra,dec,epoch)
+        self.window.finder_object=FixedTarget(name=None,coord=self.coordinates)
+        
+        self.window.LoadFinder()
+
+    
     def ExportOpen(self,event):  
+        """
+        Launch Export Window. Pull in current target list to window.
+        
+         Args:
+                self: points function towards WX application.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
+                
+        Returns:
+                Export Window.
+        """
         self.window=TargetExportWindow(self)
         self.window.Show()
         
@@ -1770,6 +1801,8 @@ class TCC(wx.Frame):
             
         
         self.export_active=True
+        
+    
         
     def dyn_airmass(self,tgt,obs,count):
         """
@@ -2089,11 +2122,32 @@ Additional Frames called during GUI operation
 
 class FinderImageWindow(wx.Frame):
     
-    def __init__(self, parent):
-        wx.Frame.__init__(self, parent, -1, "Image Window", size=(650,550))
+    def __init__(self, parent, Finder_name):
+        wx.Frame.__init__(self, parent, -1, "Finder Chart: "+Finder_name, size=(650,550))
 
         #self.image = 'example.fit'  # for debugging
         self.parent = parent
+        self.panel=Finder(self)
+        
+    def LoadFinder(self):
+        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.panel.ax1,reticle=True)
+        return
+        #self.image.fig.savefig("testfinder.png")
+        #image_file = 'testfinder.png'
+        
+class Finder(wx.Panel):
+    def __init__(self,parent):
+        wx.Panel.__init__(self,parent)
+        
+        self.parent=parent
+        
+        self.fig = Figure((6,6))
+        self.canvas = FigCanvas(self,-1, self.fig)
+        self.ax1 = self.fig.add_subplot(111)
+        self.ax1.set_axis_off()
+        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+
+        
         
 class TargetExportWindow(wx.Frame):
     def __init__(self,parent):
