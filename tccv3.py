@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as dt
 import numpy as np
 from matplotlib.figure import Figure
-from matplotlib.figure import Figure
+from matplotlib.image import AxesImage
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
@@ -30,7 +30,8 @@ from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
-from astroplan.plots.finder import plot_finder_image
+#from astroplan.plots.finder import plot_finder_image
+from Finder_picker import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
 
@@ -2123,18 +2124,34 @@ Additional Frames called during GUI operation
 class FinderImageWindow(wx.Frame):
     
     def __init__(self, parent, Finder_name):
-        wx.Frame.__init__(self, parent, -1, "Finder Chart: "+Finder_name, size=(650,550))
+        wx.Frame.__init__(self, parent, -1, "Finder Chart: "+Finder_name, size=(550,550))
+        
 
         #self.image = 'example.fit'  # for debugging
         self.parent = parent
         self.panel=Finder(self)
         
     def LoadFinder(self):
-        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.panel.ax1,reticle=True)
+        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.panel.ax1,reticle=True, log=False)
+        
+        self.panel.canvas.mpl_connect('pick_event', self.onpick4)
         return
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
+    def display_data(self, event):
+        if self.panel.canvas.HasCapture(): self.panel.canvas.ReleaseMouse()
+        wx.MessageBox('x :'+str(event.mouseevent.xdata) + 'y: ' + str(event.mouseevent.ydata), 'Info',wx.OK | wx.ICON_INFORMATION)
         
+    def onpick4(self,event):
+        artist = event.artist
+        if isinstance(artist, AxesImage):
+            im = artist
+            A = im.get_array()
+            mouseevent = event.mouseevent
+            self.x = mouseevent.xdata
+            self.y = mouseevent.ydata
+            print('onpick4 image', self.x,self.y)
+            
 class Finder(wx.Panel):
     def __init__(self,parent):
         wx.Panel.__init__(self,parent)
@@ -2146,6 +2163,10 @@ class Finder(wx.Panel):
         self.ax1 = self.fig.add_subplot(111)
         self.ax1.set_axis_off()
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        self.SetSizer(self.sizer)
+        self.Fit()
 
         
         
