@@ -19,6 +19,7 @@ import matplotlib.dates as dt
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
+import matplotlib.image as mpimg
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
@@ -30,8 +31,7 @@ from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
-#from astroplan.plots.finder import plot_finder_image
-from Finder_picker import plot_finder_image
+from astroplan.plots.finder import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
 
@@ -470,78 +470,103 @@ class GuiderControl(wx.Panel):
         self.dc = None
         self.rotAng=0
 
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        #self.Bind(wx.EVT_PAINT, self.OnPaint)
 
         #thread.start_new_thread(self.rotPaint,())
         self.current_target=None
 
-        img=wx.EmptyImage(320,320)
-        self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
-        '''
-        self.fig = Figure((4,4))
-        self.canvas = FigCanvas(self,-1, self.fig)
-        self.ax1 = self.fig.add_subplot(111)
-        self.ax1.set_axis_off()
-        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-        '''
-        self.finderButton=wx.Button(self,-1,"Load Finder Chart")
+        #img=wx.EmptyImage(320,320)
+        #self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
+        
+        self.fig_r = Figure((4,4))
+        self.canvas_r = FigCanvas(self,-1, self.fig_r)
+        self.ax_r = self.fig_r.add_subplot(111)
+        self.ax_r.set_axis_off()
+        self.cir = matplotlib.patches.Circle( (156,160), radius=125, fill=False, color='steelblue',linewidth=2.5)
+        self.line= matplotlib.patches.Rectangle( (156,160), height=-125, width=2, fill=True, color='k')
+        self.ax_r.add_patch(self.cir)
+        self.ax_r.add_patch(self.line)
+        self.fig_r.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        
+        
+        self.fig_l = Figure((4,4))
+        self.canvas_l = FigCanvas(self,-1, self.fig_l)
+        self.ax_l = self.fig_l.add_subplot(111)
+        self.ax_l.set_axis_off()
+        self.fig_l.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+        
+        self.finderLabel=wx.StaticText(self, size=(75,-1))
+        self.finderLabel.SetLabel('Radius (arcmin): ')
+        self.finderText=wx.TextCtrl(self,size=(100,-1))
+        self.finderText.SetValue('18.0')
+        
+        self.finderButton=wx.Button(self,-1,"Load Finder Chart",size=(125,-1))
         #self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
         
-        self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars")
-        self.startGuidingButton = wx.Button(self, -1, "Start Guiding")
+        self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars",size=(150,-1))
+        self.startGuidingButton = wx.Button(self, -1, "Start Guiding",size=(150,-1))
 
         self.guiderTimeLabel=wx.StaticText(self, size=(75,-1))
         self.guiderTimeLabel.SetLabel('Exposure: ')
-        self.guiderTimeText=wx.TextCtrl(self,size=(50,-1))
-        self.guiderTimeText.SetValue('10')
+        self.guiderTimeText=wx.TextCtrl(self,size=(100,-1))
+        self.guiderTimeText.SetValue('10.0')
 
-        self.guiderBinningLabel=wx.StaticText(self, size=(75,-1))
-        self.guiderBinningLabel.SetLabel('Binning: ')
-        binning_options=['1','2','3']
-        self.guiderBinningCombo=wx.ComboBox(self,size=(50,-1), choices=binning_options, style=wx.CB_READONLY)
+        self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure',size=(125,-1))
 
-        self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure')
-
-        self.guiderRotLabel=wx.StaticText(self, size=(150,-1))
-        self.guiderRotLabel.SetLabel('Guider Rotation Angle: ')
-        self.guiderRotText=wx.TextCtrl(self,size=(50,-1))
+        self.guiderRotLabel=wx.StaticText(self, size=(75,-1))
+        self.guiderRotLabel.SetLabel('Rot. Angle: ')
+        self.guiderRotText=wx.TextCtrl(self,size=(100,-1))
         self.guiderRotText.SetValue('0.0')
-        self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation')
-        self.Bind(wx.EVT_BUTTON, self.goToRot, self.guiderRotButton)
+        self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation',size=(125,-1))
+        #self.Bind(wx.EVT_BUTTON, self.goToRot, self.guiderRotButton)
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
-        self.gbox=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
-
+        #self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        self.gbox=wx.GridSizer(rows=3, cols=3, hgap=0, vgap=5)
+        self.ghbox=wx.BoxSizer(wx.HORIZONTAL)
+        
         self.gbox.Add(self.guiderTimeLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.guiderBinningLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.guiderBinningCombo, 0, wx.ALIGN_RIGHT)
+        self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_LEFT)
+        self.gbox.Add(self.guiderExposureButton,0,wx.ALIGN_LEFT)
+        self.gbox.Add(self.guiderRotLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox.Add(self.guiderRotText, 0, wx.ALIGN_LEFT)
+        self.gbox.Add(self.guiderRotButton,0,wx.ALIGN_LEFT)
+        self.gbox.Add(self.finderLabel, 0, wx.ALIGN_RIGHT)
+        self.gbox.Add(self.finderText, 0, wx.ALIGN_LEFT)
+        self.gbox.Add(self.finderButton,0,wx.ALIGN_LEFT)
+        
+        self.ghbox.AddSpacer(20)
+        self.ghbox.Add(self.gbox,0,wx.ALIGN_LEFT)
 
-        self.hbox.Add(self.finderButton,0,wx.ALIGN_RIGHT)
-        self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_RIGHT)
+        #self.hbox.Add(self.finderButton,0,wx.ALIGN_RIGHT)
+        self.hbox.AddSpacer(75)
+        self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_LEFT)
+        self.hbox.AddSpacer(15)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
-        self.hbox.Add(self.guiderExposureButton, 0, wx.ALIGN_RIGHT)
+        
+        
+        self.hbox2.Add(self.canvas_l,0,wx.ALIGN_RIGHT)
+        self.hbox2.AddSpacer(90)
+        self.hbox2.Add(self.canvas_r,0,wx.ALIGN_RIGHT)
+        
+        #self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
+        #self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
+        #self.hbox3.Add(self.guiderRotButton,0,wx.ALIGN_CENTER)
+        #self.hbox3.AddSpacer(75)
+        #self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
+        #self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
+        #self.hbox3.Add(self.guiderRotButton,0,wx.ALIGN_CENTER)
 
-        self.hbox2.AddSpacer(350)
-        self.hbox2.Add(self.imageCtrl,0,wx.ALIGN_RIGHT)
-
-        self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
-        self.hbox2.AddSpacer(10)
-        self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
-        self.hbox2.AddSpacer(10)
-        self.hbox3.Add(self.guiderRotButton,0,wx.ALIGN_CENTER)
-
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.gbox,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.hbox,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
+        #self.vbox.AddSpacer(10)
+        #self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
-        self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
+        self.vbox.Add(self.ghbox,0,wx.ALIGN_LEFT)
+        self.vbox.AddSpacer(20)
+        self.vbox.Add(self.hbox,0,wx.ALIGN_LEFT)
 
 
         self.SetSizer(self.vbox)
@@ -969,7 +994,8 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         
         #Guider Control Tab Bindings
-        self.Bind(wx.EVT_BUTTON, self.FinderOpen, self.guiderControl.finderButton)
+        self.Bind(wx.EVT_BUTTON, self.LoadFinder, self.guiderControl.finderButton)
+        self.Bind(wx.EVT_BUTTON,self.on_rot,self.guiderControl.guiderRotButton)
         
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
@@ -996,9 +1022,11 @@ class TCC(wx.Frame):
 
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
-        img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
-        self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-
+        img=mpimg.imread(img_default)
+        #img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
+        #self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
+        self.guiderControl.ax_r.imshow(img, picker=True)
+        self.guiderControl.canvas_r.mpl_connect('pick_event', self.on_pick)
 
     def createMenu(self):
         '''
@@ -1565,7 +1593,8 @@ class TCC(wx.Frame):
         
         return
         
-    def load_finder_chart(self):
+        
+    def LoadFinder(self,event):
         """
         Use Astroplan's plot_finder_image function to plot the finder image of the current target. Current location of finder chart is an axes object on the guider control tab.
         
@@ -1575,13 +1604,45 @@ class TCC(wx.Frame):
         Returns:
                 None
         """
+        name=self.control.targetNameText.GetValue()
+        ra=self.control.targetRaText.GetValue()
+        dec=self.control.targetDecText.GetValue()
+        epoch=self.control.targetEpochText.GetValue()
         
-        
-        #self.finder_chart=plot_finder_image(self.image.current_target, fov_radius=9*u.arcmin,ax=self.image.ax1)
-        #self.image.ax1.set_axis_off()
+        self.inputcoordSorter(ra,dec,epoch)
+        self.finder_object=FixedTarget(name=None,coord=self.coordinates)
+        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False)
+        return
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
+        
+    def on_pick(self,event):
+        artist = event.artist
+        if isinstance(artist, AxesImage):
+            im = artist
+            A = im.get_array()
+            center_x=A.shape[0]/2.0
+            center_y=A.shape[1]/2.0
+            mouseevent = event.mouseevent
+            self.x = mouseevent.xdata
+            self.y = mouseevent.ydata
+            #print('onpick4 image', self.x,self.y, center_x, center_y)
+            dx=self.x-center_x
+            dy=self.y-center_y
+            rho = np.sqrt(dx**2 + dy**2)
+            phi = np.arctan2(dy, dx)
+            phi_or=-1*(phi*180./np.pi)-90
+            print A.shape,rho,phi_or
+    def on_rot(self,event):
+        t_start = self.guiderControl.ax_r.transData
+        t = matplotlib.transforms.Affine2D().rotate_deg(-45)
+        t_end = t_start + t
 
+        self.guiderControl.line.set_transform(t_end)
+
+        print repr(t_start)
+        print repr(t_end)
+        self.guiderControl.ax_r.add_patch(self.guiderControl.line)
     
     def addToList(self,event):
         """
@@ -2033,25 +2094,26 @@ class TCC(wx.Frame):
         Returns:
                 None
         """
-        self.mro.lon=self.dict['lon']
-        self.mro.lat=self.dict['lat']
-        self.horizonlimit=self.dict['horizonLimit']
+        if self.initState==False:
+            self.mro.lon=self.dict['lon']
+            self.mro.lat=self.dict['lat']
+            self.horizonlimit=self.dict['horizonLimit']
         
         
-        self.control.slewButton.Enable()
-        self.control.trackButton.Enable()
-        self.init.atZenithButton.Enable()
+            self.control.slewButton.Enable()
+            self.control.trackButton.Enable()
+            self.init.atZenithButton.Enable()
         
-        self.target.listButton.Enable()
-        self.target.selectButton.Enable()
-        self.target.enterButton.Enable()
-        self.target.removeButton.Enable()
-        self.target.exportButton.Enable()
-        self.target.plot_button.Enable()
-        self.target.airmass_button.Enable()
+            self.target.listButton.Enable()
+            self.target.selectButton.Enable()
+            self.target.enterButton.Enable()
+            self.target.removeButton.Enable()
+            self.target.exportButton.Enable()
+            self.target.plot_button.Enable()
+            self.target.airmass_button.Enable()
         
-        thread.start_new_thread(self.timer,())
-        self.initState=True
+            thread.start_new_thread(self.timer,())
+            self.initState=True
         if self.initState==True:
             self.control.currentJDPos.SetForegroundColour('black')
             self.control.currentLSTPos.SetForegroundColour('black')
@@ -2130,27 +2192,34 @@ class FinderImageWindow(wx.Frame):
         #self.image = 'example.fit'  # for debugging
         self.parent = parent
         self.panel=Finder(self)
+        self.sb = self.CreateStatusBar(2)
+        self.sb.SetStatusText('On Guide Star: False',0)
+        self.sb.SetStatusText('Guider Rot Angle: 0',1)
         
     def LoadFinder(self):
         plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.panel.ax1,reticle=True, log=False)
-        
-        self.panel.canvas.mpl_connect('pick_event', self.onpick4)
+        self.panel.canvas.mpl_connect('pick_event', self.on_pick)
         return
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
-    def display_data(self, event):
-        if self.panel.canvas.HasCapture(): self.panel.canvas.ReleaseMouse()
-        wx.MessageBox('x :'+str(event.mouseevent.xdata) + 'y: ' + str(event.mouseevent.ydata), 'Info',wx.OK | wx.ICON_INFORMATION)
         
-    def onpick4(self,event):
+    def on_pick(self,event):
         artist = event.artist
         if isinstance(artist, AxesImage):
             im = artist
             A = im.get_array()
+            center_x=A.shape[0]/2.0
+            center_y=A.shape[1]/2.0
             mouseevent = event.mouseevent
             self.x = mouseevent.xdata
             self.y = mouseevent.ydata
-            print('onpick4 image', self.x,self.y)
+            #print('onpick4 image', self.x,self.y, center_x, center_y)
+            dx=self.x-center_x
+            dy=self.y-center_y
+            rho = np.sqrt(dx**2 + dy**2)
+            phi = np.arctan2(dy, dx)
+            phi_or=(phi*180./np.pi)
+            print A.shape,rho,phi_or
             
 class Finder(wx.Panel):
     def __init__(self,parent):
