@@ -484,8 +484,11 @@ class GuiderControl(wx.Panel):
         self.ax_r.set_axis_off()
         self.cir = matplotlib.patches.Circle( (156,160), radius=125, fill=False, color='steelblue',linewidth=2.5)
         self.line= matplotlib.patches.Rectangle( (156,160), height=-125, width=2, fill=True, color='k')
+        
         self.ax_r.add_patch(self.cir)
         self.ax_r.add_patch(self.line)
+        
+        
         self.fig_r.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         
         
@@ -495,7 +498,7 @@ class GuiderControl(wx.Panel):
         self.ax_l.set_axis_off()
         self.fig_l.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         
-        self.finderLabel=wx.StaticText(self, size=(75,-1))
+        self.finderLabel=wx.StaticText(self, size=(100,-1))
         self.finderLabel.SetLabel('Radius (arcmin): ')
         self.finderText=wx.TextCtrl(self,size=(100,-1))
         self.finderText.SetValue('18.0')
@@ -506,26 +509,64 @@ class GuiderControl(wx.Panel):
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars",size=(150,-1))
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding",size=(150,-1))
 
-        self.guiderTimeLabel=wx.StaticText(self, size=(75,-1))
+        self.guiderTimeLabel=wx.StaticText(self, size=(100,-1))
         self.guiderTimeLabel.SetLabel('Exposure: ')
         self.guiderTimeText=wx.TextCtrl(self,size=(100,-1))
         self.guiderTimeText.SetValue('10.0')
 
         self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure',size=(125,-1))
 
-        self.guiderRotLabel=wx.StaticText(self, size=(75,-1))
+        self.guiderRotLabel=wx.StaticText(self, size=(100,-1))
         self.guiderRotLabel.SetLabel('Rot. Angle: ')
         self.guiderRotText=wx.TextCtrl(self,size=(100,-1))
         self.guiderRotText.SetValue('0.0')
         self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation',size=(125,-1))
-        #self.Bind(wx.EVT_BUTTON, self.goToRot, self.guiderRotButton)
+        self.Bind(wx.EVT_BUTTON, self.on_Rot, self.guiderRotButton)
+        
+        self.jogNButton = wx.Button(self, -1, 'N',size=(75,-1))
+        self.jogSButton = wx.Button(self, -1, 'S',size=(75,-1))
+        self.jogWButton = wx.Button(self, -1, 'W',size=(75,-1))
+        self.jogEButton = wx.Button(self, -1, 'E',size=(75,-1))
+        
+        self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
+        self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
+        self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
+        self.focusAbsText.SetLabel('1500')
+        self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
-        #self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=3, cols=3, hgap=0, vgap=5)
+        self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
         self.ghbox=wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.clabel=wx.StaticBox(self,label="Guider Controls")
+        self.vbox4= wx.StaticBoxSizer(self.clabel, wx.VERTICAL)
+        
+        self.flabel=wx.StaticBox(self,label="Focus Guider")
+        self.vbox5= wx.StaticBoxSizer(self.flabel, wx.VERTICAL)
+        
+        self.jlabel=wx.StaticBox(self,label="Jog Guider Field")
+        self.vbox6= wx.StaticBoxSizer(self.jlabel, wx.VERTICAL)
+        
+        self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
+        self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
+        self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
+        self.gbox3.Add(self.focusAbsMove, 0, wx.ALIGN_LEFT)
+        
+        self.vbox5.Add(self.gbox3,0,wx.ALIGN_CENTER)
+        
+        self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
+        self.hbox3.AddSpacer(5)
+        self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
+        
+        self.vbox6.Add(self.jogNButton,0,wx.ALIGN_CENTER)
+        self.vbox6.AddSpacer(5)
+        self.vbox6.Add(self.hbox3,0,wx.ALIGN_CENTER)
+        self.vbox6.AddSpacer(5)
+        self.vbox6.Add(self.jogSButton,0,wx.ALIGN_CENTER)
         
         self.gbox.Add(self.guiderTimeLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_LEFT)
@@ -537,112 +578,39 @@ class GuiderControl(wx.Panel):
         self.gbox.Add(self.finderText, 0, wx.ALIGN_LEFT)
         self.gbox.Add(self.finderButton,0,wx.ALIGN_LEFT)
         
-        self.ghbox.AddSpacer(20)
-        self.ghbox.Add(self.gbox,0,wx.ALIGN_LEFT)
-
-        #self.hbox.Add(self.finderButton,0,wx.ALIGN_RIGHT)
-        self.hbox.AddSpacer(75)
+        #self.hbox.AddSpacer(50)
         self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_LEFT)
         self.hbox.AddSpacer(15)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
         
+        self.vbox4.Add(self.gbox,0,wx.ALIGN_CENTER)
+        self.vbox4.AddSpacer(10)
+        self.vbox4.Add(self.hbox,0,wx.ALIGN_CENTER)
+        
+        self.ghbox.AddSpacer(20)
+        self.ghbox.Add(self.vbox4,0,wx.ALIGN_LEFT)
+        self.ghbox.AddSpacer(20)
+        self.ghbox.Add(self.vbox6,0,wx.ALIGN_LEFT)
+        self.ghbox.AddSpacer(20)
+        self.ghbox.Add(self.vbox5,0,wx.ALIGN_LEFT)
         
         self.hbox2.Add(self.canvas_l,0,wx.ALIGN_RIGHT)
         self.hbox2.AddSpacer(90)
         self.hbox2.Add(self.canvas_r,0,wx.ALIGN_RIGHT)
-        
-        #self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
-        #self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
-        #self.hbox3.Add(self.guiderRotButton,0,wx.ALIGN_CENTER)
-        #self.hbox3.AddSpacer(75)
-        #self.hbox3.Add(self.guiderRotLabel,0,wx.ALIGN_CENTER)
-        #self.hbox3.Add(self.guiderRotText,0,wx.ALIGN_CENTER)
-        #self.hbox3.Add(self.guiderRotButton,0,wx.ALIGN_CENTER)
 
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
-        #self.vbox.AddSpacer(10)
-        #self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.ghbox,0,wx.ALIGN_LEFT)
-        self.vbox.AddSpacer(20)
-        self.vbox.Add(self.hbox,0,wx.ALIGN_LEFT)
 
 
         self.SetSizer(self.vbox)
-
-    def InitBuffer(self):
-        size=self.GetClientSize()
-        # if buffer exists and size hasn't changed do nothing
-        if self.Buffer is not None and self.Buffer.GetWidth() == size.width and self.Buffer.GetHeight() == size.height:
-            return False
-
-        self.Buffer=wx.EmptyBitmap(size.width,size.height)
-        self.dc=wx.MemoryDC()
-
-        self.dc.SelectObject(self.Buffer)
-        self.dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
-        self.dc.Clear()
-        self.drawCircle(self.center, 175)
-        self.dc.SelectObject(wx.NullBitmap)
-        return True
-
-    def drawCircle(self, center, diameter):
-        size=self.GetClientSize()
-        pen=wx.Pen('blue',1)
-        self.dc.SetPen(pen)
-        self.dc.DrawCircle(center[0],center[1],diameter)
-
-    def drawPeriscope(self):
-        size=self.GetClientSize()
-
-        #draw a reference line
-        pen=wx.Pen('black',1)
-        self.dc.SetPen(pen)
-        radius = 175
-        ang = self.rotAng*(math.pi/180.0)
-        centerLine=[self.center[0]-radius*math.sin(float(ang)), self.center[1]-radius*math.cos(float(ang))]
-        print centerLine, ang
-        self.dc.DrawLine(self.center[0],self.center[1],centerLine[0], centerLine[1])
-        #draw for lines that are a box with perpendicular sides
-        pen=wx.Pen('red',1)
-        self.dc.SetPen(pen)
-        #start with 0 deg up, left line
-        startLeft=[self.center[0]-10,self.center[1]]
-        endLeft = [startLeft[0], startLeft[1]-100]
-        self.dc.DrawLine(startLeft[0],startLeft[1],endLeft[0], endLeft[1])
-        #bottom line
-        endBottom = [startLeft[0] + 20,startLeft[1]]
-        self.dc.DrawLine(startLeft[0],startLeft[1],endBottom[0], endBottom[1])
-        #right line
-        endRight = [endBottom[0], endBottom[1]-100]
-        self.dc.DrawLine(endBottom[0],endBottom[1],endRight[0], endRight[1])
-        #top line
-        self.dc.DrawLine(endRight[0],endRight[1],endLeft[0],endLeft[1])
-
-
-    def OnPaint(self, event):
-        
-        self.InitBuffer()
-        self.dc = wx.PaintDC(self)
-        self.dc.DrawBitmap(self.Buffer, 0, 0)
-        self.drawPeriscope()
-
-    def goToRot(self,ang):
-        thread.start_new_thread(self.toRot,())
-
-    def toRot(self):
-        #compute move, should be a count down to the desired angle
-        move = float(self.guiderRotText.GetValue()) - self.rotAng
-        print 'moving: '+ str(move)
-        for m in range(int(math.fabs(move))):
-            if float(self.guiderRotText.GetValue())>=0:
-                self.rotAng = self.rotAng + 1
-            else:
-                self.rotAng = self.rotAng - 1
-            print self.rotAng, m
-            self.Refresh()
-            time.sleep(0.05)
+    def on_Rot(self,event):
+        #move = float(self.guiderRotText.GetValue()) - self.rotAng
+        self.line.remove()
+        self.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=float(self.guiderRotText.GetValue()))
+        self.ax_r.add_patch(self.line);
+        self.canvas_r.draw()
 
 class GuiderFocus(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -995,7 +963,7 @@ class TCC(wx.Frame):
         
         #Guider Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.LoadFinder, self.guiderControl.finderButton)
-        self.Bind(wx.EVT_BUTTON,self.on_rot,self.guiderControl.guiderRotButton)
+        #self.Bind(wx.EVT_BUTTON,self.on_rot,self.guiderControl.guiderRotButton)
         
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
@@ -1634,15 +1602,9 @@ class TCC(wx.Frame):
             phi_or=-1*(phi*180./np.pi)-90
             print A.shape,rho,phi_or
     def on_rot(self,event):
-        t_start = self.guiderControl.ax_r.transData
-        t = matplotlib.transforms.Affine2D().rotate_deg(-45)
-        t_end = t_start + t
-
-        self.guiderControl.line.set_transform(t_end)
-
-        print repr(t_start)
-        print repr(t_end)
-        self.guiderControl.ax_r.add_patch(self.guiderControl.line)
+        
+        self.guiderControl.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=60.0)
+        self.guiderControl.ax_r.add_patch(self.guiderControl.line);
     
     def addToList(self,event):
         """
