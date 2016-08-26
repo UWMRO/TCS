@@ -1585,12 +1585,10 @@ class TCC(wx.Frame):
             dy=self.y-center_y
             rho = np.sqrt(dx**2 + dy**2)
             phi = np.arctan2(dy, dx)
-            phi_or=-1*(phi*180./np.pi)-90
+            phi_or=(phi*180./np.pi)+90
             print A.shape,rho,phi_or
-            self.guiderControl.line.remove()
-            self.guiderControl.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=-1*phi_or)
-            self.guiderControl.ax_r.add_patch(self.guiderControl.line);
-            self.guiderControl.canvas_r.draw()
+            thread.start_new_thread(self.Rotate,(phi_or,))
+            
     def on_Rot(self,event):
         #move = float(self.guiderRotText.GetValue()) - self.rotAng
         try:
@@ -1602,11 +1600,23 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy() 
             return
-            
-        self.guiderControl.line.remove()
-        self.guiderControl.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=float(self.guiderControl.guiderRotText.GetValue()))
-        self.guiderControl.ax_r.add_patch(self.guiderControl.line);
-        self.guiderControl.canvas_r.draw()
+        thread.start_new_thread(self.Rotate,(self.guiderControl.guiderRotText.GetValue(),))
+        
+    def Rotate(self,Rot_angle):
+        current_pos=self.guiderControl.rotAng
+        if float(Rot_angle)-float(current_pos)>=0:
+            inc=1.0
+        else:
+            inc=-1.0
+        sweep_range=np.arange(current_pos, float(Rot_angle)+1, inc)
+        for angle in sweep_range:
+            self.guiderControl.line.remove()
+            self.guiderControl.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=float(angle))
+            self.guiderControl.ax_r.add_patch(self.guiderControl.line);
+            self.guiderControl.canvas_r.draw()
+            self.guiderControl.rotAng=float(angle)
+            time.sleep(0.05)
+        return
     
     def addToList(self,event):
         """
