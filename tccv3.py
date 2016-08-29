@@ -31,7 +31,8 @@ from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
-from astroplan.plots.finder import plot_finder_image
+#from astroplan.plots.finder import plot_finder_image
+from Finder_picker import plot_finder_image
 from astroquery.skyview import SkyView
 import wcsaxes
 
@@ -474,12 +475,11 @@ class GuiderControl(wx.Panel):
         self.canvas_r = FigCanvas(self,-1, self.fig_r)
         self.ax_r = self.fig_r.add_subplot(111)
         self.ax_r.set_axis_off()
-        self.cir = matplotlib.patches.Circle( (156,160), radius=125, fill=False, color='steelblue',linewidth=2.5)
-        self.line= matplotlib.patches.Rectangle( (156,160), height=-125, width=2, fill=True, color='k')
+        #self.cir = matplotlib.patches.Circle( (156,160), radius=125, fill=False, color='steelblue',linewidth=2.5)
+        #self.line= matplotlib.patches.Rectangle( (156,160), height=-125, width=2, fill=True, color='k')
         
-        self.ax_r.add_patch(self.cir)
-        self.ax_r.add_patch(self.line)
-        
+        #self.ax_r.add_patch(self.cir)
+        #self.ax_r.add_patch(self.line)
         
         self.fig_r.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         
@@ -488,6 +488,13 @@ class GuiderControl(wx.Panel):
         self.canvas_l = FigCanvas(self,-1, self.fig_l)
         self.ax_l = self.fig_l.add_subplot(111)
         self.ax_l.set_axis_off()
+        self.cir = matplotlib.patches.Circle( (150,150), radius=125, fill=False, color='steelblue',linewidth=2.5)
+        self.line= matplotlib.patches.Rectangle( (150,150), height=125, width=2, fill=True, color='k')
+        
+        
+        self.ax_l.add_patch(self.cir)
+        self.ax_l.add_patch(self.line)
+        
         self.fig_l.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         
         self.finderLabel=wx.StaticText(self, size=(100,-1))
@@ -979,8 +986,8 @@ class TCC(wx.Frame):
         img=mpimg.imread(img_default)
         #img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
         #self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-        self.guiderControl.ax_r.imshow(img, picker=True)
-        self.guiderControl.canvas_r.mpl_connect('pick_event', self.on_pick)
+        self.guiderControl.ax_r.imshow(img, picker=False)
+        self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
 
     def createMenu(self):
         '''
@@ -1565,7 +1572,7 @@ class TCC(wx.Frame):
         
         self.inputcoordSorter(ra,dec,epoch)
         self.finder_object=FixedTarget(name=None,coord=self.coordinates)
-        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False)
+        plot_finder_image(self.finder_object, fov_radius=float(self.guiderControl.finderText.GetValue())*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False)
         return
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
@@ -1585,7 +1592,7 @@ class TCC(wx.Frame):
             dy=self.y-center_y
             rho = np.sqrt(dx**2 + dy**2)
             phi = np.arctan2(dy, dx)
-            phi_or=(phi*180./np.pi)+90
+            phi_or=(phi*180./np.pi)-90
             print A.shape,rho,phi_or
             thread.start_new_thread(self.Rotate,(phi_or,))
             
@@ -1600,7 +1607,7 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy() 
             return
-        thread.start_new_thread(self.Rotate,(self.guiderControl.guiderRotText.GetValue(),))
+        thread.start_new_thread(self.Rotate,(-1*float(self.guiderControl.guiderRotText.GetValue()),))
         
     def Rotate(self,Rot_angle):
         current_pos=self.guiderControl.rotAng
@@ -1611,9 +1618,9 @@ class TCC(wx.Frame):
         sweep_range=np.arange(current_pos, float(Rot_angle)+1, inc)
         for angle in sweep_range:
             self.guiderControl.line.remove()
-            self.guiderControl.line = matplotlib.patches.Rectangle((156,160), height=-125, width=2, fill=True, color='k',angle=float(angle))
-            self.guiderControl.ax_r.add_patch(self.guiderControl.line);
-            self.guiderControl.canvas_r.draw()
+            self.guiderControl.line = matplotlib.patches.Rectangle((150,150), height=125, width=2, fill=True, color='k',angle=float(angle))
+            self.guiderControl.ax_l.add_patch(self.guiderControl.line);
+            self.guiderControl.canvas_l.draw()
             self.guiderControl.rotAng=float(angle)
             time.sleep(0.05)
         return
