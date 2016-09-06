@@ -2164,62 +2164,6 @@ class TCC(wx.Frame):
 Additional Frames called during GUI operation
 '''
 
-class FinderImageWindow(wx.Frame):
-    
-    def __init__(self, parent, Finder_name):
-        wx.Frame.__init__(self, parent, -1, "Finder Chart: "+Finder_name, size=(550,550))
-        
-
-        #self.image = 'example.fit'  # for debugging
-        self.parent = parent
-        self.panel=Finder(self)
-        self.sb = self.CreateStatusBar(2)
-        self.sb.SetStatusText('On Guide Star: False',0)
-        self.sb.SetStatusText('Guider Rot Angle: 0',1)
-        
-    def LoadFinder(self):
-        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.panel.ax1,reticle=True, log=False)
-        self.panel.canvas.mpl_connect('pick_event', self.on_pick)
-        return
-        #self.image.fig.savefig("testfinder.png")
-        #image_file = 'testfinder.png'
-        
-    def on_pick(self,event):
-        artist = event.artist
-        if isinstance(artist, AxesImage):
-            im = artist
-            A = im.get_array()
-            center_x=A.shape[0]/2.0
-            center_y=A.shape[1]/2.0
-            mouseevent = event.mouseevent
-            self.x = mouseevent.xdata
-            self.y = mouseevent.ydata
-            #print('onpick4 image', self.x,self.y, center_x, center_y)
-            dx=self.x-center_x
-            dy=self.y-center_y
-            rho = np.sqrt(dx**2 + dy**2)
-            phi = np.arctan2(dy, dx)
-            phi_or=(phi*180./np.pi)
-            print A.shape,rho,phi_or
-            
-class Finder(wx.Panel):
-    def __init__(self,parent):
-        wx.Panel.__init__(self,parent)
-        
-        self.parent=parent
-        
-        self.fig = Figure((6,6))
-        self.canvas = FigCanvas(self,-1, self.fig)
-        self.ax1 = self.fig.add_subplot(111)
-        self.ax1.set_axis_off()
-        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
-        self.SetSizer(self.sizer)
-        self.Fit()
-
-        
-        
 class TargetExportWindow(wx.Frame):
     def __init__(self,parent):
         wx.Frame.__init__(self, parent, -1, "Export to Target List File", size=(300,200))
