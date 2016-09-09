@@ -144,7 +144,7 @@ class Control(wx.Panel):
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetLabel('1500')
-        self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
+        self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
 
         self.slewButton = wx.Button(self, -1, "Slew to Target")
@@ -381,8 +381,7 @@ class Target(wx.Panel):
 
         debug==True
         self.dir=os.getcwd()
-
-
+			
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -531,7 +530,7 @@ class GuiderControl(wx.Panel):
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetLabel('1500')
-        self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
+        self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox=wx.BoxSizer(wx.HORIZONTAL)
@@ -886,6 +885,7 @@ class TCC(wx.Frame):
         #Stores current time zone for whole GUI
         self.current_timezone="PST"
         self.mro=ephem.Observer()
+        self.mrolat=46.9528*u.deg
         
         self.MRO = Observer(longitude = -120.7278 *u.deg,
                 latitude = 46.9528*u.deg,
@@ -958,11 +958,14 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.LoadFinder, self.guiderControl.finderButton)
         self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
         
+        # Init Tab Bindings
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
         self.Bind(wx.EVT_BUTTON, self.setRATrackingRate,self.init.rateRAButton)
         self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
+        self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
+        self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
         
         self.createMenu()
 
@@ -1200,8 +1203,12 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        self.protocol.sendCommand("offset 1 positive")
+        if self.tracking==True:
+        	self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+		if self.tracking==False:
+			self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
         return
+    		
     def Woffset(self,event):
         """
         Jog Command; apply a coordinate offset in the West direction.
@@ -1213,7 +1220,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        self.protocol.sendCommand("offset 0 negative")
+        if self.tracking==True:
+        	self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+		if self.tracking==False:
+			self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
         return
     def Eoffset(self,event):
         """
@@ -1226,7 +1236,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        self.protocol.sendCommand("offset 0 positive")
+        if self.tracking==True:
+        	self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+		if self.tracking==False:
+			self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
         return
     def Soffset(self,event):
         """
@@ -1239,7 +1252,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        self.protocol.sendCommand("offset 1 negative")
+        if self.tracking==True:
+        	self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+		if self.tracking==False:
+			self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
         return
         
     def focusIncPlus(self,event):
@@ -1287,10 +1303,14 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        val=self.control.focusAbsText.GetValue()
-        self.control.currentFocusPos.SetLabel(val)
+        inc=self.control.focusAbsText.GetValue()
+        curFocus=self.control.currentFocusPos.GetLabel()
+        if curFocus=='Unknown':
+        	curFocus=0.0
+        newfocus=float(curFocus)+float(inc)
+        self.control.currentFocusPos.SetLabel(str(newfocus))
         self.control.currentFocusPos.SetForegroundColour('black')
-        self.protocol.sendCommand(str("focus")+' '+str(val))
+        self.protocol.sendCommand(str("focus")+' '+str(inc))
         return
         
     def haltmotion(self,event):
@@ -1320,14 +1340,22 @@ class TCC(wx.Frame):
          Returns:
                 None
         '''
-        #self.protocol.sendLine(str("toggletrack")+' '+str(self.tracking))
-        self.protocol.sendCommand(str("toggletrack")+' '+str(self.tracking))
+        RATR=self.control.currentRATRPos.GetLabel()
+        DECTR=self.control.currentDECTRPos.GetLabel()
+        print RATR, DECTR
+        if str(RATR)=='Unknown':
+        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 1.0 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
+        	dlg.ShowModal()
+        	dlg.Destroy()
+        	return
         if self.tracking==False:
             self.control.trackButton.SetLabel('Stop Tracking')
             self.sb.SetStatusText('Tracking: True',0)
+            self.protocol.sendCommand("track on "+str(RATR)+' '+str(DECTR))
         if self.tracking==True:
             self.control.trackButton.SetLabel('Start Tracking')
             self.sb.SetStatusText('Tracking: False',0)
+            self.protocol.sendCommand("track off")
         self.tracking= not self.tracking    
         return
     
@@ -1490,18 +1518,26 @@ class TCC(wx.Frame):
 
                 self.decimalcoords=self.coordinates.to_string('decimal')
             
-            
+            	self.LST=str(self.control.currentLSTPos.GetLabel())
+            	self.LST=self.LST.split(':')
+            	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
                 self.log([input_ra,input_dec,current_epoch])
-                self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
+                command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
+                self.protocol.sendCommand(command)
+                thread.start_new_thread(self.velwatch,())
+                #d.addCallback(self.vcback)
                 self.control.slewButton.SetLabel('Stop Slew')
                 self.sb.SetStatusText('Slewing: True',1)
                 self.control.currentNamePos.SetLabel(name)
                 self.control.currentNamePos.SetForegroundColour((0,0,0))
-            
+                self.control.currentRaPos.SetLabel(input_ra)
+            	self.control.currentRaPos.SetForegroundColour((0,0,0))
+            	self.control.currentDecPos.SetLabel(input_dec)
+            	self.control.currentDecPos.SetForegroundColour((0,0,0))
                 self.slewing= not self.slewing
                 
                 return
-            
+                         
             elif float(self.slew_altitude) < float(self.horizonlimit):
                 dlg = wx.MessageDialog(self,
                                "Target is below current minimum altitude, cannot slew.",
@@ -1512,15 +1548,59 @@ class TCC(wx.Frame):
                 return
                 
         elif self.slewing==True:
-            self.protocol.sendLine("stop")
+            self.protocol.sendCommand("stop")
             self.control.slewButton.SetLabel('Start Slew')
             self.sb.SetStatusText('Slewing: False',1)
             
             self.slewing= not self.slewing
             
         return
-
-    
+    def velwatch(self):
+    	time.sleep(0.5)
+    	while self.slewing==True:
+    		d=self.protocol.sendCommand("velmeasure")
+    		d.addCallback(self.velmeasure)
+    		time.sleep(0.5)
+    		
+    def velmeasure(self,msg):
+    	print repr(msg)
+    	msg=int(msg)
+    	if msg==1:
+    		self.slewing=False
+    		wx.CallAfter(self.slewbutton_toggle)
+    	if msg==0:
+    		self.slewing=True
+    		
+    		
+    def checkslew(self):
+    	while True:
+    		if self.slewing==False:
+    			wx.CallAfter(self.slewbuttons_on,True)
+    		if self.slewing==True:
+    			wx.CallAfter(self.slewbuttons_on,False)
+    		time.sleep(2.0)
+    def slewbuttons_on(self,bool):
+    	self.control.jogNButton.Enable(bool)
+    	self.control.jogSButton.Enable(bool)
+    	self.control.jogWButton.Enable(bool)
+    	self.control.jogEButton.Enable(bool)
+    	self.control.trackButton.Enable(bool)
+    	self.init.parkButton.Enable(bool)
+    	self.init.coverposButton.Enable(bool)
+    def slewbutton_toggle(self):
+    	self.control.slewButton.SetLabel('Start Slew')
+    	self.sb.SetStatusText('Slewing: False',1)
+    def getstatus(self):
+    	time.sleep(5.0)
+    	while True:
+    		self.LST=str(self.control.currentLSTPos.GetLabel())
+    		self.LST=self.LST.split(':')
+    		self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+    		self.protocol.sendCommand("status "+str(self.LST))
+    		time.sleep(1.0)
+    		
+    	 	
+    	
     def set_target(self, event):
         """
         Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guider control tab for finder charts
@@ -1532,11 +1612,13 @@ class TCC(wx.Frame):
         Returns:
                 None
         """
-        name = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0)
-        ra = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
-        dec = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
-        epoch = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
-        mag = self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),4)
+        sel_item=self.target.targetList.GetFocusedItem()
+        
+        name=str(self.target.targetList.GetItem(sel_item,col=0).GetText())
+        input_ra=str(self.target.targetList.GetItem(sel_item,col=1).GetText())
+        input_dec=str(self.target.targetList.GetItem(sel_item,col=2).GetText())
+        input_epoch=str(self.target.targetList.GetItem(sel_item,col=3).GetText())
+        mag = str(self.target.targetList.GetItem(sel_item,4).GetText())
 
         #self.coordinates=SkyCoord(ra,dec,frame='icrs')
         #self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
@@ -1545,9 +1627,9 @@ class TCC(wx.Frame):
 
         #print name, ra, dec, epoch
         self.control.targetNameText.SetValue(name)
-        self.control.targetRaText.SetValue(ra)
-        self.control.targetDecText.SetValue(dec)
-        self.control.targetEpochText.SetValue(epoch)
+        self.control.targetRaText.SetValue(input_ra)
+        self.control.targetDecText.SetValue(input_dec)
+        self.control.targetEpochText.SetValue(input_epoch)
         self.control.targetMagText.SetValue(mag)
         
         self.log("Current target is '"+name+"'")
@@ -1885,9 +1967,11 @@ class TCC(wx.Frame):
                 Radial plot of target altitude and azimuth in new window or current plotting window (overplotting not advised).
         
         '''
-        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
-        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
-        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        sel_item=self.target.targetList.GetFocusedItem()
+        input_ra=self.target.targetList.GetItem(sel_item,col=1).GetText()
+        input_dec=self.target.targetList.GetItem(sel_item,col=2).GetText()
+        input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
+        
         current_epoch=self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
@@ -1895,7 +1979,7 @@ class TCC(wx.Frame):
         if self.precession==True:
             self.coordprecess(self.coordinates,current_epoch,input_epoch) 
             
-        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
         self.target_style={'color':'Black'}
@@ -1921,9 +2005,10 @@ class TCC(wx.Frame):
                 Airmass curve of target in new window or current plotting window (overplotting not advised).
         
         '''
-        input_ra=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),1)
-        input_dec=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),2)
-        input_epoch=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),3)
+        sel_item=self.target.targetList.GetFocusedItem()
+        input_ra=self.target.targetList.GetItem(sel_item,col=1).GetText()
+        input_dec=self.target.targetList.GetItem(sel_item,col=2).GetText()
+        input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
         current_epoch=self.control.currentEpochPos.GetLabel()
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
@@ -1931,7 +2016,7 @@ class TCC(wx.Frame):
         if self.precession==True:
             self.coordprecess(self.coordinates,current_epoch,input_epoch) 
             
-        self.targetobject=FixedTarget(name=self.target.targetList.GetItemText(self.target.targetList.GetFocusedItem(),0),coord=self.coordinates)
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
         
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
@@ -1999,9 +2084,17 @@ class TCC(wx.Frame):
         self.control.currentDecPos.SetForegroundColour('black')
         
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
-        
+        if target_name=="Zenith":
+        	self.protocol.sendCommand("zenith")
         return
-    
+    def parkscope(self,event):
+    	if self.slewing==False:
+    		self.protocol.sendCommand("park")
+    		
+    def coverpos(self,event):
+    	if self.slewing==False:
+    		self.protocol.sendCommand("coverpos")
+    		
     def setRATrackingRate(self,event):
         """
         Sets telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
@@ -2092,8 +2185,12 @@ class TCC(wx.Frame):
             self.target.exportButton.Enable()
             self.target.plot_button.Enable()
             self.target.airmass_button.Enable()
+            self.init.parkButton.Enable()
+            self.init.coverposButton.Enable()
         
             thread.start_new_thread(self.timer,())
+            thread.start_new_thread(self.checkslew,())
+            thread.start_new_thread(self.getstatus,())
             self.initState=True
         if self.initState==True:
             self.control.currentJDPos.SetForegroundColour('black')
@@ -2148,11 +2245,6 @@ class TCC(wx.Frame):
         self.mro.date=dati.datetime.utcnow()
         lst = self.mro.sidereal_time()
         return {'mjd':mjdt,'utc':self.mro.date,'local':local,'epoch':epoch, 'lst':lst}
-        
-
-    def test(self,event):
-        print 'this is a test event'
-        return
 
     def getFocus(self,event):
         num=self.focusNum.GetValue()
@@ -2252,11 +2344,12 @@ class DataForwardingProtocol(basic.LineReceiver):
 
         if gui:
             val = gui.control.logBox.GetValue()
-            gui.control.logBox.SetValue(val + data)
+            self.timestamp()
+            gui.control.logBox.SetValue(val+stamp+data+'\n')
             gui.control.logBox.SetInsertionPointEnd()
             sep_data= data.split(" ")
             if sep_data[0] in self._deferreds:
-                self._deferreds.pop(sep_data[0]).callpack(sep_data[1])
+                self._deferreds.pop(sep_data[0]).callback(sep_data[1])
 
     def sendCommand(self, data):
         self.transport.write(data)
@@ -2267,6 +2360,33 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui=self.factory.gui
         gui.protocol=self
         self.output = self.factory.gui.control.logBox
+    def timestamp(self):
+    	t=datetime.now()
+    	if len(str(t.month))==1:
+    		month='0'+str(t.month)
+    	else:
+    		month=str(t.month)
+    	if len(str(t.day))==1:
+    		day='0'+str(t.day)
+    	else:
+    		day=str(t.day)
+    	if len(str(t.hour))==1:
+    		hour='0'+str(t.hour)
+    	else:
+    		hour=str(t.hour)
+    	if len(str(t.minute))==1:
+    		minute='0'+str(t.minute)
+    	else:
+    		minute=str(t.minute)
+    	if len(str(t.second))==1:
+    		second='0'+str(t.second)
+    	else:
+    		second=str(t.second)
+    	global stamp
+    	stamp=str(t.year)+str(month)+str(day)+'  '+str(hour)+':'+str(minute)+':'+str(second)+': '
+    	return stamp
+    	
+    	
 
 class TCCClient(protocol.ClientFactory):
 
@@ -2286,8 +2406,8 @@ if __name__=="__main__":
   app.frame = TCC()
   app.frame.Show()
   reactor.registerWxApp(app)
-  #thread.start_new_thread(os.system,("./parsercode/test",))
-  #time.sleep(3)
-  #reactor.connectTCP('localhost',5501,TCCClient(app.frame))
+  thread.start_new_thread(os.system,("./parsercode/test",))
+  time.sleep(3)
+  reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   reactor.run()
   app.MainLoop()

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <math.h>
 #include <stdio.h>
 #include <sstream>
 #include <stdlib.h>
@@ -7,9 +9,11 @@
 #include <algorithm>
 #include <iterator>
 #include <unistd.h>
-//#include "home/mro/mcapi/mcapi-4.4.1/src/mcapi.h"
 #include "mcapi.h"
+#include "iomappings.h"
+#ifndef __BCT30__
 #include "bct30.h"
+#endif
 
 #include <cstring> // Needed for memset 
 #include <sys/socket.h>  // Needed for the socket functions
@@ -18,10 +22,19 @@
 
 bct30 pmc;
 
+double pastRApos=0.0;
+double pastDECpos=0.0;
+
 const char *parser(std::string input)
 {	
-	pmc.init();
+	//std::cout << "reached parser" << std::endl;
+	
+	//std::cout << "through parser" << std::endl;
 	std::string s = input;
+	double RArate,Decrate;
+	//test print
+	//std::cout << "line 27: " << s << std::endl;
+
 	std::string delimiter = " ";
 	size_t n = std::count(s.begin(), s.end(), ' ')+1;
 	std::string tokens[n];
@@ -29,113 +42,213 @@ const char *parser(std::string input)
 	for(int i = 0;i < n; i++)
 	{
 		std::string token = s.substr(0,s.find(' '));
+		//std::cout << "loop " << i << ": " << token << std::endl;
 		tokens[i]=token;
 		s=s.substr(s.find(' ')+1,s.length());
 	}  
 
 	if(tokens[0]=="slew")
 	{
-		std::cout << "slew " << tokens[1] << " "<< tokens[2] <<std::endl;
-		/*
-		double ra = ::atof(tokens[1].c_str());
-		double dec = ::atof(tokens[2].c_str());
-		pmc.moveTo(0,&ra);
-		pmc.moveTo(1,&dec);
+		std::cout << "slew " << tokens[1] << " "<< tokens[2] << " "<< tokens[3] <<std::endl;
 		
-		int deg, hour, min;
-   		double sec;
-   		double target_degrees, current_degrees, temp_degrees;
-   		double RAtarget_degrees, DECtarget_degrees; // the target, in degrees
-
-   
-   		double SDdeg;
-  
-   		bool ok;
-   		//QString L;  		
-
-
-   		// positive degrees == East
-   		RAmove_2_deg = (tokens[1] - LST)*15.0; 
-   		DECmove_2_deg = tokens[2] - mrolat;
-
-		//   bct30::moveTo, degrees are decimal degrees
-   		if(fabs(RAmove_2_deg) > (maxHourAngle*15.0))
+		double RAtarget_degrees = ::atof(tokens[1].c_str());
+		double DECtarget_degrees = ::atof(tokens[2].c_str());
+		double LST = ::atof(tokens[3].c_str());
+		double RAtarget_hrs, RAmove_2_deg, DECmove_2_deg;
+		double RAvel, DECvel;
+		
+		RAtarget_hrs = RAtarget_degrees/15.0;
+		
+		RAmove_2_deg = (RAtarget_hrs - LST)*15.0; 
+   		DECmove_2_deg = DECtarget_degrees - 46.951166666667; //mrolat
+		const char *slew = "slew 1";
+		if(fabs(RAmove_2_deg) > (8.0*15.0)) //maxHourAngle
    		{
-      		info("Target RA out of range");
-      		slewstate = IDLE;
-      		return;
+      		const char *out= "Target RA exceeds max Hour Angle";
+      		return out;
    		}
-   		if(fabs(DECmove_2_deg) > maxZenith)
+   		if(fabs(DECmove_2_deg) > 80.0) //maxZenith
    		{
-      		info("Target DEC out of range");
-      		slewstate = IDLE;
-      		return;
+      		const char *out= "Target DEC out of range";
+      		return out;
    		}
-
-  
-   		// if moveTo returns non-zero, something is wrong with the range
-   		if(pmc.moveTo(RaAxis, &RAmove_2_deg)) 
-   		{
-      		halt();
-      		slewstate = IDLE;
-      		return;
-   		}
-
-   		else if(pmc.moveTo(DecAxis, &DECmove_2_deg))
-   		{
-      		halt();
-      		slewstate = IDLE;
-      		return;
-   		}
-   		else 
-      		slewstate = PERFORMING;
-
-
+   		pmc.getVelocity(RaAxis,&RAvel);
+   		std::cout << RAvel <<std::endl;
+		pmc.moveTo(RaAxis, &RAmove_2_deg);
+		pmc.moveTo(DecAxis, &DECmove_2_deg);
+		pmc.getVelocity(RaAxis,&RAvel);
+		//std::cout << RAvel <<std::endl;
+		return slew;
+		
+	}
+	if(tokens[0] == "velmeasure")
+	{
+		double curRApos, curDECpos; // axis velocity
+		
+		pmc.getPosition(RaAxis, &curRApos); //ra in degrees
+		pmc.getPosition(DecAxis, &curDECpos); //dec in degrees
+		std::cout << curRApos << ' ' << curDECpos << std::endl;
+		if(fabs(curRApos-pastRApos) < 0.0001 && fabs(curDECpos-pastDECpos) < 0.0001)
+		{
+			const char *out="velmeasure 1";
+			return out;
 		}
-		*/
-		return 0;
+		else
+		{
+			pastDECpos = curDECpos;
+			pastRApos = curRApos;
+			const char *out="velmeasure 0";
+			return out;
+		}
+		//std::ostringstream RAvelstr;
+		//std::ostringstream DECvelstr;
+		//RAvelstr << RAvel;
+		//DECvelstr << DECvel;
+		//std::string RAstr = RAvelstr.str();
+		//std::string DECstr = DECvelstr.str();
+		//return RAstr.c_str();
+		//return key,RAstr.c_str(),DECstr.c_str();
+	}
+	if(tokens[0]=="status")
+	{
+		double ira_deg, idec_deg;
 		
+		//std::cout << "status begin" <<std::endl;
+		pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
+   		pmc.getPosition(DecAxis, &idec_deg);  //RA and DEC in degrees off zenith
+   		//std::cout << ira_deg <<std::endl;
+   		//std::cout << idec_deg <<std::endl;
+   		std::ostringstream RAstr;
+		std::ostringstream DECstr;
+		RAstr << ira_deg;
+		DECstr << idec_deg;
+   		std::string curRAstr = RAstr.str();
+   		std::string curDECstr = DECstr.str();
+   		std::string data=curRAstr+","+curDECstr+","+tokens[1];
+   		std::ofstream myfile;
+   		myfile.open ("TCCstatus.txt");
+   		myfile << data;
+  		myfile.close();
+  		const char *out = "File Written";
+  		return out;
 	}
 	if(tokens[0] == "focus")
 	{
-		std::cout << "focus " << tokens[1] <<std::endl;
-		return 0;
+		double focus_inc = ::atof(tokens[1].c_str());
+		pmc.MoveRelative(FocusAxis, focus_inc);
+		const char *focus = "focusing";
+		return focus;
 	}
+	//std::cout << "offset incoming" << std::endl;
 	if(tokens[0] == "offset")
 	{
+		const char *offset;
 		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
-		return 0;
-	}
-	if(tokens[0] == "settrackingrate")
-	{
-		std::cout << "set tracking rate\n";
-		return 0;
+		double inc = ::atof(tokens[2].c_str());
+		double RATR= ::atof(tokens
+		pmc.stopSlew();
+		if(tokens[1]=="N")
+		{
+			pmc.Jog(DecAxis,inc);
+			offset = "offset N";
+		}
+		if(tokens[1]=="S")
+		{
+			pmc.Jog(DecAxis,-inc);
+			offset = "offset S";
+		}
+		if(tokens[1]=="E")
+		{
+			pmc.Jog(RaAxis,inc);
+			offset = "offset E";
+		}
+		if(tokens[1]=="W")
+		{
+			pmc.Jog(RaAxis,-inc);
+			offset = "offset W";
+		}
+		if(tokens[3]=="True")
+		{
+			pmc.track(RaAxis, RATR);
+		}
+		return offset;
 	}
 	if(tokens[0] == "stop")
 	{
-		std::cout << "stop\n";
 		pmc.stopSlew();
-		//const char *nstop = "nstop 1";
-		return 0;
+		const char *nstop = "stop slew";
+		return nstop;
 	}
-	if(tokens[0] == "toggletrack")
+	if(tokens[0] == "track")
 	{
-		std::cout << "toggle the track\n";
-		return 0;
+		std::cout << "toggling tracking\n";
+		if(tokens[1] == "on")
+		{
+			double RaRate = ::atof(tokens[2].c_str());
+			double DecRate = ::atof(tokens[3].c_str());
+		 	if((RaRate > 25) || (RaRate < -10))
+		 	{
+      			const char *out= "Ra rate must be between -10 and 25 deg/hr.";
+      			return out;
+   			}
+      		if((DecRate > 25) || (RaRate < -10)) 
+	 		{
+      			const char *out= "Dec rate must be between -10 and 25 deg/hr.";
+      			return out;
+   			}
+   			pmc.stopSlew();
+			pmc.track(RaAxis, RaRate);
+	 		//pmc.track(DecAxis, DecRate);
+	 		//pmc.track();
+	 		const char *out= "Tracking Enabled";
+      		return out;
+		}
+		if(tokens[1] == "off")
+		{
+			pmc.stopSlew();
+			const char *out= "Tracking Disabled";
+      		return out;
+		}
+		const char *out= "Invalid Command";
+      	return out;
 	}
 	if(tokens[0] == "halt")
 	{
-		std::cout << "halt\n";
-		pmc.estop(1);
-		pmc.estop(0);
-		return 0;
+		const char *out= "Emergency Stop";
+		pmc.estop(RaAxis);
+		pmc.estop(DecAxis);
+		return out;
 	}
 	if(tokens[0] == "trackingstatus")
 	{
 		std::cout << "tracking status\n";
 		return 0;
 	}
-	
+	if(tokens[0] == "coverpos")
+	{
+	static double RaCover = 0;
+    static double DecCover = 5115086;
+    
+	pmc.stopSlew();	// stop any motion. 
+	pmc.MoveAbsolute(RaAxis, RaCover);	// see globals.h for Ra/DecCover values
+    pmc.MoveAbsolute(DecAxis, DecCover);
+    const char *out = "Slewed to Cover Position";
+	return out;
+	}
+	if(tokens[0] == "park")
+	{
+	pmc.MoveAbsolute(RaAxis, 0.0);
+    pmc.MoveAbsolute(DecAxis, 0.0);
+    const char *out = "Parked Telescope";
+	return out;
+	}
+	if(tokens[0] == "zenith")
+	{
+	pmc.setZenith();	// reset encoders to zeros
+	const char *out = "Telescope at Zenith";
+	return out;
+	}
+	return "Invalid Command";
 	
 }
 
@@ -202,8 +315,7 @@ void Listener(void) {
   }
 
   std::cout << "Waiting to recieve data..." << std::endl;
-
-
+  
   while(1) {
 
 	ssize_t bytes_received;
@@ -221,12 +333,22 @@ void Listener(void) {
 
 	/* Place parser code here.  Return a string up and then send that string with send.*/
 	
-	const char *msg = "receive data";
-	send(new_fd, msg, strlen(msg), 0);
-
-	std::cout << bytes_received << " bytes recieved :" << std::endl;
+	//std::cout << bytes_received << " bytes recieved" << std::endl;
 	incoming_data_buffer[bytes_received] = '\0';
-	std::cout << incoming_data_buffer << std::endl;
+	
+	std::string input = (std::string) incoming_data_buffer;
+	//std::cout << "reached " <<input << std::endl;
+	//std::cout << "reached line 229" << std::endl;
+	const char* results = parser((std::string) incoming_data_buffer);
+	//std::cout << "reached line 231" << std::endl;
+	//std::cout << "results are: " << results << std::endl;
+	//const char *msg = "receive data";
+	std::cout << results << std::endl;
+	send(new_fd, results, strlen(results), 0);
+
+	
+	//incoming_data_buffer[bytes_received] = '\0';
+	//std::cout << incoming_data_buffer << std::endl;
   } 
   // clean up
   close(new_fd);
@@ -237,6 +359,9 @@ void Listener(void) {
 
 int main(int argc, char *argv[])
 {
+	pmc.init();
+	Listener();
+	/*
 	std::string data;
 	std::string spacer= " ";
 	data.append(std::string(argv[1]));
@@ -250,6 +375,7 @@ int main(int argc, char *argv[])
 	std::string input = data.c_str();
 	//std::cout << input;
 	parser(input);
+	*/
 	return 0;
 }
 
