@@ -143,7 +143,7 @@ class Control(wx.Panel):
         self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
-        self.focusAbsText.SetLabel('1500')
+        self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
 
@@ -529,7 +529,7 @@ class GuiderControl(wx.Panel):
         self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
-        self.focusAbsText.SetLabel('1500')
+        self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -978,11 +978,11 @@ class TCC(wx.Frame):
 
         self.readConfig()
         """Target testing parameters """
-        self.target.nameText.SetLabel('M31')
-        self.target.raText.SetLabel('00h42m44.330s')
-        self.target.decText.SetLabel('+41d16m07.50s')
-        self.target.epochText.SetLabel('J2000')
-        self.target.magText.SetLabel('3.43')
+        self.target.nameText.SetValue('M31')
+        self.target.raText.SetValue('00h42m44.330s')
+        self.target.decText.SetValue('+41d16m07.50s')
+        self.target.epochText.SetValue('J2000')
+        self.target.magText.SetValue('3.43')
 
         #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
@@ -1700,9 +1700,9 @@ class TCC(wx.Frame):
     def Rotate(self,Rot_angle):
         current_pos=self.guiderControl.rotAng
         if float(Rot_angle)-float(current_pos)>=0:
-            inc=1.0
+            inc=0.5
         else:
-            inc=-1.0
+            inc=-0.5
         sweep_range=np.arange(current_pos, float(Rot_angle)+1, inc)
         for angle in sweep_range:
             wx.CallAfter(self.guiderControl.line.remove,)
@@ -1710,7 +1710,7 @@ class TCC(wx.Frame):
             wx.CallAfter(self.guiderControl.ax_l.add_patch,self.guiderControl.line);
             wx.CallAfter(self.guiderControl.canvas_l.draw,)
             self.guiderControl.rotAng=float(angle)
-            time.sleep(0.05)
+            time.sleep(0.025)
         return
     
     def addToList(self,event):
