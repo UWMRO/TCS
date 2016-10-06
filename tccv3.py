@@ -1689,8 +1689,14 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy() 
             return
-        thread.start_new_thread(self.Rotate,(-1*float(self.guiderControl.guiderRotText.GetValue()),))
-        
+	if val>0:
+		while val>=360.0:
+			val-=360.0
+	if val<0:
+		while val<=-360.0:
+			val+=360.0
+        thread.start_new_thread(self.Rotate,(-1*val,))
+	   
     def Rotate(self,Rot_angle):
         current_pos=self.guiderControl.rotAng
         if float(Rot_angle)-float(current_pos)>=0:
@@ -1699,10 +1705,10 @@ class TCC(wx.Frame):
             inc=-1.0
         sweep_range=np.arange(current_pos, float(Rot_angle)+1, inc)
         for angle in sweep_range:
-            self.guiderControl.line.remove()
+            wx.CallAfter(self.guiderControl.line.remove,)
             self.guiderControl.line = matplotlib.patches.Rectangle((150,150), height=125, width=2, fill=True, color='k',angle=float(angle))
-            self.guiderControl.ax_l.add_patch(self.guiderControl.line);
-            self.guiderControl.canvas_l.draw()
+            wx.CallAfter(self.guiderControl.ax_l.add_patch,self.guiderControl.line);
+            wx.CallAfter(self.guiderControl.canvas_l.draw,)
             self.guiderControl.rotAng=float(angle)
             time.sleep(0.05)
         return
