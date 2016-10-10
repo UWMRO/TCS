@@ -1205,8 +1205,8 @@ class TCC(wx.Frame):
         """
         if self.tracking==True:
         	self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-		if self.tracking==False:
-			self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
+	if self.tracking==False:
+		self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
         return
     		
     def Woffset(self,event):
@@ -1222,8 +1222,8 @@ class TCC(wx.Frame):
         """
         if self.tracking==True:
         	self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-		if self.tracking==False:
-			self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
+	if self.tracking==False:
+		self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
         return
     def Eoffset(self,event):
         """
@@ -1238,8 +1238,8 @@ class TCC(wx.Frame):
         """
         if self.tracking==True:
         	self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-		if self.tracking==False:
-			self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
+	if self.tracking==False:
+		self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
         return
     def Soffset(self,event):
         """
@@ -1254,8 +1254,8 @@ class TCC(wx.Frame):
         """
         if self.tracking==True:
         	self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-		if self.tracking==False:
-			self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
+	if self.tracking==False:
+		self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
         return
         
     def focusIncPlus(self,event):
@@ -1793,7 +1793,7 @@ class TCC(wx.Frame):
             input_ra = l[1]
             input_dec = l[2]
             epoch = l[3]
-            mag=l[4]
+            mag=l[4][0:-1]
             epoch_now = self.control.currentEpochPos.GetLabel()
             
             self.inputcoordSorter(input_ra,input_dec,epoch)
