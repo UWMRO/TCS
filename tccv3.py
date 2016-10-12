@@ -488,10 +488,12 @@ class GuiderControl(wx.Panel):
         self.ax_l = self.fig_l.add_subplot(111)
         self.ax_l.set_axis_off()
         self.cir = matplotlib.patches.Circle( (150,150), radius=125, fill=False, color='steelblue',linewidth=2.5)
+	self.cir1 = matplotlib.patches.Circle( (150,150), radius=126, fill=False, color='k',linewidth=1.0)
         self.line= matplotlib.patches.Rectangle( (150,150), height=125, width=2, fill=True, color='k')
         
         
         self.ax_l.add_patch(self.cir)
+	self.ax_l.add_patch(self.cir1)
         self.ax_l.add_patch(self.line)
         
         self.fig_l.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
@@ -871,6 +873,7 @@ class TCC(wx.Frame):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
         
         #Tracking on boot is false
+	self.guider_rot=False
         self.calculate=True
         self.precession=True
         self.tracking=False
@@ -1676,7 +1679,8 @@ class TCC(wx.Frame):
             phi = np.arctan2(dy, dx)
             phi_or=(phi*180./np.pi)-90
             print A.shape,rho,phi_or
-            thread.start_new_thread(self.Rotate,(phi_or,))
+	    if self.guider_rot==False:	
+            	thread.start_new_thread(self.Rotate,(phi_or,))
             
     def on_Rot(self,event):
         #move = float(self.guiderRotText.GetValue()) - self.rotAng
@@ -1695,9 +1699,12 @@ class TCC(wx.Frame):
 	if val<0:
 		while val<=-360.0:
 			val+=360.0
-        thread.start_new_thread(self.Rotate,(-1*val,))
+
+	if self.guider_rot==False:
+        	thread.start_new_thread(self.Rotate,(-1*val,))
 	   
     def Rotate(self,Rot_angle):
+	self.guider_rot=True
         current_pos=self.guiderControl.rotAng
         if float(Rot_angle)-float(current_pos)>=0:
             inc=0.5
@@ -1711,6 +1718,7 @@ class TCC(wx.Frame):
             wx.CallAfter(self.guiderControl.canvas_l.draw,)
             self.guiderControl.rotAng=float(angle)
             time.sleep(0.025)
+	self.guider_rot=False
         return
     
     def addToList(self,event):
