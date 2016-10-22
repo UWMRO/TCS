@@ -1600,7 +1600,7 @@ class TCC(wx.Frame):
     		self.LST=self.LST.split(':')
     		self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
     		self.protocol.sendCommand("status "+str(self.LST))
-    		time.sleep(1.0)
+    		time.sleep(15.0)
     		
     	 	
     	
