@@ -8,6 +8,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 #include "mcapi.h"
 #include "iomappings.h"
@@ -24,6 +26,17 @@ bct30 pmc;
 
 double pastRApos=0.0;
 double pastDECpos=0.0;
+
+void paddletimer()
+{
+	while ( 1 )
+	{
+		int x;
+		x=1000;
+		std::this_thread::sleep_for(std::chrono::milliseconds(x));
+		pmc.checkHandPaddle();
+	}
+}
 
 const char *parser(std::string input)
 {	
@@ -118,17 +131,20 @@ const char *parser(std::string input)
    		pmc.getPosition(DecAxis, &idec_deg);  //RA and DEC in degrees off zenith
    		//std::cout << ira_deg <<std::endl;
    		//std::cout << idec_deg <<std::endl;
+   		double ira_hrs;
+   		double LST_hrs = ::atof(tokens[3].c_str());
+   		ira_hrs=ira_deg/15.0;
    		std::ostringstream RAstr;
 		std::ostringstream DECstr;
-		RAstr << ira_deg;
-		DECstr << idec_deg;
+		RAstr << LST_hrs-ira_hrs; //current RA in hours
+		DECstr << 46.951166666667-idec_deg; //current DEC in degrees
    		std::string curRAstr = RAstr.str();
    		std::string curDECstr = DECstr.str();
-   		std::string data=curRAstr+","+curDECstr+","+tokens[1];
-   		std::ofstream myfile;
-   		myfile.open ("TCCstatus.txt");
-   		myfile << data;
-  		myfile.close();
+   		std::string data=tokens[1]+" "+curRAstr+" "+curDECstr+" "+tokens[2]+" "+tokens[3];
+   		std::ofstream log(tokens[4], std::ios_base::app | std::ios_base::out);
+   		//myfile.open (tokens[4]);
+   		log << data+"\n";
+  		log.close();
   		const char *out = "File Written";
   		return out;
 	}
@@ -145,7 +161,7 @@ const char *parser(std::string input)
 		const char *offset;
 		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
-		double RATR= ::atof(tokens
+		double RATR= ::atof(tokens[4].c_str());
 		pmc.stopSlew();
 		if(tokens[1]=="N")
 		{
@@ -194,6 +210,7 @@ const char *parser(std::string input)
       		if((DecRate > 25) || (RaRate < -10)) 
 	 		{
       			const char *out= "Dec rate must be between -10 and 25 deg/hr.";
+      			
       			return out;
    			}
    			pmc.stopSlew();
@@ -360,7 +377,9 @@ void Listener(void) {
 int main(int argc, char *argv[])
 {
 	pmc.init();
+	std::thread t1(paddletimer);
 	Listener();
+	t1.join();
 	/*
 	std::string data;
 	std::string spacer= " ";

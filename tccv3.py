@@ -3,6 +3,7 @@ import time
 import wx
 import os
 import subprocess
+import signal
 import re
 import astropy
 from astropy.time import Time
@@ -40,6 +41,9 @@ from twisted.internet import wxreactor
 wxreactor.install()
 from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
+
+global pipe
+pipe=None
 
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -129,8 +133,8 @@ class Control(wx.Panel):
         self.currentRATRLabel = wx.StaticText(self, size=(75,-1))
         self.currentRATRLabel.SetLabel('RA TR: ')
         self.currentRATRPos = wx.StaticText(self,size=(75,-1))
-        self.currentRATRPos.SetLabel('Unknown')
-        self.currentRATRPos.SetForegroundColour((255,0,0))
+        self.currentRATRPos.SetLabel('15.04')
+        self.currentRATRPos.SetForegroundColour("black")
         
         self.currentDECTRLabel = wx.StaticText(self, size=(75,-1))
         self.currentDECTRLabel.SetLabel('DEC TR: ')
@@ -163,8 +167,12 @@ class Control(wx.Panel):
         self.jogEButton = wx.Button(self, -1, 'E')
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
         self.jogIncrement.SetValue('5.0')
-
-
+        
+        self.jogNButton.Disable()
+        self.jogSButton.Disable()
+        self.jogWButton.Disable()
+        self.jogEButton.Disable()
+        
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
@@ -678,12 +686,15 @@ class Initialization(wx.Panel):
         self.initButton = wx.Button(self, -1, "Initialize Telescope Systems")
         self.parkButton= wx.Button(self, -1, "Park Telescope")
         self.coverposButton=wx.Button(self,-1,"Slew to Cover Position")
+        self.onTargetButton=wx.Button(self,-1,"On Target")
         
         self.parkButton.Disable()
         self.coverposButton.Disable()
+        self.onTargetButton.Disable()
 
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=5, cols=3, hgap=5, vgap=5)
 
@@ -713,16 +724,23 @@ class Initialization(wx.Panel):
         self.gbox2.Add(self.maxdDECText, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.dDECButton, 0, wx.ALIGN_LEFT)
 
-        self.hbox1.Add(self.parkButton,0,wx.ALIGN_CENTER)
         self.hbox1.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
+        self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.initButton,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
+        self.hbox1.AddSpacer(10)
         self.hbox1.Add(self.syncButton, 0, wx.ALIGN_RIGHT)
-        self.hbox1.Add(self.coverposButton,0,wx.ALIGN_CENTER)
-
+        
+        self.vbox.AddSpacer(10)
+        self.hbox2.Add(self.coverposButton,0,wx.ALIGN_CENTER)
+        self.hbox2.AddSpacer(10)
+        self.hbox2.Add(self.onTargetButton,0,wx.ALIGN_CENTER)
+        self.hbox2.AddSpacer(10)
+        self.hbox2.Add(self.parkButton,0,wx.ALIGN_CENTER)
+		
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox1,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.gbox,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(10)
@@ -1025,6 +1043,7 @@ class TCC(wx.Frame):
         tool_file.AppendMenu(1122,'Precession',precess)
         
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
+        self.Bind(wx.EVT_CLOSE, self.on_exit)
         self.Bind(wx.EVT_MENU, self.on_night, m_night)
         self.Bind(wx.EVT_MENU, self.on_Pacific, id=1110)
         self.Bind(wx.EVT_MENU, self.on_Mountain, id=1111)
@@ -1056,11 +1075,13 @@ class TCC(wx.Frame):
         dlg.Destroy()
         if result == wx.ID_OK:
             if(self.protocol is not None):
-                d= self.protocol.sendCommand("shutdown")
-                d.addCallback(self.quit)
+                #d= self.protocol.sendCommand("shutdown")
+                #d.addCallback(self.quit)
+                self.quit()
     def quit(self):
         self.Destroy()
-        reactor.stop()
+        os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
+        reactor.callFromThread(reactor.stop)
             #add save coordinates
             #self.Destroy()
 
@@ -1463,7 +1484,7 @@ class TCC(wx.Frame):
     
         self.ra_out=ra_in+d_ra
         self.dec_out=dec_in+d_dec
-        #print ra_out,dec_out
+        print self.ra_out,self.dec_out
     
         self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
         return self.coordinates, self.ra_out, self.dec_out
@@ -1583,23 +1604,32 @@ class TCC(wx.Frame):
     			wx.CallAfter(self.slewbuttons_on,False)
     		time.sleep(2.0)
     def slewbuttons_on(self,bool):
-    	self.control.jogNButton.Enable(bool)
-    	self.control.jogSButton.Enable(bool)
-    	self.control.jogWButton.Enable(bool)
-    	self.control.jogEButton.Enable(bool)
+    	#self.control.jogNButton.Enable(bool)
+    	#self.control.jogSButton.Enable(bool)
+    	#self.control.jogWButton.Enable(bool)
+    	#self.control.jogEButton.Enable(bool)
     	self.control.trackButton.Enable(bool)
     	self.init.parkButton.Enable(bool)
     	self.init.coverposButton.Enable(bool)
+    	
     def slewbutton_toggle(self):
     	self.control.slewButton.SetLabel('Start Slew')
     	self.sb.SetStatusText('Slewing: False',1)
+    	
     def getstatus(self):
     	time.sleep(5.0)
     	while True:
     		self.LST=str(self.control.currentLSTPos.GetLabel())
+    		self.epoch=str(self.control.currentEpochPos.GetLabel())
+    		self.UTC=str(self.control.currentUTCPos.GetLabel())
+    		self.UTC=self.UTC.split(" ")
+    		self.UTCdate=self.UTC[0].split("/")
+    		self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
+    		self.UTC=self.UTCdate+"T"+self.UTC[1]
+    		self.sfile="logs/"+self.UTCdate+".txt"
     		self.LST=self.LST.split(':')
     		self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-    		self.protocol.sendCommand("status "+str(self.LST))
+    		self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
     		time.sleep(15.0)
     		
     	 	
@@ -2201,9 +2231,11 @@ class TCC(wx.Frame):
             self.target.airmass_button.Enable()
             self.init.parkButton.Enable()
             self.init.coverposButton.Enable()
+            self.init.onTargetButton.Enable()
         
             thread.start_new_thread(self.timer,())
             thread.start_new_thread(self.checkslew,())
+            print "Slew Checking On"
             thread.start_new_thread(self.getstatus,())
             self.initState=True
         if self.initState==True:
@@ -2415,13 +2447,17 @@ class TCCClient(protocol.ClientFactory):
         reactor.stop()
 
 if __name__=="__main__":
-
-  app = wx.App(False)
-  app.frame = TCC()
-  app.frame.Show()
-  reactor.registerWxApp(app)
-  thread.start_new_thread(os.system,("./parsercode/test",))
-  time.sleep(3)
-  reactor.connectTCP('localhost',5501,TCCClient(app.frame))
-  reactor.run()
-  app.MainLoop()
+	try:
+  		app = wx.App(False)
+  		app.frame = TCC()
+  		app.frame.Show()
+  		reactor.registerWxApp(app)
+  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		#thread.start_new_thread(os.system,("./parsercode/test",))
+  		time.sleep(3)
+  		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
+  		reactor.run()
+  		app.MainLoop()
+	except KeyboardInterrupt:
+		os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
+		sys.exit(0)
