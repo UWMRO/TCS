@@ -27,14 +27,24 @@ bct30 pmc;
 double pastRApos=0.0;
 double pastDECpos=0.0;
 
+double RaRate=0.0;
+double DecRate=0.0;
+
+bool tracking=false;
+//bool resumetracking=false;
+
 void paddletimer()
 {
 	while ( 1 )
 	{
 		int x;
-		x=1000;
+		x=300;
 		std::this_thread::sleep_for(std::chrono::milliseconds(x));
-		pmc.checkHandPaddle();
+		int isSlew = pmc.checkHandPaddle();	// has side-effect of setting 
+		if (isSlew == 0 && tracking) 
+			{
+			pmc.track(RaAxis, RaRate);
+			}	
 	}
 }
 
@@ -162,7 +172,7 @@ const char *parser(std::string input)
 		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
 		double RATR= ::atof(tokens[4].c_str());
-		pmc.stopSlew();
+		//pmc.stopSlew();
 		if(tokens[1]=="N")
 		{
 			pmc.Jog(DecAxis,inc);
@@ -200,8 +210,9 @@ const char *parser(std::string input)
 		std::cout << "toggling tracking\n";
 		if(tokens[1] == "on")
 		{
-			double RaRate = ::atof(tokens[2].c_str());
-			double DecRate = ::atof(tokens[3].c_str());
+			tracking = true;
+			RaRate = ::atof(tokens[2].c_str());
+			DecRate = ::atof(tokens[3].c_str());
 		 	if((RaRate > 25) || (RaRate < -10))
 		 	{
       			const char *out= "Ra rate must be between -10 and 25 deg/hr.";
@@ -222,6 +233,7 @@ const char *parser(std::string input)
 		}
 		if(tokens[1] == "off")
 		{
+			tracking = false;
 			pmc.stopSlew();
 			const char *out= "Tracking Disabled";
       		return out;
@@ -266,6 +278,28 @@ const char *parser(std::string input)
 	return out;
 	}
 	return "Invalid Command";
+	
+	if(tokens[0] == "point")
+	{
+	double ira_deg, idec_deg;	// initial values
+    double ra_deg, dec_deg;	//encoder positions in decimal degrees
+    double LST = ::atof(tokens[3].c_str());
+    double RA = ::atof(tokens[1].c_str());
+    
+    pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
+    pmc.getPosition(DecAxis, &idec_deg); //
+    
+    ra_deg = RA - (LST*15.0);
+   	//ra_deg = -ra_deg; //pmc.setPosition input fix
+   	
+   	dec_deg = 46.951166666667 - LST;
+   	
+   	pmc.setPosition(RaAxis, &ra_deg);
+    pmc.setPosition(DecAxis, &dec_deg);
+    
+    const char *out= "Pointing set";
+    return out;
+	}
 	
 }
 

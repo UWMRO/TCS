@@ -168,10 +168,10 @@ class Control(wx.Panel):
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
         self.jogIncrement.SetValue('5.0')
         
-        self.jogNButton.Disable()
-        self.jogSButton.Disable()
-        self.jogWButton.Disable()
-        self.jogEButton.Disable()
+        #self.jogNButton.Disable()
+        #self.jogSButton.Disable()
+        #self.jogWButton.Disable()
+        #self.jogEButton.Disable()
         
         #setup sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -987,6 +987,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
         self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
         self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
+        self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
         
         self.createMenu()
 
@@ -1599,15 +1600,21 @@ class TCC(wx.Frame):
     def checkslew(self):
     	while True:
     		if self.slewing==False:
-    			wx.CallAfter(self.slewbuttons_on,True)
+    			wx.CallAfter(self.slewbuttons_on,True,self.tracking)
     		if self.slewing==True:
-    			wx.CallAfter(self.slewbuttons_on,False)
+    			wx.CallAfter(self.slewbuttons_on,False,self.tracking)
     		time.sleep(2.0)
-    def slewbuttons_on(self,bool):
-    	#self.control.jogNButton.Enable(bool)
-    	#self.control.jogSButton.Enable(bool)
-    	#self.control.jogWButton.Enable(bool)
-    	#self.control.jogEButton.Enable(bool)
+    def slewbuttons_on(self,bool,track):
+    	if track==False:
+    		self.control.jogNButton.Enable(bool)
+    		self.control.jogSButton.Enable(bool)
+    		self.control.jogWButton.Enable(bool)
+    		self.control.jogEButton.Enable(bool)
+    	if track==True:
+    		self.control.jogNButton.Enable(False)
+    		self.control.jogSButton.Enable(False)
+    		self.control.jogWButton.Enable(False)
+    		self.control.jogEButton.Enable(False)
     	self.control.trackButton.Enable(bool)
     	self.init.parkButton.Enable(bool)
     	self.init.coverposButton.Enable(bool)
@@ -2138,6 +2145,19 @@ class TCC(wx.Frame):
     def coverpos(self,event):
     	if self.slewing==False:
     		self.protocol.sendCommand("coverpos")
+    		
+    def pointing(self,event):
+    	self.targetRA=str(self.control.currentRaPos.GetValue())
+    	self.targetRA=self.targetRA.split(':')
+    	self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
+    	self.targetRA=self.targetRA*15.0 #Degrees
+    	self.targetDEC=str(self.control.currentDecPos.GetValue())
+    	self.targetDEC=self.targetDEC.split(':')
+    	self.targetDEC=float(self.targetDEC[0])+float(self.targetDEC[1])/60.+float(self.targetDEC[2])/3600.
+    	self.LST=str(self.control.currentLSTPos.GetValue())
+    	self.LST=self.LST.split(':')
+    	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+    	self.protocol.sendCommand("point "+self.targetRA+ " "+self.targetDec+" "+self.LST)
     		
     def setRATrackingRate(self,event):
         """
