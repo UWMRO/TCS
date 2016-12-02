@@ -620,6 +620,13 @@ class GuiderFocus(wx.Panel):
         None
 
 
+#Ernest        
+class Spectrograph(wx.Panel):
+    def __init__(self,parent,debug,night):
+        wx.Panel.__init__(self,parent)
+        None
+
+
 
 class Initialization(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -926,6 +933,7 @@ class TCC(wx.Frame):
         #scienceFocusPage=ScienceFocus(nb, debug, self.night)
         guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
+        spectroPage=Spectrograph(nb,debug,self.night)
         #guiderFocusPage=GuiderFocus(nb,debug,self.night)
         initPage=Initialization(nb, debug, self.night)
         logPage=NightLog(nb, debug, self.night)
@@ -947,12 +955,15 @@ class TCC(wx.Frame):
         '''
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(3)
+        
+        nb.AddPage(spectroPage,"Spectrograph")
+        self.guider=nb.GetPage(4)
 
         nb.AddPage(initPage,"Initialization Parameters")
-        self.init=nb.GetPage(4)
+        self.init=nb.GetPage(5)
 
         nb.AddPage(logPage,"Night Log")
-        self.nl=nb.GetPage(5)
+        self.nl=nb.GetPage(6)
         
         #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
@@ -2472,7 +2483,7 @@ if __name__=="__main__":
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		#pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
   		#thread.start_new_thread(os.system,("./parsercode/test",))
   		time.sleep(3)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
