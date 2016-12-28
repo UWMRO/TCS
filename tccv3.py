@@ -267,13 +267,13 @@ class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
 
-        #setup the test and retrieval button for getting target list
+        #Target List Retrieval
         self.fileLabel=wx.StaticText(self, size=(125,-1))
         self.fileLabel.SetLabel('Target List Path: ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
 
 
-        #show list of targets with selection button.  When the target is highlighted the selection button will input the data into the Control window.
+        #Initialize Target List Table
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
         self.targetList.InsertColumn(0,'Target Name',width=125)
         self.targetList.InsertColumn(1,'RA',width=100)
@@ -283,7 +283,7 @@ class Target(wx.Panel):
         self.targetList.InsertColumn(6,'Airmass',width=75)
         
 
-        #Input individual target, use astropy and a lot of error checking to solve format failures
+        #Manual Target Input
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
@@ -321,7 +321,7 @@ class Target(wx.Panel):
         self.plot_button.Disable()
         self.airmass_button.Disable()
 
-        #setup sizers
+        #Setup wxpython Sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
@@ -375,41 +375,17 @@ class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         None
-'''
-        self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
-        self.currentFocusLabel.SetLabel('Focus: ')
-        self.currentFocusPos = wx.StaticText(self,size=(75,-1))
-        self.currentFocusPos.SetLabel('Unknown')
-        self.currentFocusPos.SetForegroundColour((255,0,0))
 
-#Focus Change
-        self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
-        self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
-        self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
-        self.focusAbsText.SetLabel('1500')
-        self.focusAbsMove = wx.Button(self,-1,'Move Absolute')
-
-
-        self.slewButton = wx.Button(self, -1, "Slew to Target")
-        #self.slewButton.Disable()
-        self.trackButton = wx.Button(self, -1, "Start Tracking")
-        #self.trackButton.Disable()
-'''
 class Guider(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
 
-        #self.guiderTZLabel=wx.StaticText(self, size=(75,-1))
-        #self.guiderTZLabel.SetLabel('Time Zone: ')
-        #time_options=['Pacific','UTC']
-        #self.guiderTZCombo=wx.ComboBox(self,size=(50,-1), choices=time_options, style=wx.CB_READONLY)
-
-        #self.header=wx.StaticText(self,-1,"Guider Performance")
-        #Add current offset and timing information only.
+        #Initialize Figure Canvas Structure
         self.dpi = 100
         self.fig = Figure((7.0,4.5), dpi=self.dpi)
         self.canvas = FigCanvas(self,-1, self.fig)
 
+        #Guider Perfomance Initialization
         self.ax1 = self.fig.add_subplot(211)
         self.ax1.set_title('Guider Performance', size='small')
         self.ax1.set_ylabel('Offset (arcmin)', size='x-small')
@@ -434,10 +410,6 @@ class Guider(wx.Panel):
         self.toolbar = NavigationToolbar(self.canvas)
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
-        #self.hbox=wx.BoxSizer(wx.HORIZONTAL)
-        #self.hbox.Add(self.guiderTZLabel,0)
-        #self.hbox.Add(self.guiderTZCombo,0)
-        #self.vbox.Add(self.hbox,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(5)
         self.vbox.Add(self.canvas, 0, wx.ALIGN_CENTER)
         self.vbox.Add(self.toolbar,0, wx.ALIGN_CENTER)
@@ -600,15 +572,6 @@ class GuiderFocus(wx.Panel):
         wx.Panel.__init__(self,parent)
         None
 
-
-#Ernest        
-class Spectrograph(wx.Panel):
-    def __init__(self,parent,debug,night):
-        wx.Panel.__init__(self,parent)
-        None
-
-
-
 class Initialization(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -735,7 +698,6 @@ class Initialization(wx.Panel):
         self.vbox.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
         self.SetSizer(self.vbox)
-
 
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
@@ -879,9 +841,9 @@ class TCC(wx.Frame):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
         
         #Tracking on boot is false
-	self.guider_rot=False
         self.calculate=True
         self.precession=True
+        self.guider_rot = False
         self.tracking=False
         self.slewing=False
         self.night=True
@@ -912,9 +874,8 @@ class TCC(wx.Frame):
         controlPage=Control(nb, debug, self.night)
         targetPage=Target(nb, debug, self.night)
         #scienceFocusPage=ScienceFocus(nb, debug, self.night)
-        guiderPage=Guider(nb, debug, self.night)
+        #guiderPage=Guider(nb, debug, self.night)
         guiderControlPage=GuiderControl(nb,debug,self.night)
-        spectroPage=Spectrograph(nb,debug,self.night)
         #guiderFocusPage=GuiderFocus(nb,debug,self.night)
         initPage=Initialization(nb, debug, self.night)
         logPage=NightLog(nb, debug, self.night)
@@ -933,18 +894,16 @@ class TCC(wx.Frame):
         '''
         nb.AddPage(guiderFocusPage, "Guider Focus")
         self.guiderFocus=nb.GetPage(4)
-        '''
+
         nb.AddPage(guiderPage,"Guider Performance Monitor")
         self.guider=nb.GetPage(3)
-        
-        nb.AddPage(spectroPage,"Spectrograph")
-        self.guider=nb.GetPage(4)
+        '''
 
         nb.AddPage(initPage,"Initialization Parameters")
-        self.init=nb.GetPage(5)
+        self.init=nb.GetPage(3)
 
         nb.AddPage(logPage,"Night Log")
-        self.nl=nb.GetPage(6)
+        self.nl=nb.GetPage(4)
         
         #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
@@ -984,6 +943,7 @@ class TCC(wx.Frame):
         self.createMenu()
 
         self.sb = self.CreateStatusBar(5)
+        self.sb.SetStatusWidths([150,150,150,-2,-1])
 
         sizer=wx.BoxSizer()
         sizer.Add(nb,1, wx.EXPAND|wx.ALL)
