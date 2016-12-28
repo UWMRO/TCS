@@ -2,10 +2,7 @@
 import time
 import wx
 import os
-import subprocess
 import signal
-import re
-import astropy
 from astropy.time import Time
 import thread
 import threading
@@ -13,10 +10,7 @@ import ephem
 import matplotlib
 import datetime as dati
 from datetime import datetime, timedelta
-import math
-matplotlib.use('WXAgg')
 import matplotlib.pyplot as plt
-import matplotlib.dates as dt
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
@@ -24,23 +18,18 @@ import matplotlib.image as mpimg
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigCanvas, \
     NavigationToolbar2WxAgg as NavigationToolbar
-from pytz import timezone
-import scipy
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-from scipy import linspace, polyval, polyfit, sqrt, stats, randn
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic, FK4, FK5
-#from astroplan.plots.finder import plot_finder_image
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from Finder_picker import plot_finder_image
-from astroquery.skyview import SkyView
-import wcsaxes
-
 from twisted.internet import wxreactor
 wxreactor.install()
 from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
+
+matplotlib.use('WXAgg')
+
 
 global pipe
 pipe=None
@@ -49,11 +38,11 @@ class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
         
-        #self.parent = parent
+        self.parent = parent
         
         self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
-        #Input individual target, use astropy and a lot of error checking to solve format failures
+        #Manual Target Input
         self.targetNameLabel = wx.StaticText(self, size=(75,-1))
         self.targetNameLabel.SetLabel('Name: ')
         self.targetNameText = wx.TextCtrl(self,size=(100,-1))
@@ -74,7 +63,7 @@ class Control(wx.Panel):
         self.targetMagLabel.SetLabel('V Mag: ')
         self.targetMagText = wx.TextCtrl(self,size=(100,-1))
 
-        #Current Positions
+        #TCC Status Items
         self.currentNameLabel = wx.StaticText(self, size=(75,-1))
         self.currentNameLabel.SetLabel('Name:')
         self.currentNamePos = wx.StaticText(self,size=(100,-1))
@@ -150,17 +139,15 @@ class Control(wx.Panel):
         self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
-
+        #Telescope Control Buttons
         self.slewButton = wx.Button(self, -1, "Slew to Target")
         self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
         self.trackButton.Disable()
-
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
-        # self.stopButton.Bind(wx.EVT_ENTER_WINDOW, self.onMouseOver)
 
-        #need to reposition these, they're all on top of each other in the
-        #top left
+
+        #Telescope Jog Controls
         self.jogNButton = wx.Button(self, -1, 'N')
         self.jogSButton = wx.Button(self, -1, 'S')
         self.jogWButton = wx.Button(self, -1, 'W')
@@ -168,12 +155,7 @@ class Control(wx.Panel):
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
         self.jogIncrement.SetValue('5.0')
         
-        #self.jogNButton.Disable()
-        #self.jogSButton.Disable()
-        #self.jogWButton.Disable()
-        #self.jogEButton.Disable()
-        
-        #setup sizers
+        #Sizers; Format Status Panel
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
         self.vbox2=wx.BoxSizer(wx.VERTICAL)
@@ -245,7 +227,6 @@ class Control(wx.Panel):
         
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
-        #Not conviced this is the best place for increment. Clunky and doesn't allow for labeling. Underneath seems better
         self.hbox3.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
