@@ -844,12 +844,14 @@ class TCC(wx.Frame):
         self.calculate=True
         self.precession=True
         self.guider_rot = False
-        self.tracking=False
-        self.slewing=False
+        #self.tracking=False
+        #self.slewing=False
         self.night=True
         self.initState=False
         self.export_active=False
+        self.telescope_status={'slewing':False,'tracking':False,'guiding':False,'precession':True,'initState':False,'guider_rot':False}
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
+
         self.list_count=0
         self.active_threads={}
         self.thread_to_close=-1
@@ -1180,10 +1182,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        if self.tracking==True:
-        	self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-	if self.tracking==False:
-		self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
+        if self.telescope_status.get('tracking')==True:
+            self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+        if self.telescope_status.get('tracking')==False:
+            self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
         return
     		
     def Woffset(self,event):
@@ -1197,10 +1199,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        if self.tracking==True:
-        	self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-	if self.tracking==False:
-		self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
+        if self.telescope_status.get('tracking')==True:
+            self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+        if self.telescope_status.get('tracking')==False:
+            self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
         return
     def Eoffset(self,event):
         """
@@ -1213,10 +1215,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        if self.tracking==True:
-        	self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-	if self.tracking==False:
-		self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
+        if self.telescope_status.get('tracking')==True:
+            self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+        if self.telescope_status.get('tracking')==False:
+            self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
         return
     def Soffset(self,event):
         """
@@ -1229,10 +1231,10 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
-        if self.tracking==True:
-        	self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
-	if self.tracking==False:
-		self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
+        if self.telescope_status.get('tracking')==True:
+            self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+        if self.telescope_status.get('tracking')==False:
+		    self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
         return
         
     def focusIncPlus(self,event):
@@ -1321,19 +1323,19 @@ class TCC(wx.Frame):
         DECTR=self.control.currentDECTRPos.GetLabel()
         print RATR, DECTR
         if str(RATR)=='Unknown':
-        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 1.0 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
+        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 15.04 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
         	dlg.ShowModal()
         	dlg.Destroy()
         	return
-        if self.tracking==False:
-            self.control.trackButton.SetLabel('Stop Tracking')
+        if self.telescope_status.get('tracking')==False:
             self.sb.SetStatusText('Tracking: True',0)
             self.protocol.sendCommand("track on "+str(RATR)+' '+str(DECTR))
-        if self.tracking==True:
-            self.control.trackButton.SetLabel('Start Tracking')
+            self.control.trackButton.SetLabel('Stop Tracking')
+        if self.telescope_status.get('tracking')==True:
             self.sb.SetStatusText('Tracking: False',0)
             self.protocol.sendCommand("track off")
-        self.tracking= not self.tracking    
+            self.control.trackButton.SetLabel('Start Tracking')
+        self.telescope_status['tracking']= not self.telescope_status.get('tracking')
         return
     
        
@@ -1465,7 +1467,7 @@ class TCC(wx.Frame):
         
         
         
-        if self.slewing==False:
+        if self.telescope_status.get('slewing')==False:
             
             self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
             self.inputcoordSorter(input_ra,input_dec,input_epoch)
@@ -1511,7 +1513,7 @@ class TCC(wx.Frame):
             	self.control.currentRaPos.SetForegroundColour((0,0,0))
             	self.control.currentDecPos.SetLabel(input_dec)
             	self.control.currentDecPos.SetForegroundColour((0,0,0))
-                self.slewing= not self.slewing
+                self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
                 
                 return
                          
@@ -1524,17 +1526,17 @@ class TCC(wx.Frame):
                 self.log("Error: Attempted slew altitude below 20 degrees.")
                 return
                 
-        elif self.slewing==True:
+        elif self.telescope_status.get('slewing')==True:
             self.protocol.sendCommand("stop")
             self.control.slewButton.SetLabel('Start Slew')
             self.sb.SetStatusText('Slewing: False',1)
-            
-            self.slewing= not self.slewing
+
+            self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
             
         return
     def velwatch(self):
     	time.sleep(0.5)
-    	while self.slewing==True:
+    	while self.telescope_status.get('slewing')==True:
     		d=self.protocol.sendCommand("velmeasure")
     		d.addCallback(self.velmeasure)
     		time.sleep(0.5)
@@ -1543,18 +1545,18 @@ class TCC(wx.Frame):
     	print repr(msg)
     	msg=int(msg)
     	if msg==1:
-    		self.slewing=False
-    		wx.CallAfter(self.slewbutton_toggle)
+            self.telescope_status['slewing']=False
+            wx.CallAfter(self.slewbutton_toggle)
     	if msg==0:
-    		self.slewing=True
+            self.telescope_status['slewing']=True
     		
     		
     def checkslew(self):
     	while True:
-    		if self.slewing==False:
-    			wx.CallAfter(self.slewbuttons_on,True,self.tracking)
-    		if self.slewing==True:
-    			wx.CallAfter(self.slewbuttons_on,False,self.tracking)
+    		if self.telescope_status.get('slewing')==False:
+                wx.CallAfter(self.slewbuttons_on,True,self.telescope_status.get('tracking'))
+    		if self.telescope_status.get('slewing')==True:
+                wx.CallAfter(self.slewbuttons_on,False,self.telescope_status.get('tracking'))
     		time.sleep(2.0)
     def slewbuttons_on(self,bool,track):
     	if track==False:
@@ -2091,11 +2093,11 @@ class TCC(wx.Frame):
         	self.protocol.sendCommand("zenith")
         return
     def parkscope(self,event):
-    	if self.slewing==False:
+    	if self.telescope_status.get('slewing')==False:
     		self.protocol.sendCommand("park")
     		
     def coverpos(self,event):
-    	if self.slewing==False:
+    	if self.telescope_status.get('slewing')==False:
     		self.protocol.sendCommand("coverpos")
     		
     def pointing(self,event):
