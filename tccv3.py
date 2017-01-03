@@ -866,6 +866,9 @@ class TCC(wx.Frame):
                 name = "Manastash Ridge Observatory"
                 )
         debug=True
+
+        ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO)
+        self.SetIcon(ico)
         
 
         self.dir=os.getcwd()
@@ -1552,12 +1555,13 @@ class TCC(wx.Frame):
     		
     		
     def checkslew(self):
-    	while True:
-    		if self.telescope_status.get('slewing')==False:
+        while True:
+            if self.telescope_status.get('slewing')==False:
                 wx.CallAfter(self.slewbuttons_on,True,self.telescope_status.get('tracking'))
-    		if self.telescope_status.get('slewing')==True:
+            if self.telescope_status.get('slewing')==True:
                 wx.CallAfter(self.slewbuttons_on,False,self.telescope_status.get('tracking'))
-    		time.sleep(2.0)
+            time.sleep(2.0)
+
     def slewbuttons_on(self,bool,track):
     	if track==False:
     		self.control.jogNButton.Enable(bool)
