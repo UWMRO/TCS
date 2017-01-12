@@ -153,7 +153,8 @@ class Control(wx.Panel):
         self.jogWButton = wx.Button(self, -1, 'W')
         self.jogEButton = wx.Button(self, -1, 'E')
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
-        self.jogIncrement.SetValue('5.0')
+        self.jogIncrement.SetValue('1.0')
+        self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(75,-1), style = wx.CB_DROPDOWN, choices=["arcsec", "arcmin", "deg"])
         
         #Sizers; Format Status Panel
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -162,6 +163,7 @@ class Control(wx.Panel):
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
@@ -227,15 +229,19 @@ class Control(wx.Panel):
         
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
-        self.hbox3.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
-        self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
+
+        self.hbox4.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
+        self.hbox4.AddSpacer(5)
+        self.hbox4.Add(self.jogUnits, 0, wx.ALIGN_LEFT)
         
         self.vbox6.Add(self.jogNButton,0,wx.ALIGN_CENTER)
         self.vbox6.AddSpacer(5)
         self.vbox6.Add(self.hbox3,0,wx.ALIGN_CENTER)
         self.vbox6.AddSpacer(5)
         self.vbox6.Add(self.jogSButton,0,wx.ALIGN_CENTER)
+        self.vbox6.AddSpacer(5)
+        self.vbox6.Add(self.hbox4 ,0, wx.ALIGN_CENTER)
         
         self.vbox2.Add(self.vbox5,0,wx.ALIGN_CENTER)
         self.vbox2.AddSpacer(5)
@@ -849,9 +855,9 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.export_active=False
-        self.telescope_status={'slewing':False,'tracking':False,'guiding':False,'precession':True,'initState':False,'guider_rot':False}
+        self.telescope_status={'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False,'precession':True,'initState':False,'guider_rot':False}
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
-
+        self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
         self.list_count=0
         self.active_threads={}
         self.thread_to_close=-1
@@ -1185,6 +1191,18 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
+        unit=self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts= 20.0
+        if unit == "arcsec":
+            delta_enc=20*float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == "arcmin":
+            delta_enc=20*(float(self.control.jogIncrement.GetValue())*u.arcmin).to(u.arcsec).value
+            self.log(unit+' '+str(delta_enc)+' encoder counts')
+        if unit == 'deg':
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+
         if self.telescope_status.get('tracking')==True:
             self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
@@ -1202,6 +1220,18 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_enc = 20 * float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == "arcmin":
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == 'deg':
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+
         if self.telescope_status.get('tracking')==True:
             self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
@@ -1218,6 +1248,19 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
+
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_enc = 20 * float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == "arcmin":
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == 'deg':
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+
         if self.telescope_status.get('tracking')==True:
             self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
@@ -1234,6 +1277,18 @@ class TCC(wx.Frame):
          Returns:
                 None
         """
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_enc = 20 * float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == "arcmin":
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+        if unit == 'deg':
+            delta_enc = 20 * (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
+
         if self.telescope_status.get('tracking')==True:
             self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
@@ -1334,10 +1389,12 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Tracking: True',0)
             self.protocol.sendCommand("track on "+str(RATR)+' '+str(DECTR))
             self.control.trackButton.SetLabel('Stop Tracking')
+            self.control.trackButton.SetBackgroundColour('Light Steel Blue')
         if self.telescope_status.get('tracking')==True:
             self.sb.SetStatusText('Tracking: False',0)
             self.protocol.sendCommand("track off")
             self.control.trackButton.SetLabel('Start Tracking')
+            self.control.trackButton.SetBackgroundColour('Light Steel Blue')
         self.telescope_status['tracking']= not self.telescope_status.get('tracking')
         return
     
@@ -1471,7 +1528,7 @@ class TCC(wx.Frame):
         
         
         if self.telescope_status.get('slewing')==False:
-            
+
             self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
             self.inputcoordSorter(input_ra,input_dec,input_epoch)
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
@@ -1509,6 +1566,7 @@ class TCC(wx.Frame):
                 thread.start_new_thread(self.velwatch,())
                 #d.addCallback(self.vcback)
                 self.control.slewButton.SetLabel('Stop Slew')
+                self.control.slewButton.SetBackgroundColour('Light Steel Blue')
                 self.sb.SetStatusText('Slewing: True',1)
                 self.control.currentNamePos.SetLabel(name)
                 self.control.currentNamePos.SetForegroundColour((0,0,0))
@@ -1532,6 +1590,7 @@ class TCC(wx.Frame):
         elif self.telescope_status.get('slewing')==True:
             self.protocol.sendCommand("stop")
             self.control.slewButton.SetLabel('Start Slew')
+            self.control.slewButton.SetBackgroundColour(self.d_color)
             self.sb.SetStatusText('Slewing: False',1)
 
             self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
@@ -2140,6 +2199,7 @@ class TCC(wx.Frame):
         if valid_input==True:
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
+            self.log("Right Ascension Tracking Rate set to " + RArate)
         else:
             dlg = wx.MessageDialog(self,
                                "Please input an integer or float number.",
