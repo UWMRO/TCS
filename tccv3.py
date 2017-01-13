@@ -858,7 +858,7 @@ class TCC(wx.Frame):
         self.export_active=False
         self.telescope_status={'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False }
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
-        self.target_coords{"Name":None, "RA": None, "Dec": None} #For pointing, align telescope coordinates with these values once pointing is carried out.
+        self.target_coords={"Name":None, "RA": None, "Dec": None} #For pointing, align telescope coordinates with these values once pointing is carried out.
         self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
         self.list_count=0
         self.active_threads={}
@@ -2166,11 +2166,11 @@ class TCC(wx.Frame):
     		self.protocol.sendCommand("coverpos")
     		
     def pointing(self,event):
-    	self.targetRA=str(self.target_coords.get('RA'))
-    	self.targetRA=self.targetRA.split(':')
-    	self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
-    	self.targetRA=self.targetRA*15.0 #Degrees
-    	self.targetDEC=str(self.target_coords.get('DEC')
+        self.targetRA=str(self.target_coords.get('RA'))
+        self.targetRA=self.targetRA.split(':')
+        self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
+        self.targetRA=self.targetRA*15.0 #Degrees
+        # self.targetDEC=str(self.target_coords.get('DEC'))
     	self.targetDEC=self.targetDEC.split(':')
     	self.targetDEC=float(self.targetDEC[0])+float(self.targetDEC[1])/60.+float(self.targetDEC[2])/3600.
     	self.LST=str(self.control.currentLSTPos.GetValue())
