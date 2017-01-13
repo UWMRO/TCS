@@ -145,6 +145,7 @@ class Control(wx.Panel):
         self.trackButton = wx.Button(self, -1, "Start Tracking")
         self.trackButton.Disable()
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
+        self.stopButton.SetBackgroundColour('Red')
 
 
         #Telescope Jog Controls
@@ -855,8 +856,9 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.export_active=False
-        self.telescope_status={'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False,'precession':True,'initState':False,'guider_rot':False}
+        self.telescope_status={'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False }
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
+        self.target_coords{"Name":None, "RA": None, "Dec": None} #For pointing, align telescope coordinates with these values once pointing is carried out.
         self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
         self.list_count=0
         self.active_threads={}
@@ -1019,7 +1021,6 @@ class TCC(wx.Frame):
 
         self.SetMenuBar(self.menubar)
 
-   
     def on_exit(self, event):
         """
         Exit in a graceful way so that the telescope information can be saved and used at a later time.
@@ -1042,6 +1043,7 @@ class TCC(wx.Frame):
                 #d= self.protocol.sendCommand("shutdown")
                 #d.addCallback(self.quit)
                 self.quit()
+
     def quit(self):
         self.Destroy()
         os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
@@ -1068,6 +1070,7 @@ class TCC(wx.Frame):
             color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
             self.SetBackgroundColour(color)
         return
+
     def on_Pacific(self,event):
         """
         Event handle for the pacific time zone option. Changes time to the current pacific time representation.
@@ -1082,6 +1085,7 @@ class TCC(wx.Frame):
         self.current_timezone="PST"
         self.sb.SetStatusText('Timezone: PST',4)
         return
+
     def on_Mountain(self,event):
         """
         Event handle for the Mountain time zone option. Changes time to the current Mountain time representation.
@@ -1096,6 +1100,7 @@ class TCC(wx.Frame):
         self.current_timezone="MST"
         self.sb.SetStatusText('Timezone: MST',4)
         return
+
     def pre_on(self,event):
         """
         Turns precession on for the entire GUI. Note that this is on by default when the GUI is initialized.
@@ -1145,7 +1150,6 @@ class TCC(wx.Frame):
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
         return
-
 
     def readConfig(self):
         """
@@ -1237,6 +1241,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get('tracking')==False:
             self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
         return
+
     def Eoffset(self,event):
         """
         Jog Command; apply a coordinate offset in the East direction.
@@ -1266,6 +1271,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get('tracking')==False:
             self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
         return
+
     def Soffset(self,event):
         """
         Jog Command; apply a coordinate offset in the South direction.
@@ -1311,6 +1317,7 @@ class TCC(wx.Frame):
         val=int(val)
         self.control.focusAbsText.SetValue(str(val))
         return
+
     def focusIncNeg(self,event):
         """
         Focus Increment; apply a negative focus increment of 1500.
@@ -1364,8 +1371,7 @@ class TCC(wx.Frame):
         '''
         self.protocol.sendCommand("halt")
         return
-        
-    
+
     def toggletracksend(self,evt):
         '''
         Passes a command to the telescope to toggle tracking.
@@ -1397,8 +1403,7 @@ class TCC(wx.Frame):
             self.control.trackButton.SetBackgroundColour('Light Steel Blue')
         self.telescope_status['tracking']= not self.telescope_status.get('tracking')
         return
-    
-       
+
     def inputcoordSorter(self,ra,dec,epoch):
         '''
         Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC. Supports galactic coordinates as well, to
@@ -1466,6 +1471,7 @@ class TCC(wx.Frame):
             dlg.Destroy() 
             return
         '''
+
     def coordprecess(self,coords,epoch_now,epoch):
         '''
         coordprecess() generates an astropy skycoord object with RA/DEC precessed to the current epoch.
@@ -1574,6 +1580,9 @@ class TCC(wx.Frame):
             	self.control.currentRaPos.SetForegroundColour((0,0,0))
             	self.control.currentDecPos.SetLabel(input_dec)
             	self.control.currentDecPos.SetForegroundColour((0,0,0))
+                self.target_coords['Name']=name
+                self.target_coords['RA']=input_ra
+                self.target_coords['DEC']=input_dec
                 self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
                 
                 return
@@ -1596,6 +1605,7 @@ class TCC(wx.Frame):
             self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
             
         return
+
     def velwatch(self):
     	time.sleep(0.5)
     	while self.telescope_status.get('slewing')==True:
@@ -1655,8 +1665,6 @@ class TCC(wx.Frame):
     		self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
     		self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
     		time.sleep(15.0)
-    		
-    	 	
     	
     def set_target(self, event):
         """
@@ -1692,8 +1700,7 @@ class TCC(wx.Frame):
         self.log("Current target is '"+name+"'")
         
         return
-        
-        
+
     def LoadFinder(self,event):
         """
         Use Astroplan's plot_finder_image function to plot the finder image of the current target. Current location of finder chart is an axes object on the guider control tab.
@@ -1963,7 +1970,6 @@ class TCC(wx.Frame):
         
         self.window.LoadFinder()
 
-    
     def ExportOpen(self,event):  
         """
         Launch Export Window. Pull in current target list to window.
@@ -1994,9 +2000,7 @@ class TCC(wx.Frame):
             
         
         self.export_active=True
-        
-    
-        
+
     def dyn_airmass(self,tgt,obs,count):
         """
         Continuously calculates the airmass using observer information and target information. Airmass is calculated using the secz function in astropy. 
@@ -2018,8 +2022,7 @@ class TCC(wx.Frame):
             wx.CallAfter(self.target.targetList.SetStringItem,count,5,str(a))
             #self.target.targetList.SetStringItem(count,5,str(a))
             time.sleep(1)
-            
-    
+
     def target_plot(self,event):
         '''
         Plot the selected targets position over the next 8 hours utilizing astroplan's plot_sky() method. This method plot with respect to target selected in
@@ -2119,9 +2122,7 @@ class TCC(wx.Frame):
         self.init.targetEpochText.SetValue(epoch)
         
         return
-        
-            
-            
+
     def setTelescopePosition(self,event):
         """
         Sends contents of the name, RA, DEC and EPOCH text boxes in the initialization tab to the control tab. Overwrites current control tab values in the status column with the sent values.
@@ -2155,6 +2156,7 @@ class TCC(wx.Frame):
         if target_name=="Zenith":
         	self.protocol.sendCommand("zenith")
         return
+
     def parkscope(self,event):
     	if self.telescope_status.get('slewing')==False:
     		self.protocol.sendCommand("park")
@@ -2164,17 +2166,18 @@ class TCC(wx.Frame):
     		self.protocol.sendCommand("coverpos")
     		
     def pointing(self,event):
-    	self.targetRA=str(self.control.currentRaPos.GetValue())
+    	self.targetRA=str(self.target_coords.get('RA'))
     	self.targetRA=self.targetRA.split(':')
     	self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
     	self.targetRA=self.targetRA*15.0 #Degrees
-    	self.targetDEC=str(self.control.currentDecPos.GetValue())
+    	self.targetDEC=str(self.target_coords.get('DEC')
     	self.targetDEC=self.targetDEC.split(':')
     	self.targetDEC=float(self.targetDEC[0])+float(self.targetDEC[1])/60.+float(self.targetDEC[2])/3600.
     	self.LST=str(self.control.currentLSTPos.GetValue())
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
     	self.protocol.sendCommand("point "+self.targetRA+ " "+self.targetDec+" "+self.LST)
+        self.telescope_status['pointState']=True
     		
     def setRATrackingRate(self,event):
         """
