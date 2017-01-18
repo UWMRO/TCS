@@ -40,7 +40,7 @@ class Control(wx.Panel):
         
         self.parent = parent
         
-        self.logBox = wx.TextCtrl(self,size=(600,200), style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
+        self.logBox = wx.TextCtrl(self, style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
         #Manual Target Input
         self.targetNameLabel = wx.StaticText(self, size=(75,-1))
@@ -161,11 +161,13 @@ class Control(wx.Panel):
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
         self.vbox2=wx.BoxSizer(wx.VERTICAL)
+        self.vbox7=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
+        #self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-        self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
+        self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+        self.gbox=wx.GridSizer(rows=6, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
         
@@ -191,6 +193,8 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
+        self.gbox.Add(self.slewButton,0, wx.ALIGN_CENTER)
+        self.gbox.Add(self.trackButton,0, wx.ALIGN_CENTER)
         
         self.vbox3.Add(self.gbox,0,wx.ALIGN_CENTER)
         self.vbox1.Add(self.vbox3,0,wx.ALIGN_CENTER)
@@ -221,6 +225,10 @@ class Control(wx.Panel):
         
         self.vbox4.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
+        self.vbox7.Add(self.vbox4,0,wx.ALIGN_CENTER)
+        self.vbox7.AddSpacer(5)
+        self.vbox7.Add(self.stopButton,0,wx.ALIGN_CENTER)
+
         self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
@@ -249,23 +257,24 @@ class Control(wx.Panel):
         self.vbox2.Add(self.vbox6,0,wx.ALIGN_CENTER)
     
 
-        self.hbox1.Add(self.vbox4, 0, wx.ALIGN_CENTER)
+        self.hbox1.Add(self.vbox7, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
         self.hbox1.Add(self.vbox1, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
         self.hbox1.Add(self.vbox2, 0, wx.ALIGN_CENTER)
 
-        self.hbox2.Add(self.slewButton, 0, wx.ALIGN_CENTER)
-        self.hbox2.AddSpacer(25)
-        self.hbox2.Add(self.trackButton, 0, wx.ALIGN_CENTER)
+        self.hbox5.AddSpacer(30)
+        self.hbox5.Add(self.logBox, -1, wx.EXPAND)
+        self.hbox5.AddSpacer(30)
 
         self.vbox.Add(self.hbox1,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.stopButton,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.logBox,0,wx.ALIGN_CENTER)
+        self.vbox.AddSpacer(15)
+        #self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
+        #self.vbox.AddSpacer(10)
+        #self.vbox.Add(self.stopButton,0,wx.ALIGN_CENTER)
+        #self.vbox.AddSpacer(10)
+        self.vbox.Add(self.hbox5,-1,wx.EXPAND)
+        self.vbox.AddSpacer(15)
 
         self.SetSizer(self.vbox)
 
