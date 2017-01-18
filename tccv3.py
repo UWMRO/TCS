@@ -122,8 +122,8 @@ class Control(wx.Panel):
         self.currentRATRLabel = wx.StaticText(self, size=(75,-1))
         self.currentRATRLabel.SetLabel('RA TR: ')
         self.currentRATRPos = wx.StaticText(self,size=(75,-1))
-        self.currentRATRPos.SetLabel('15.04')
-        self.currentRATRPos.SetForegroundColour("black")
+        self.currentRATRPos.SetLabel('Unknown')
+        self.currentRATRPos.SetForegroundColour((255,0,0))
         
         self.currentDECTRLabel = wx.StaticText(self, size=(75,-1))
         self.currentDECTRLabel.SetLabel('DEC TR: ')
@@ -269,7 +269,6 @@ class Control(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-    
 class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -846,6 +845,8 @@ class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
+
+        self.server=DataForwardingProtocol()
         
         #Tracking on boot is false
         self.calculate=True
@@ -856,8 +857,8 @@ class TCC(wx.Frame):
         self.night=True
         self.initState=False
         self.export_active=False
-        self.telescope_status={'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False }
-        self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'trackingRate':None }
+        self.telescope_status={'connectState':False,'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False}
+        self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'RAtrackingRate':None }
         self.target_coords={"Name":None, "RA": None, "Dec": None} #For pointing, align telescope coordinates with these values once pointing is carried out.
         self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
         self.list_count=0
@@ -1179,7 +1180,7 @@ class TCC(wx.Frame):
         self.sb.SetStatusText('Timezone: UTC',4)
         self.init.targetDecText.SetValue(str(self.dict['lat']))
         self.init.targetEpochText.SetValue(str( '%.3f') % t['epoch'])
-        self.init.trackingRateRAText.SetValue(str(self.dict['trackingRate']))
+        self.init.trackingRateRAText.SetValue(str(self.dict['RAtrackingRate']))
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
@@ -2257,10 +2258,12 @@ class TCC(wx.Frame):
             self.mro.lon=self.dict['lon']
             self.mro.lat=self.dict['lat']
             self.horizonlimit=self.dict['horizonLimit']
+            self.RA_trackrate=self.dict['RAtrackingRate']
         
         
             self.control.slewButton.Enable()
             self.control.trackButton.Enable()
+            self.control.currentRATRPos.SetLabel(str(self.RA_trackrate))
             self.init.atZenithButton.Enable()
         
             self.target.listButton.Enable()
@@ -2285,7 +2288,13 @@ class TCC(wx.Frame):
             self.control.currentUTCPos.SetForegroundColour('black')
             self.control.currentLocalPos.SetForegroundColour('black')
             self.control.currentEpochPos.SetForegroundColour('black')
-            self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
+            self.control.currentRATRPos.SetForegroundColour('black')
+            try: self.telescope_status['connectState']=self.server.connectState
+            except NameError: self.telescope_status['connectState']= False
+            if self.telescope_status['connectState']:
+                self.sb.SetStatusText('Connected to Telescope', 3)
+            else:
+                self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
 
     def timer(self):
         """
@@ -2422,6 +2431,7 @@ class DataForwardingProtocol(basic.LineReceiver):
     def __init__(self):
         self.output = None
         self._deferreds = {}
+        self.connectState=False
 
     def dataReceived(self, data):
         gui = self.factory.gui
@@ -2447,6 +2457,7 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui=self.factory.gui
         gui.protocol=self
         self.output = self.factory.gui.control.logBox
+        self.connectState=True
     def timestamp(self):
     	t=datetime.now()
     	if len(str(t.month))==1:
