@@ -645,7 +645,7 @@ class Initialization(wx.Panel):
 
         self.maxdDECLabel=wx.StaticText(self, size=(75,-1))
         self.maxdDECLabel.SetLabel('Max dDEC: ')
-        self.maxdDECText=wx.TextCtrl(self,-1)
+        self.maxdDECText=wx.TextCtrl(self,size=(100,-1))
         self.dDECButton = wx.Button(self, -1, "Set Maximum dDEC")
 
 
@@ -741,11 +741,11 @@ class Initialization(wx.Panel):
         self.gbox_v.Add(self.guidebox2_h, 0, wx.ALIGN_CENTER)
 
 
-        self.leftbox_v.Add(self.tsbox_v,0,wx.ALIGN_CENTER)
+        self.leftbox_v.Add(self.tsbox_v,0,wx.ALIGN_LEFT)
         self.leftbox_v.AddSpacer(5)
-        self.leftbox_v.Add(self.tbox_v,0,wx.ALIGN_CENTER)
+        self.leftbox_v.Add(self.tbox_v,0,wx.ALIGN_LEFT)
         self.leftbox_v.AddSpacer(5)
-        self.leftbox_v.Add(self.gbox_v, 0, wx.ALIGN_CENTER)
+        self.leftbox_v.Add(self.gbox_v, 0, wx.ALIGN_LEFT)
 
 
         self.main_h.AddSpacer(20)
