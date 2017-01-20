@@ -253,7 +253,7 @@ class Control(wx.Panel):
         self.vbox6.Add(self.hbox4 ,0, wx.ALIGN_CENTER)
         
         self.vbox2.Add(self.vbox5,0,wx.ALIGN_CENTER)
-        self.vbox2.AddSpacer(5)
+        self.vbox2.AddSpacer(15)
         self.vbox2.Add(self.vbox6,0,wx.ALIGN_CENTER)
     
 
@@ -287,6 +287,7 @@ class Target(wx.Panel):
         self.fileLabel.SetLabel('Target List Path: ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
 
+        self.logBox = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
         #Initialize Target List Table
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
@@ -341,6 +342,7 @@ class Target(wx.Panel):
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
+        self.logbox_h= wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
 
         self.hbox1.Add(self.fileLabel,0,wx.ALIGN_CENTER)
@@ -374,11 +376,18 @@ class Target(wx.Panel):
         self.hbox3.AddSpacer(25)
         self.hbox3.Add(self.airmass_button,0,wx.ALIGN_CENTER)
 
+        self.logbox_h.AddSpacer(30)
+        self.logbox_h.Add(self.logBox, wx.ALIGN_CENTER, wx.EXPAND)
+        self.logbox_h.AddSpacer(30)
+
         self.vbox.Add(self.hbox1,0, wx.ALIGN_CENTER,5)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox2,0, wx.ALIGN_CENTER,5)
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox3,0, wx.ALIGN_CENTER,5)
+        self.vbox.AddSpacer(10)
+        self.vbox.Add(self.logbox_h, wx.ALIGN_CENTER, wx.EXPAND)
+        self.vbox.AddSpacer(15)
 
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
@@ -595,43 +604,35 @@ class Initialization(wx.Panel):
 
         self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates")
         self.atZenithButton.Disable()
-        
+
+        self.logBox = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
         #Set current telescope position
-        self.targetNameLabel=wx.StaticText(self, size=(75,-1))
+        self.targetNameLabel=wx.StaticText(self, -1)
         self.targetNameLabel.SetLabel('Name: ')
         self.targetNameText=wx.TextCtrl(self,size=(100,-1))
 
-        self.targetRaLabel=wx.StaticText(self, size=(75,-1))
+        self.targetRaLabel=wx.StaticText(self, -1)
         self.targetRaLabel.SetLabel('RA: ')
         self.targetRaText=wx.TextCtrl(self,size=(100,-1))
 
-        self.targetDecLabel=wx.StaticText(self, size=(75,-1))
+        self.targetDecLabel=wx.StaticText(self, -1)
         self.targetDecLabel.SetLabel('DEC: ')
         self.targetDecText=wx.TextCtrl(self,size=(100,-1))
 
-        self.targetEpochLabel=wx.StaticText(self, size=(75,-1))
+        self.targetEpochLabel=wx.StaticText(self, -1)
         self.targetEpochLabel.SetLabel('EPOCH: ')
         self.targetEpochText=wx.TextCtrl(self,size=(100,-1))
         self.targetEpochText.SetLabel('2000')
 
-        #Precessed Coordinates
-        self.precessNameText=wx.StaticText(self,size=(100,-1))
-        self.precessNameText.SetLabel('None')
-        self.precessRaText=wx.StaticText(self,size=(100,-1))
-        self.precessRaText.SetLabel('None')
-        self.precessDecText=wx.StaticText(self,size=(100,-1))
-        self.precessDecText.SetLabel('None')
-        self.precessEpochText=wx.StaticText(self,size=(100,-1))
-        self.precessEpochText.SetLabel('None')
 
         # this should autofill from tcc.conf
-        self.trackingRateRALabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateRALabel=wx.StaticText(self)
         self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
         self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
 
-        self.trackingRateDECLabel=wx.StaticText(self, size=(100,-1))
+        self.trackingRateDECLabel=wx.StaticText(self)
         self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
         self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
         self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
@@ -644,7 +645,7 @@ class Initialization(wx.Panel):
 
         self.maxdDECLabel=wx.StaticText(self, size=(75,-1))
         self.maxdDECLabel.SetLabel('Max dDEC: ')
-        self.maxdDECText=wx.TextCtrl(self,size=(100,-1))
+        self.maxdDECText=wx.TextCtrl(self,-1)
         self.dDECButton = wx.Button(self, -1, "Set Maximum dDEC")
 
 
@@ -658,61 +659,110 @@ class Initialization(wx.Panel):
         self.coverposButton.Disable()
         self.onTargetButton.Disable()
 
-        self.vbox=wx.BoxSizer(wx.VERTICAL)
-        self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
-        self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
-        self.gbox=wx.GridSizer(rows=4, cols=3, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=5, cols=3, hgap=5, vgap=5)
+        self.main_v=wx.BoxSizer(wx.VERTICAL)
+        self.main_h=wx.BoxSizer(wx.HORIZONTAL)
+        self.leftbox_v=wx.BoxSizer(wx.VERTICAL)
 
-        self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.precessNameText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetRaLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetRaText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.precessRaText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetDecLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetDecText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.precessDecText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetEpochLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.targetEpochText, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.precessEpochText, 0, wx.ALIGN_RIGHT)
+        #self.tssubbox_h=wx.BoxSizer(wx.HORIZONTAL)
 
-        self.gbox2.Add(self.trackingRateRALabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.trackingRateRAText, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.rateRAButton, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.trackingRateDECLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.trackingRateDECText, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.rateDECButton,0,wx.ALIGN_LEFT)
-        self.gbox2.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.maxdRAText, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.dRAButton, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.maxdDECLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.maxdDECText, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.dDECButton, 0, wx.ALIGN_LEFT)
+        self.tslabel = wx.StaticBox(self, label="Telescope Slewing")
+        self.tsbox_v = wx.StaticBoxSizer(self.tslabel, wx.VERTICAL)
 
-        self.hbox1.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.initButton,0,wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(10)
-        self.hbox1.Add(self.syncButton, 0, wx.ALIGN_RIGHT)
-        
-        self.vbox.AddSpacer(10)
-        self.hbox2.Add(self.coverposButton,0,wx.ALIGN_CENTER)
-        self.hbox2.AddSpacer(10)
-        self.hbox2.Add(self.onTargetButton,0,wx.ALIGN_CENTER)
-        self.hbox2.AddSpacer(10)
-        self.hbox2.Add(self.parkButton,0,wx.ALIGN_CENTER)
-		
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.hbox1,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.gbox,0,wx.ALIGN_CENTER)
-        self.vbox.AddSpacer(10)
-        self.vbox.Add(self.gbox2,0,wx.ALIGN_CENTER)
+        self.tclabel = wx.StaticBox(self, label="Telescope Coordinates")
+        self.tcbox_v = wx.StaticBoxSizer(self.tclabel, wx.VERTICAL)
 
-        self.SetSizer(self.vbox)
+        self.tlabel = wx.StaticBox(self, label="Tracking")
+        self.tbox_v = wx.StaticBoxSizer(self.tlabel, wx.VERTICAL)
+
+        self.glabel = wx.StaticBox(self, label="Guiding")
+        self.gbox_v = wx.StaticBoxSizer(self.glabel, wx.VERTICAL)
+
+        self.coordbox_g = wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
+        self.slewbox_h = wx.BoxSizer(wx.HORIZONTAL)
+        self.trackbox1_h = wx.BoxSizer(wx.HORIZONTAL)
+        self.trackbox2_h = wx.BoxSizer(wx.HORIZONTAL)
+        self.guidebox1_h = wx.BoxSizer(wx.HORIZONTAL)
+        self.guidebox2_h = wx.BoxSizer(wx.HORIZONTAL)
+        self.logbox_h = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.coordbox_g.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.syncButton,0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetNameLabel, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetNameText, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetRaLabel, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetRaText, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetDecLabel, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetDecText, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetEpochLabel, 0, wx.ALIGN_CENTER)
+        self.coordbox_g.Add(self.targetEpochText, 0, wx.ALIGN_CENTER)
+
+        self.tcbox_v.Add(self.coordbox_g, 0 ,wx.ALIGN_CENTER)
+        self.tcbox_v.Add(self.onTargetButton,0,wx.ALIGN_CENTER)
+
+        self.slewbox_h.Add(self.initButton,0,wx.ALIGN_LEFT)
+        self.slewbox_h.AddSpacer(10)
+        self.slewbox_h.Add(self.parkButton, 0, wx.ALIGN_LEFT)
+        self.slewbox_h.AddSpacer(10)
+        self.slewbox_h.Add(self.coverposButton, 0, wx.ALIGN_LEFT)
+
+
+        self.tsbox_v.Add(self.slewbox_h,0,wx.ALIGN_LEFT)
+
+        self.trackbox1_h.Add(self.trackingRateRALabel,0,wx.ALIGN_RIGHT)
+        self.trackbox1_h.AddSpacer(5)
+        self.trackbox1_h.Add(self.trackingRateRAText,0,wx.ALIGN_RIGHT)
+        self.trackbox1_h.AddSpacer(5)
+        self.trackbox1_h.Add(self.rateRAButton,0,wx.ALIGN_RIGHT)
+
+        self.trackbox2_h.Add(self.trackingRateDECLabel,0,wx.ALIGN_RIGHT)
+        self.trackbox2_h.AddSpacer(5)
+        self.trackbox2_h.Add(self.trackingRateDECText,0,wx.ALIGN_RIGHT)
+        self.trackbox2_h.AddSpacer(5)
+        self.trackbox2_h.Add(self.rateDECButton,0,wx.ALIGN_RIGHT)
+
+        self.tbox_v.Add(self.trackbox1_h,0,wx.ALIGN_CENTER)
+        self.tbox_v.AddSpacer(5)
+        self.tbox_v.Add(self.trackbox2_h,0,wx.ALIGN_CENTER)
+
+        self.guidebox1_h.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
+        self.guidebox1_h.AddSpacer(5)
+        self.guidebox1_h.Add(self.maxdRAText,0, wx.ALIGN_RIGHT)
+        self.guidebox1_h.AddSpacer(5)
+        self.guidebox1_h.Add(self.dRAButton, 0, wx.ALIGN_RIGHT)
+
+        self.guidebox2_h.Add(self.maxdDECLabel, 0, wx.ALIGN_RIGHT)
+        self.guidebox2_h.AddSpacer(5)
+        self.guidebox2_h.Add(self.maxdDECText, 0, wx.ALIGN_RIGHT)
+        self.guidebox2_h.AddSpacer(5)
+        self.guidebox2_h.Add(self.dDECButton, 0, wx.ALIGN_RIGHT)
+
+        self.gbox_v.Add(self.guidebox1_h, 0, wx.ALIGN_CENTER)
+        self.gbox_v.AddSpacer(5)
+        self.gbox_v.Add(self.guidebox2_h, 0, wx.ALIGN_CENTER)
+
+
+        self.leftbox_v.Add(self.tsbox_v,0,wx.ALIGN_CENTER)
+        self.leftbox_v.AddSpacer(5)
+        self.leftbox_v.Add(self.tbox_v,0,wx.ALIGN_CENTER)
+        self.leftbox_v.AddSpacer(5)
+        self.leftbox_v.Add(self.gbox_v, 0, wx.ALIGN_CENTER)
+
+
+        self.main_h.AddSpacer(20)
+        self.main_h.Add(self.leftbox_v, wx.ALIGN_LEFT)
+        self.main_h.AddSpacer(50)
+        self.main_h.Add(self.tcbox_v, wx.ALIGN_LEFT)
+
+        self.logbox_h.AddSpacer(30)
+        self.logbox_h.Add(self.logBox,wx.ALIGN_CENTER, wx.EXPAND)
+        self.logbox_h.AddSpacer(30)
+
+        self.main_v.Add(self.main_h,wx.ALIGN_CENTER)
+        #self.main_v.AddSpacer(3)
+        self.main_v.Add(self.logbox_h, wx.ALIGN_CENTER, wx.EXPAND)
+        self.main_v.AddSpacer(15)
+
+        self.SetSizer(self.main_v)
 
 class NightLog(wx.ScrolledWindow):
     def __init__(self,parent, debug, night):
@@ -1159,6 +1209,8 @@ class TCC(wx.Frame):
         f_out.write(current_time_log+','+str(input)+'\n')
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
+        self.target.logBox.AppendText(str(current_time) + ':  ' + str(input) + '\n')
+        self.init.logBox.AppendText(str(current_time) + ':  ' + str(input) + '\n')
         return
 
     def readConfig(self):
@@ -1380,6 +1432,7 @@ class TCC(wx.Frame):
          
         '''
         self.protocol.sendCommand("halt")
+        self.log("WARNING: Halt Motion Button pressed. A full restart of the TCC is required.")
         return
 
     def toggletracksend(self,evt):
@@ -2304,6 +2357,7 @@ class TCC(wx.Frame):
                 self.sb.SetStatusText('Connected to Telescope', 3)
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
+                self.log("Failed to connect to telescope. Restart the application.")
 
     def timer(self):
         """
