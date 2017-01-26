@@ -1,4 +1,7 @@
 #!/user/local/bin python
+
+#For use at Manastash Ridge Observatory in Ellensberg, WA
+
 import time
 import wx
 import os
@@ -30,7 +33,6 @@ from twisted.protocols import basic
 
 matplotlib.use('WXAgg')
 
-
 global pipe
 pipe=None
 
@@ -39,105 +41,131 @@ class Control(wx.Panel):
         wx.Panel.__init__(self,parent)
         
         self.parent = parent
-        
+
+
+        #Logbox for the control tab, continuous updates supplied by TCC.log
         self.logBox = wx.TextCtrl(self, style= wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
+        #############################################################
+
         #Manual Target Input
+
+        #Target Name
         self.targetNameLabel = wx.StaticText(self, size=(75,-1))
         self.targetNameLabel.SetLabel('Name: ')
         self.targetNameText = wx.TextCtrl(self,size=(100,-1))
 
+        #Target Right Ascension
         self.targetRaLabel = wx.StaticText(self, size=(75,-1))
         self.targetRaLabel.SetLabel('RA: ')
         self.targetRaText = wx.TextCtrl(self,size=(100,-1))
 
+        #Target Declination
         self.targetDecLabel = wx.StaticText(self, size=(75,-1))
         self.targetDecLabel.SetLabel('DEC: ')
         self.targetDecText = wx.TextCtrl(self,size=(100,-1))
 
+        #Target Epoch
         self.targetEpochLabel = wx.StaticText(self, size=(75,-1))
         self.targetEpochLabel.SetLabel('EPOCH: ')
         self.targetEpochText = wx.TextCtrl(self,size=(100,-1))
 
+        #Target V Magnitude
         self.targetMagLabel = wx.StaticText(self, size=(75,-1))
         self.targetMagLabel.SetLabel('V Mag: ')
         self.targetMagText = wx.TextCtrl(self,size=(100,-1))
 
+        #############################################################
+
         #TCC Status Items
+
+        #Current Target Name
         self.currentNameLabel = wx.StaticText(self, size=(75,-1))
         self.currentNameLabel.SetLabel('Name:')
         self.currentNamePos = wx.StaticText(self,size=(100,-1))
         self.currentNamePos.SetLabel('Unknown')
         self.currentNamePos.SetForegroundColour((255,0,0))
 
+        #Current RA Position of the Telescope
         self.currentRaLabel = wx.StaticText(self, size=(75,-1))
         self.currentRaLabel.SetLabel('RA: ')
         self.currentRaPos = wx.StaticText(self,size=(100,-1))
         self.currentRaPos.SetLabel('Unknown')
         self.currentRaPos.SetForegroundColour((255,0,0))
 
+        #Current DEC Position of the Telescope
         self.currentDecLabel = wx.StaticText(self, size=(75,-1))
         self.currentDecLabel.SetLabel('DEC: ')
         self.currentDecPos = wx.StaticText(self,size=(100,-1))
         self.currentDecPos.SetLabel('Unknown')
         self.currentDecPos.SetForegroundColour((255,0,0))
 
+        #Current Epoch (updated by timer thread)
         self.currentEpochLabel = wx.StaticText(self, size=(75,-1))
         self.currentEpochLabel.SetLabel('EPOCH: ')
         self.currentEpochPos = wx.StaticText(self,size=(75,-1))
         self.currentEpochPos.SetLabel('Unknown')
         self.currentEpochPos.SetForegroundColour((255,0,0))
 
+        #CUrrent Date and Time in Universal Time (updated by timer thread)
         self.currentUTCLabel = wx.StaticText(self, size=(75,-1))
         self.currentUTCLabel.SetLabel('UTC: ')
         self.currentUTCPos = wx.StaticText(self,size=(150,-1))
         self.currentUTCPos.SetLabel('Unknown')
         self.currentUTCPos.SetForegroundColour((255,0,0))
 
+        #Current Local Sidereal Time (updated by timer thread)
         self.currentLSTLabel = wx.StaticText(self, size=(75,-1))
         self.currentLSTLabel.SetLabel('LST: ')
         self.currentLSTPos = wx.StaticText(self,size=(100,-1))
         self.currentLSTPos.SetLabel('Unknown')
         self.currentLSTPos.SetForegroundColour((255,0,0))
 
+        #Current Local Date and Time (updated by timer thread)
         self.currentLocalLabel = wx.StaticText(self, size=(75,-1))
         self.currentLocalLabel.SetLabel('Local: ')
         self.currentLocalPos = wx.StaticText(self,size=(150,-1))
         self.currentLocalPos.SetLabel('Unknown')
         self.currentLocalPos.SetForegroundColour((255,0,0))
 
+        #Current Julian Date (updated by timer thread)
         self.currentJDLabel = wx.StaticText(self, size=(75,-1))
         self.currentJDLabel.SetLabel('MJD: ')
         self.currentJDPos = wx.StaticText(self,size=(75,-1))
         self.currentJDPos.SetLabel('Unknown')
         self.currentJDPos.SetForegroundColour((255,0,0))
 
-
+        #Current Relative Position of the focus axis
         self.currentFocusLabel = wx.StaticText(self, size=(75,-1))
         self.currentFocusLabel.SetLabel('Focus: ')
         self.currentFocusPos = wx.StaticText(self,size=(75,-1))
         self.currentFocusPos.SetLabel('Unknown')
         self.currentFocusPos.SetForegroundColour((255,0,0))
 
+        #Current RA Tracking Rate
         self.currentRATRLabel = wx.StaticText(self, size=(75,-1))
         self.currentRATRLabel.SetLabel('RA TR: ')
         self.currentRATRPos = wx.StaticText(self,size=(75,-1))
         self.currentRATRPos.SetLabel('Unknown')
         self.currentRATRPos.SetForegroundColour((255,0,0))
-        
+
+        #Current DEC Tracking Rate
         self.currentDECTRLabel = wx.StaticText(self, size=(75,-1))
         self.currentDECTRLabel.SetLabel('DEC TR: ')
         self.currentDECTRPos = wx.StaticText(self,size=(75,-1))
         self.currentDECTRPos.SetLabel('Unknown')
         self.currentDECTRPos.SetForegroundColour((255,0,0))
 
+        #############################################################
 
-        #Focus Change
+        #Focus Controls
         self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
+
+        #############################################################
 
         #Telescope Control Buttons
         self.slewButton = wx.Button(self, -1, "Slew to Target")
@@ -147,6 +175,7 @@ class Control(wx.Panel):
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         self.stopButton.SetBackgroundColour('Red')
 
+        #############################################################
 
         #Telescope Jog Controls
         self.jogNButton = wx.Button(self, -1, 'N')
@@ -155,34 +184,43 @@ class Control(wx.Panel):
         self.jogEButton = wx.Button(self, -1, 'E')
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
         self.jogIncrement.SetValue('1.0')
-        self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(75,-1), style = wx.CB_DROPDOWN, choices=["arcsec", "arcmin", "deg"])
-        
-        #Sizers; Format Status Panel
+        self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(75,-1), style = wx.CB_DROPDOWN,
+                                    choices=["arcsec", "arcmin", "deg"])
+
+        #############################################################
+
+        #Sizers; Build Sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.vbox1=wx.BoxSizer(wx.VERTICAL)
         self.vbox2=wx.BoxSizer(wx.VERTICAL)
         self.vbox7=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
-        #self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=6, cols=2, hgap=5, vgap=5)
         self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
-        
+
+        #Current Target Sizer
         self.ctlabel = wx.StaticBox(self,label="Current Target")
         self.vbox3 = wx.StaticBoxSizer(self.ctlabel, wx.VERTICAL)
-        
+
+        #TCC Status Sizer
         self.TCCstatus=wx.StaticBox(self,label="TCC Status")
         self.vbox4= wx.StaticBoxSizer(self.TCCstatus, wx.VERTICAL)
-        
+
+        #Focus Sizer
         self.flabel=wx.StaticBox(self,label="Focus")
         self.vbox5= wx.StaticBoxSizer(self.flabel, wx.VERTICAL)
-        
+
+        #Jog Telescope Sizer
         self.jlabel=wx.StaticBox(self,label="Jog Telescope")
         self.vbox6= wx.StaticBoxSizer(self.jlabel, wx.VERTICAL)
-        
+
+        #Sizers: Populate Sizers
+
+        #Populate Current Target Box
         self.gbox.Add(self.targetNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetNameText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.targetRaLabel, 0, wx.ALIGN_RIGHT)
@@ -199,7 +237,7 @@ class Control(wx.Panel):
         self.vbox3.Add(self.gbox,0,wx.ALIGN_CENTER)
         self.vbox1.Add(self.vbox3,0,wx.ALIGN_CENTER)
 
-
+        #Populate TCC Status Box
         self.gbox2.Add(self.currentNameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentNamePos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentRaLabel, 0, wx.ALIGN_RIGHT)
@@ -269,10 +307,6 @@ class Control(wx.Panel):
 
         self.vbox.Add(self.hbox1,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(15)
-        #self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
-        #self.vbox.AddSpacer(10)
-        #self.vbox.Add(self.stopButton,0,wx.ALIGN_CENTER)
-        #self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox5,-1,wx.EXPAND)
         self.vbox.AddSpacer(15)
 
@@ -282,12 +316,19 @@ class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
 
+        #############################################################
+
         #Target List Retrieval
         self.fileLabel=wx.StaticText(self, size=(125,-1))
         self.fileLabel.SetLabel('Target List Path: ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
 
+        #############################################################
+
+        #Logbox for the Target tab, continuously updated by TCC.log()
         self.logBox = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
+
+        #############################################################
 
         #Initialize Target List Table
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
@@ -297,29 +338,38 @@ class Target(wx.Panel):
         self.targetList.InsertColumn(3,'EPOCH',width=62.5)
         self.targetList.InsertColumn(5,'V Mag',width=62.5)
         self.targetList.InsertColumn(6,'Airmass',width=75)
-        
+
+        #############################################################
 
         #Manual Target Input
+
+        #Target Name
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
         self.nameText=wx.TextCtrl(self,size=(100,-1))
 
+        #Target RA
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
         self.raText=wx.TextCtrl(self,size=(100,-1))
 
+        #Target DEC
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
         self.decText=wx.TextCtrl(self,size=(100,-1))
 
+        #Target Coordinate Epoch
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
         self.epochText=wx.TextCtrl(self,size=(100,-1))
 
+        #Target V Magnitude
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
         self.magText=wx.TextCtrl(self,size=(100,-1))
-        
+
+        #############################################################
+
         #Buttons
         self.listButton = wx.Button(self, -1, "Retrieve List")
         self.selectButton = wx.Button(self, -1, "Select as Current Target")
@@ -328,7 +378,8 @@ class Target(wx.Panel):
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
-        
+
+        #Turn Buttons off initially, enable on initialization
         self.listButton.Disable()
         self.selectButton.Disable()
         self.enterButton.Disable()
@@ -337,7 +388,7 @@ class Target(wx.Panel):
         self.plot_button.Disable()
         self.airmass_button.Disable()
 
-        #Setup wxpython Sizers
+        #Sizers: Create Box Sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
@@ -345,11 +396,12 @@ class Target(wx.Panel):
         self.logbox_h= wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
 
+        #Sizers: Populate Box Sizers
         self.hbox1.Add(self.fileLabel,0,wx.ALIGN_CENTER)
         self.hbox1.Add(self.fileText,0, wx.ALIGN_CENTER)
         self.hbox1.Add(self.listButton,0, wx.ALIGN_CENTER)
 
-
+        #Populate Manual Target Input Box
         self.gbox.Add(self.nameLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.nameText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.raLabel, 0, wx.ALIGN_RIGHT)
