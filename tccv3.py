@@ -622,8 +622,7 @@ class GuiderControl(wx.Panel):
         self.gbox.Add(self.finderLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.finderText, 0, wx.ALIGN_LEFT)
         self.gbox.Add(self.finderButton,0,wx.ALIGN_LEFT)
-        
-        #self.hbox.AddSpacer(50)
+
         self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_LEFT)
         self.hbox.AddSpacer(15)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
@@ -651,7 +650,6 @@ class GuiderControl(wx.Panel):
 
         self.SetSizer(self.vbox)
 
-
 class GuiderFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -661,70 +659,98 @@ class Initialization(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
 
-        # add line to separate the different sections
+        #############################################################
 
-        self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates")
-        self.atZenithButton.Disable()
-
+        # Logbox for the Initialization tab, continuously updated by TCC.log()
         self.logBox = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.VSCROLL)
 
-        #Set current telescope position
+        #############################################################
+
+        #Telescope Coordinates
+
+        #Name of object at desired coordinates; if "Zenith" , Set Telescope Position uses Zenith command
         self.targetNameLabel=wx.StaticText(self, -1)
         self.targetNameLabel.SetLabel('Name: ')
         self.targetNameText=wx.TextCtrl(self,size=(100,-1))
-
+        #Right Ascension Coordinate
         self.targetRaLabel=wx.StaticText(self, -1)
         self.targetRaLabel.SetLabel('RA: ')
         self.targetRaText=wx.TextCtrl(self,size=(100,-1))
-
+        #Declination Coordinate
         self.targetDecLabel=wx.StaticText(self, -1)
         self.targetDecLabel.SetLabel('DEC: ')
         self.targetDecText=wx.TextCtrl(self,size=(100,-1))
-
+        #Current Epoch; generated from init task
         self.targetEpochLabel=wx.StaticText(self, -1)
         self.targetEpochLabel.SetLabel('EPOCH: ')
         self.targetEpochText=wx.TextCtrl(self,size=(100,-1))
         self.targetEpochText.SetLabel('2000')
+        #Buttons; At Zenith & Set Telescope Position
+        self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates") #Not a slew to Zenith
+        self.syncButton = wx.Button(self, -1, "Set Telescope Position") #Tell the telescope it is at a certain location
+        self.onTargetButton = wx.Button(self, -1, "On Target")
 
+        #############################################################
+
+        #Tracking Initialization
+
+        #NOTE: RA and DEC tracking currently not working simultaneously, DEC tracking is needed much less than
+        #RA tracking however, so for now only RA tracking works.
 
         # this should autofill from tcc.conf
+
+        #Right Ascension Tracking Rate; Suggested value of 15.04
         self.trackingRateRALabel=wx.StaticText(self)
         self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
         self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
-
+        #Declination Tracking Rate
         self.trackingRateDECLabel=wx.StaticText(self)
         self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
         self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
         self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
 
+        #############################################################
+
+        #Guiding Initialization
+
         #allows for change in maximum guider offsets, should be set by tcc.conf as an initial value
+
+        #Maximum delta Right Ascension; Guider cannot issue a correction greater than this value
         self.maxdRALabel=wx.StaticText(self, size=(75,-1))
         self.maxdRALabel.SetLabel('Max dRA: ')
         self.maxdRAText=wx.TextCtrl(self,size=(100,-1))
         self.dRAButton = wx.Button(self, -1, "Set Maximum dRA")
-
+        #Maximum delta Declination; Guider cannot issue a correction greater than this value
         self.maxdDECLabel=wx.StaticText(self, size=(75,-1))
         self.maxdDECLabel.SetLabel('Max dDEC: ')
         self.maxdDECText=wx.TextCtrl(self,size=(100,-1))
         self.dDECButton = wx.Button(self, -1, "Set Maximum dDEC")
 
+        #############################################################
 
-        self.syncButton = wx.Button(self, -1, "Set Telescope Position")
-        self.initButton = wx.Button(self, -1, "Initialize Telescope Systems")
-        self.parkButton= wx.Button(self, -1, "Park Telescope")
-        self.coverposButton=wx.Button(self,-1,"Slew to Cover Position")
-        self.onTargetButton=wx.Button(self,-1,"On Target")
-        
+        #Telescope Slewing
+
+        #Buttons
+        self.initButton = wx.Button(self, -1, "Initialize Telescope Systems") #Initialization; Begin threads
+        self.parkButton= wx.Button(self, -1, "Park Telescope") #Park Telescope, send telescope to park position
+        self.coverposButton=wx.Button(self,-1,"Slew to Cover Position") # Slew to Cover Position
+
+        #############################################################
+
+        #Disable Buttons not usable before Initialization
+
+        self.atZenithButton.Disable()
         self.parkButton.Disable()
         self.coverposButton.Disable()
         self.onTargetButton.Disable()
 
+        #############################################################
+
+        #Sizers: Create Box Sizers
         self.main_v=wx.BoxSizer(wx.VERTICAL)
         self.main_h=wx.BoxSizer(wx.HORIZONTAL)
         self.leftbox_v=wx.BoxSizer(wx.VERTICAL)
-
-        #self.tssubbox_h=wx.BoxSizer(wx.HORIZONTAL)
 
         self.tslabel = wx.StaticBox(self, label="Telescope Slewing")
         self.tsbox_v = wx.StaticBoxSizer(self.tslabel, wx.VERTICAL)
@@ -746,6 +772,7 @@ class Initialization(wx.Panel):
         self.guidebox2_h = wx.BoxSizer(wx.HORIZONTAL)
         self.logbox_h = wx.BoxSizer(wx.HORIZONTAL)
 
+        #Sizers: Populate Box Sizers
         self.coordbox_g.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.syncButton,0, wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.targetNameLabel, 0, wx.ALIGN_CENTER)
@@ -819,7 +846,6 @@ class Initialization(wx.Panel):
         self.logbox_h.AddSpacer(30)
 
         self.main_v.Add(self.main_h,wx.ALIGN_CENTER)
-        #self.main_v.AddSpacer(3)
         self.main_v.Add(self.logbox_h, wx.ALIGN_CENTER, wx.EXPAND)
         self.main_v.AddSpacer(15)
 
@@ -886,13 +912,10 @@ class NightLog(wx.ScrolledWindow):
 
         #Failure Log
         self.failheader=wx.StaticText(self,label="FAILURE LOG")
-        #self.failinfo=wx.StaticText(self,label="Time                                                                          Description                                                                                    ")
         self.faillog=wx.TextCtrl(self, size=(600,50),style= wx.TE_MULTILINE)
 
         #Focus Log
         self.focheader=wx.StaticText(self,label="FOCUS LOG")
-        #self.focinfo=wx.StaticText(self,label='Time               Instrument               Focus                 Az      El      Temp    Strc    Prim     Sec     Air     filt     FWHM')
-        #self.foclog=wx.TextCtrl(self, size=(600,100),style= wx.TE_MULTILINE)
         self.foclog=wx.ListCtrl(self,size=(600,100), style=wx.LC_REPORT| wx.VSCROLL | wx.LC_VRULES)
         self.foclog.InsertColumn(0,'Time',width=50)
         self.foclog.InsertColumn(1,'Instrument',width=75)
