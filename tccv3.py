@@ -503,74 +503,80 @@ class GuiderControl(wx.Panel):
         # need to define guider directory and filename structure
 
         self.Buffer = None
-        self.center=[200,275]
+        self.center=[200,275] #Center Coordinate for finder image and guider image plots
         self.dc = None
-        self.rotAng=0
-        
+        self.rotAng=0 #Guider Rotation Angle
+
+        #############################################################
+
+        #Righthand Figure; guider image
         self.fig_r = Figure((4,4))
         self.canvas_r = FigCanvas(self,-1, self.fig_r)
         self.ax_r = self.fig_r.add_subplot(111)
         self.ax_r.set_axis_off()
-        #self.cir = matplotlib.patches.Circle( (156,160), radius=125, fill=False, color='steelblue',linewidth=2.5)
-        #self.line= matplotlib.patches.Rectangle( (156,160), height=-125, width=2, fill=True, color='k')
-        
-        #self.ax_r.add_patch(self.cir)
-        #self.ax_r.add_patch(self.line)
-        
         self.fig_r.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
+
+        #############################################################
         
-        
+        #Lefthand Figure; finder image with periscope overlay
         self.fig_l = Figure((4,4))
         self.canvas_l = FigCanvas(self,-1, self.fig_l)
         self.ax_l = self.fig_l.add_subplot(111)
         self.ax_l.set_axis_off()
         self.cir = matplotlib.patches.Circle( (150,150), radius=125, fill=False, color='steelblue',linewidth=2.5)
-	self.cir1 = matplotlib.patches.Circle( (150,150), radius=126, fill=False, color='k',linewidth=1.0)
+        self.cir1 = matplotlib.patches.Circle( (150,150), radius=126, fill=False, color='k',linewidth=1.0)
         self.line= matplotlib.patches.Rectangle( (150,150), height=125, width=2, fill=True, color='k')
-        
-        
-        self.ax_l.add_patch(self.cir)
-	self.ax_l.add_patch(self.cir1)
-        self.ax_l.add_patch(self.line)
-        
+        self.ax_l.add_patch(self.cir) #Periscope Overlay
+        self.ax_l.add_patch(self.cir1) #Periscope Overlay
+        self.ax_l.add_patch(self.line) #Periscope Overlay
         self.fig_l.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
-        
+
+        #############################################################
+
+        #Guider Controls Box
+
+        #Row 1: Guider Exposure
+        self.guiderTimeLabel = wx.StaticText(self, size=(100, -1))
+        self.guiderTimeLabel.SetLabel('Exposure: ')
+        self.guiderTimeText = wx.TextCtrl(self, size=(100, -1))
+        self.guiderTimeText.SetValue('10.0')
+        self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure', size=(125, -1))
+        #Row 2: Guider Rotation
+        self.guiderRotLabel = wx.StaticText(self, size=(100, -1))
+        self.guiderRotLabel.SetLabel('Rot. Angle: ')
+        self.guiderRotText = wx.TextCtrl(self, size=(100, -1))
+        self.guiderRotText.SetValue('0.0')
+        self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation', size=(125, -1))
+        #Row 3: Generate Finder Chart
         self.finderLabel=wx.StaticText(self, size=(100,-1))
         self.finderLabel.SetLabel('Radius (arcmin): ')
         self.finderText=wx.TextCtrl(self,size=(100,-1))
         self.finderText.SetValue('18.0')
-        
         self.finderButton=wx.Button(self,-1,"Load Finder Chart",size=(125,-1))
-        #self.finderButton.Bind(wx.EVT_BUTTON,self.load_finder_chart)
-        
+        #Row 4: Guiding Controls
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars",size=(150,-1))
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding",size=(150,-1))
 
-        self.guiderTimeLabel=wx.StaticText(self, size=(100,-1))
-        self.guiderTimeLabel.SetLabel('Exposure: ')
-        self.guiderTimeText=wx.TextCtrl(self,size=(100,-1))
-        self.guiderTimeText.SetValue('10.0')
+        #############################################################
 
-        self.guiderExposureButton = wx.Button(self, -1, 'Guider Exposure',size=(125,-1))
-
-        self.guiderRotLabel=wx.StaticText(self, size=(100,-1))
-        self.guiderRotLabel.SetLabel('Rot. Angle: ')
-        self.guiderRotText=wx.TextCtrl(self,size=(100,-1))
-        self.guiderRotText.SetValue('0.0')
-        self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation',size=(125,-1))
-        #self.Bind(wx.EVT_BUTTON, self.on_Rot, self.guiderRotButton)
-        
+        #Guider Jog Controls
         self.jogNButton = wx.Button(self, -1, 'N',size=(75,-1))
         self.jogSButton = wx.Button(self, -1, 'S',size=(75,-1))
         self.jogWButton = wx.Button(self, -1, 'W',size=(75,-1))
         self.jogEButton = wx.Button(self, -1, 'E',size=(75,-1))
-        
+
+        #############################################################
+
+        #Guider Focus Controls
         self.focusIncPlusButton = wx.Button(self, -1, 'Increment Positive')
         self.focusIncNegButton = wx.Button(self, -1, 'Increment Negative')
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
 
+        #############################################################
+
+        #Sizers: Create Box Sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
@@ -578,16 +584,18 @@ class GuiderControl(wx.Panel):
         self.gbox=wx.GridSizer(rows=3, cols=3, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
         self.ghbox=wx.BoxSizer(wx.HORIZONTAL)
-        
+
+        #Guider Controls Box Sizer
         self.clabel=wx.StaticBox(self,label="Guider Controls")
         self.vboxc= wx.StaticBoxSizer(self.clabel, wx.VERTICAL)
-        
+        #Guider Focus Controls Box Sizer
         self.flabel=wx.StaticBox(self,label="Focus Guider")
         self.vboxf= wx.StaticBoxSizer(self.flabel, wx.VERTICAL)
-        
+        #Jog Guider Field Box Sizer
         self.jlabel=wx.StaticBox(self,label="Jog Guider Field")
         self.vboxj= wx.StaticBoxSizer(self.jlabel, wx.VERTICAL)
-        
+
+        #Sizers: Populate Box Sizers
         self.gbox3.Add(self.focusIncPlusButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
@@ -630,10 +638,10 @@ class GuiderControl(wx.Panel):
         self.ghbox.Add(self.vboxj,0,wx.ALIGN_LEFT)
         self.ghbox.AddSpacer(20)
         self.ghbox.Add(self.vboxf,0,wx.ALIGN_LEFT)
-        
-        self.hbox2.Add(self.canvas_l,0,wx.ALIGN_RIGHT)
-        self.hbox2.AddSpacer(90)
-        self.hbox2.Add(self.canvas_r,0,wx.ALIGN_RIGHT)
+
+        self.hbox2.Add(self.canvas_l,0,wx.ALIGN_CENTER)
+        self.hbox2.AddSpacer(50)
+        self.hbox2.Add(self.canvas_r,0,wx.ALIGN_CENTER)
 
         self.vbox.AddSpacer(10)
         self.vbox.Add(self.hbox2,0,wx.ALIGN_CENTER)
@@ -642,6 +650,7 @@ class GuiderControl(wx.Panel):
 
 
         self.SetSizer(self.vbox)
+
 
 class GuiderFocus(wx.Panel):
     def __init__(self,parent, debug, night):
@@ -955,7 +964,7 @@ class NightLog(wx.ScrolledWindow):
 class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, self.title,size=(900,600))
+        wx.Frame.__init__(self, None, -1, self.title,size=(900,650))
 
         self.server=DataForwardingProtocol()
         
