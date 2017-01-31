@@ -1719,9 +1719,9 @@ class TCC(wx.Frame):
             	self.control.currentRaPos.SetForegroundColour((0,0,0))
             	self.control.currentDecPos.SetLabel(input_dec)
             	self.control.currentDecPos.SetForegroundColour((0,0,0))
-                self.target_coords['Name']=name
-                self.target_coords['RA']=input_ra
-                self.target_coords['DEC']=input_dec
+                self.target_coords['Name']=name  #Store name of target for pointing routine
+                self.target_coords['RA']=input_ra #Store target RA for pointing routine
+                self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
                 self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
                 
                 return
@@ -2305,11 +2305,22 @@ class TCC(wx.Frame):
     		self.protocol.sendCommand("coverpos")
     		
     def pointing(self,event):
+        """
+        Pointing aligns the telescopes position coordinates with a target has been slewed to. Pointing is called
+        when the observer jogs the target directly into the center of the frame after a slew. This alignment corrects
+        future inaccuracies in slewing and should be executed as an initialization task.
+
+        Args:
+                self: points function towards WX application
+                event: handler allows function to be tethered to a WX widget. Tethered to the On Target button
+        Returns:
+                None
+        """
         self.targetRA=str(self.target_coords.get('RA'))
         self.targetRA=self.targetRA.split(':')
         self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
         self.targetRA=self.targetRA*15.0 #Degrees
-        # self.targetDEC=str(self.target_coords.get('DEC'))
+        self.targetDEC=str(self.target_coords.get('DEC'))
     	self.targetDEC=self.targetDEC.split(':')
     	self.targetDEC=float(self.targetDEC[0])+float(self.targetDEC[1])/60.+float(self.targetDEC[2])/3600.
     	self.LST=str(self.control.currentLSTPos.GetValue())
@@ -2414,10 +2425,9 @@ class TCC(wx.Frame):
             self.init.parkButton.Enable()
             self.init.coverposButton.Enable()
             self.init.onTargetButton.Enable()
-        
+
             thread.start_new_thread(self.timer,())
             thread.start_new_thread(self.checkslew,())
-            print "Slew Checking On"
             thread.start_new_thread(self.getstatus,())
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
@@ -2427,6 +2437,7 @@ class TCC(wx.Frame):
             self.control.currentLocalPos.SetForegroundColour('black')
             self.control.currentEpochPos.SetForegroundColour('black')
             self.control.currentRATRPos.SetForegroundColour('black')
+            thread.start_new_thread(self.logstatus,())
             try: self.telescope_status['connectState']=self.server.connectState
             except NameError: self.telescope_status['connectState']= False
             if self.telescope_status['connectState']:
@@ -2434,6 +2445,16 @@ class TCC(wx.Frame):
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
+
+    def logstatus(self):
+        while True:
+            message=''
+            for key in self.telescope_status:
+                message+=key+': '+str(self.telescope_status.get(key))+' | '
+            wx.CallAfter(self.log, (message))
+            time.sleep(120)
+
+
 
     def timer(self):
         """
