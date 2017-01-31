@@ -988,17 +988,10 @@ class TCC(wx.Frame):
     title='Manastash Ridge Observatory Telescope Control Computer'
     def __init__(self):
         wx.Frame.__init__(self, None, -1, self.title,size=(900,650))
-
-        self.server=DataForwardingProtocol()
-        
-        #Tracking on boot is false
+        self.protocol=None
+        self.server=DataForwardingProtocol() #Twisted Python connection to server
         self.calculate=True
-        self.precession=True
-        self.guider_rot = False
-        #self.tracking=False
-        #self.slewing=False
         self.night=True
-        self.initState=False
         self.export_active=False
         self.telescope_status={'connectState':False,'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False}
         self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'RAtrackingRate':None }
@@ -1115,11 +1108,8 @@ class TCC(wx.Frame):
         self.target.epochText.SetValue('J2000')
         self.target.magText.SetValue('3.43')
 
-        #png image appears to cause an RGB conversion failure.  Either use jpg or convert with PIL
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         img=mpimg.imread(img_default)
-        #img = wx.Image(img_default, wx.BITMAP_TYPE_ANY)
-        #self.guiderControl.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
         self.guiderControl.ax_r.imshow(img, picker=False)
         self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
 
@@ -1187,6 +1177,8 @@ class TCC(wx.Frame):
                 #d= self.protocol.sendCommand("shutdown")
                 #d.addCallback(self.quit)
                 self.quit()
+            else:
+                self.Destroy()
 
     def quit(self):
         self.Destroy()
@@ -1255,7 +1247,7 @@ class TCC(wx.Frame):
             Returns:
                     self.precession: Sets self.precession = True
         """
-        self.precession=True
+        self.telescope_status['precession']=True
         self.log("Precession enabled")
         return
         
@@ -1269,7 +1261,7 @@ class TCC(wx.Frame):
             Returns:
                     self.precession: Sets self.precession = True
         """
-        self.precession=False
+        self.telescope_status['precession']=False
         self.log("Precession disabled")
         return
         
@@ -1686,7 +1678,7 @@ class TCC(wx.Frame):
             self.inputcoordSorter(input_ra,input_dec,input_epoch)
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
             
-            if self.precession==True:
+            if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,current_epoch,input_epoch)
                 
             self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
@@ -1887,8 +1879,8 @@ class TCC(wx.Frame):
             phi = np.arctan2(dy, dx)
             phi_or=(phi*180./np.pi)-90
             print A.shape,rho,phi_or
-	    if self.guider_rot==False:	
-            	thread.start_new_thread(self.Rotate,(phi_or,))
+	    if self.telescope_status.get('guider_rot')==False:
+                thread.start_new_thread(self.Rotate,(phi_or,))
             
     def on_Rot(self,event):
         #move = float(self.guiderRotText.GetValue()) - self.rotAng
@@ -1908,11 +1900,11 @@ class TCC(wx.Frame):
 		while val<=-360.0:
 			val+=360.0
 
-	if self.guider_rot==False:
+	if self.telescope_status.get('guider_rot')==False:
         	thread.start_new_thread(self.Rotate,(-1*val,))
 	   
     def Rotate(self,Rot_angle):
-	self.guider_rot=True
+        self.telescope_status['guider_rot']=True
         current_pos=self.guiderControl.rotAng
         if float(Rot_angle)-float(current_pos)>=0:
             inc=0.5
@@ -1926,7 +1918,7 @@ class TCC(wx.Frame):
             wx.CallAfter(self.guiderControl.canvas_l.draw,)
             self.guiderControl.rotAng=float(angle)
             time.sleep(0.025)
-	self.guider_rot=False
+        self.telescope_status['guider_rot']=False
         return
     
     def addToList(self,event):
@@ -1955,7 +1947,7 @@ class TCC(wx.Frame):
             input_ra=self.coordinates.ra.degree
             input_dec=self.coordinates.dec.degree
         
-        if self.precession==True:
+        if self.telescope_status.get('precession')==True:
             self.coordprecess(self.coordinates,epoch_now,epoch)
             
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
@@ -2018,7 +2010,7 @@ class TCC(wx.Frame):
                 input_ra=self.coordinates.ra.degree
                 input_dec=self.coordinates.dec.degree
         
-            if self.precession==True:
+            if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,epoch_now,epoch)
             
             self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
@@ -2087,7 +2079,7 @@ class TCC(wx.Frame):
                 
             self.inputcoordSorter(input_ra,input_dec,epoch)
                 
-            if self.precession==True:
+            if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,epoch_now,epoch)
             
             self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
@@ -2194,7 +2186,7 @@ class TCC(wx.Frame):
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
         
-        if self.precession==True:
+        if self.telescope_status.get('precession')==True:
             self.coordprecess(self.coordinates,current_epoch,input_epoch) 
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
@@ -2231,7 +2223,7 @@ class TCC(wx.Frame):
         
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
         
-        if self.precession==True:
+        if self.telescope_status.get('precession')==True:
             self.coordprecess(self.coordinates,current_epoch,input_epoch) 
             
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
@@ -2400,7 +2392,7 @@ class TCC(wx.Frame):
         Returns:
                 None
         """
-        if self.initState==False:
+        if self.telescope_status.get('initState')==False:
             self.mro.lon=self.dict['lon']
             self.mro.lat=self.dict['lat']
             self.horizonlimit=self.dict['horizonLimit']
@@ -2427,8 +2419,8 @@ class TCC(wx.Frame):
             thread.start_new_thread(self.checkslew,())
             print "Slew Checking On"
             thread.start_new_thread(self.getstatus,())
-            self.initState=True
-        if self.initState==True:
+            self.telescope_status['initState']=True
+        if self.telescope_status.get('initState')==True:
             self.control.currentJDPos.SetForegroundColour('black')
             self.control.currentLSTPos.SetForegroundColour('black')
             self.control.currentUTCPos.SetForegroundColour('black')
