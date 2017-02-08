@@ -1,5 +1,5 @@
 #!/user/local/bin python
-
+#Bifrost Telescope Control Computer Software
 #For use at Manastash Ridge Observatory in Ellensberg, WA
 
 import time
@@ -985,50 +985,71 @@ class NightLog(wx.ScrolledWindow):
         self.Show()
 
 class TCC(wx.Frame):
-    title='Manastash Ridge Observatory Telescope Control Computer'
+    title='Bifrost Telescope Control Computer'
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, self.title,size=(900,650))
-        self.protocol=None
-        self.server=DataForwardingProtocol() #Twisted Python connection to server
-        self.calculate=True
-        self.night=True
-        self.export_active=False
-        self.telescope_status={'connectState':False,'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,'guiding':False, 'pointState': False,'precession': True,'initState':False,'guider_rot' :False}
-        self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'RAtrackingRate':None }
-        self.target_coords={"Name":None, "RA": None, "Dec": None} #For pointing, align telescope coordinates with these values once pointing is carried out.
-        self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
-        self.list_count=0
-        self.active_threads={}
+        wx.Frame.__init__(self, None, -1, self.title,size=(900,650)) #Wxpython frame object
+
+        #############################################################
+
+        #Dictionaries of relevant telescope information
+
+        #Most of Bifrost's functions rely on and alter the contents of these dictionaries.
+        #Bifrost has been designed such that these dictionaries provide a quick summary of the overall observing
+        #session.
+
+        #Telescope Status: Contains information on dynamic processes in GUI operation
+        self.telescope_status={'connectState':False,'RA':'Unknown', 'Dec':'Unknown', 'slewing':False,'tracking':False,
+                               'guiding':False, 'pointState': False,'precession': True,
+                               'initState':False,'guider_rot' :False}
+
+        #Initilization Status: Contains information on (typically) static processes in GUI operation or information
+        #from past observing sessions.
+        self.dict={'lat':None, 'lon':None,'elevation':None, 'lastRA':None, 'lastDEC':None,'lastGuiderRot':None,
+                   'lastFocusPos':None,'maxdRA':None,'maxdDEC':None, 'RAtrackingRate':None }
+
+        #Target Coordinates: For pointing, align telescope coordinates with these values once pointing is carried out.
+        self.target_coords={"Name":None, "RA": None, "Dec": None}
+
+        #############################################################
+
+        #Additional variables
+
+        self.protocol = None  # twisted python connection protocol to server, overwrite during connection
+        self.server = DataForwardingProtocol()  # Twisted Python server identification
+        self.calculate = True  # Flag for dynamic airmass calculation
+        self.night = True  # Send GUI to night mode
+        self.export_active = False  # Track the status of the export target list window
+        self.d_color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND) #Default background color for OS
+        self.list_count=0 #Tracks the number of targets currently in the targetlist.
+        self.active_threads={} #Keep track of threads open in GUI
         self.thread_to_close=-1
-        #Stores current time zone for whole GUI
-        self.current_timezone="PST"
-        self.mro=ephem.Observer()
-        self.mrolat=46.9528*u.deg
-        
-        self.MRO = Observer(longitude = -120.7278 *u.deg,
+        self.current_timezone="PST" #Current timezone is Pacific Standard Time at MRO
+        self.mro=ephem.Observer() #Ephem object for mro location (To do: Roll this into Astroplan's Observer object)
+        self.mrolat=46.9528*u.deg #Latitude of Manastash Ridge Observatory
+        self.MRO = Observer(longitude = -120.7278 *u.deg, #Astroplan Observer Object for MRO
                 latitude = 46.9528*u.deg,
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        debug=True
-
-        ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO)
+        debug=True #Debug mode, currently no functionality
+        ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
-        
+        self.dir=os.getcwd() #Current path for file IO
 
-        self.dir=os.getcwd()
-        
-        #setup notebook
+        #############################################################
+
+        #Setup Notebook
+
         p=wx.Panel(self)
         nb=wx.Notebook(p)
-        controlPage=Control(nb, debug, self.night)
-        targetPage=Target(nb, debug, self.night)
+        controlPage=Control(nb, debug, self.night) #Telescope Control Tab
+        targetPage=Target(nb, debug, self.night) #Target List Tab
         #scienceFocusPage=ScienceFocus(nb, debug, self.night)
         #guiderPage=Guider(nb, debug, self.night)
-        guiderControlPage=GuiderControl(nb,debug,self.night)
+        guiderControlPage=GuiderControl(nb,debug,self.night) #Guider Control Tab
         #guiderFocusPage=GuiderFocus(nb,debug,self.night)
-        initPage=Initialization(nb, debug, self.night)
-        logPage=NightLog(nb, debug, self.night)
+        initPage=Initialization(nb, debug, self.night) #Initialization Tab
+        logPage=NightLog(nb, debug, self.night) #Night Log Tab
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
@@ -1049,7 +1070,7 @@ class TCC(wx.Frame):
         self.guider=nb.GetPage(3)
         '''
 
-        nb.AddPage(initPage,"Initialization Parameters")
+        nb.AddPage(initPage,"Initialization")
         self.init=nb.GetPage(3)
 
         nb.AddPage(logPage,"Night Log")
@@ -1099,6 +1120,8 @@ class TCC(wx.Frame):
         sizer.Add(nb,1, wx.EXPAND|wx.ALL)
         p.SetSizer(sizer)
         p.Layout()
+
+        #############################################################
 
         self.readConfig()
         """Target testing parameters """
@@ -1760,8 +1783,7 @@ class TCC(wx.Frame):
             wx.CallAfter(self.slewbutton_toggle)
     	if msg==0:
             self.telescope_status['slewing']=True
-    		
-    		
+
     def checkslew(self):
         while True:
             if self.telescope_status.get('slewing')==False:
@@ -2454,8 +2476,6 @@ class TCC(wx.Frame):
             wx.CallAfter(self.log, (message))
             time.sleep(120)
 
-
-
     def timer(self):
         """
         Dynamically updates Julian Date, LST, UTC, Local Time and current Epoch in the telescope control tab.
@@ -2586,6 +2606,7 @@ class Export(wx.Panel):
 '''
 Twisted Python
 '''
+
 class DataForwardingProtocol(basic.LineReceiver):
 
     def __init__(self):
@@ -2643,8 +2664,6 @@ class DataForwardingProtocol(basic.LineReceiver):
     	global stamp
     	stamp=str(t.year)+str(month)+str(day)+'  '+str(hour)+':'+str(minute)+':'+str(second)+': '
     	return stamp
-    	
-    	
 
 class TCCClient(protocol.ClientFactory):
 
