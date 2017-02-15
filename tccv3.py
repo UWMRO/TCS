@@ -1107,6 +1107,8 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
         self.Bind(wx.EVT_BUTTON, self.setRATrackingRate,self.init.rateRAButton)
         self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
+        self.Bind(wx.EVT_BUTTON, self.setmaxdRA, self.init.dRAButton)
+        self.Bind(wx.EVT_BUTTON, self.setmaxdDEC, self.init.dDECButton)
         self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
         self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
         self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
@@ -1197,13 +1199,21 @@ class TCC(wx.Frame):
         dlg.Destroy()
         if result == wx.ID_OK:
             if(self.protocol is not None):
-                #d= self.protocol.sendCommand("shutdown")
-                #d.addCallback(self.quit)
+                d= self.protocol.sendCommand("shutdown")
+                d.addCallback(self.quit)
                 self.quit()
             else:
-                self.Destroy()
+                self.quit()
 
     def quit(self):
+        """
+        Exit the GUI and shut down the reactor
+
+            Args:
+                self: points function towards WX application
+            Returns:
+                None
+        """
         self.Destroy()
         os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
         reactor.callFromThread(reactor.stop)
@@ -1222,12 +1232,12 @@ class TCC(wx.Frame):
         
         """
         if self.night:
-            self.SetBackgroundColour((176,23,23))
+            self.control.SetBackgroundColour((176,23,23))
             self.night=False
         else:
             self.night=True
-            color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
-            self.SetBackgroundColour(color)
+            #color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
+            self.control.SetBackgroundColour(self.d_color)
         return
 
     def on_Pacific(self,event):
@@ -2374,6 +2384,7 @@ class TCC(wx.Frame):
         if valid_input==True:
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
+            self.dict['RAtrackingRate'] = RArate
             self.log("Right Ascension Tracking Rate set to " + RArate)
         else:
             dlg = wx.MessageDialog(self,
@@ -2406,6 +2417,8 @@ class TCC(wx.Frame):
         if valid_input==True:
             self.control.currentDECTRPos.SetLabel(DECrate)
             self.control.currentDECTRPos.SetForegroundColour('black')
+            self.dict['DECtrackingRate'] = DECrate
+            self.log("Declination Tracking Rate set to " + DECrate)
         else:
             dlg = wx.MessageDialog(self,
                                "Please input an integer or float number.",
@@ -2413,7 +2426,69 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy() 
         return
-        
+
+    def setmaxdRA(self,event):
+        """
+                Sets the maximum RA adjustment the guider is allowed to perform.
+
+                Args:
+                        self: points function towards WX application.
+                        event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Maximum dRA" button in the initialization tab.
+
+                Returns:
+                        None
+                """
+        dRA = self.init.maxdRAText.GetValue()
+
+        valid_input = True
+
+        try:
+            val = float(dRA)
+        except ValueError:
+            valid_input = False
+
+        if valid_input == True:
+            self.dict['maxdRA'] = dRA
+            self.log("Maximum Guider Right Ascension offset set to " + dRA)
+        else:
+            dlg = wx.MessageDialog(self,
+                                   "Please input an integer or float number.",
+                                   "Error", wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+        return
+
+    def setmaxdDEC(self,event):
+        """
+                Sets the maximum DEC adjustment the guider is allowed to perform.
+
+                Args:
+                        self: points function towards WX application.
+                        event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Maximum dDEC" button in the initialization tab.
+
+                Returns:
+                        None
+                """
+        dDEC = self.init.maxdDECText.GetValue()
+
+        valid_input = True
+
+        try:
+            val = float(dDEC)
+        except ValueError:
+            valid_input = False
+
+        if valid_input == True:
+            self.dict['maxdDEC'] = dDEC
+            self.log("Maximum Guider Declination offset set to " + dDEC)
+        else:
+            dlg = wx.MessageDialog(self,
+                                   "Please input an integer or float number.",
+                                   "Error", wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+        return
+
     def onInit(self,event):
         """
         Initialize telescope systems according to values set in the TCC config file. Enables buttons throughout the GUI that depend on initialized systems to function.
