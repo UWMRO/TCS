@@ -169,19 +169,32 @@ class Control(wx.Panel):
 
         #Telescope Control Buttons
         self.slewButton = wx.Button(self, -1, "Slew to Target")
+        self.slewButton.SetBackgroundColour('Light Slate Blue')
+        self.slewButton.SetForegroundColour('White')
         self.slewButton.Disable()
         self.trackButton = wx.Button(self, -1, "Start Tracking")
+        self.trackButton.SetBackgroundColour('Light Slate Blue')
+        self.trackButton.SetForegroundColour('White')
         self.trackButton.Disable()
         self.stopButton = wx.Button(self, -1, "HALT MOTION")
         self.stopButton.SetBackgroundColour('Red')
+        self.stopButton.SetForegroundColour('White')
 
         #############################################################
 
         #Telescope Jog Controls
         self.jogNButton = wx.Button(self, -1, 'N')
+        self.jogNButton.SetBackgroundColour('Light Slate Blue')
+        self.jogNButton.SetForegroundColour('White')
         self.jogSButton = wx.Button(self, -1, 'S')
+        self.jogSButton.SetBackgroundColour('Light Slate Blue')
+        self.jogSButton.SetForegroundColour('White')
         self.jogWButton = wx.Button(self, -1, 'W')
+        self.jogWButton.SetBackgroundColour('Light Slate Blue')
+        self.jogWButton.SetForegroundColour('White')
         self.jogEButton = wx.Button(self, -1, 'E')
+        self.jogEButton.SetBackgroundColour('Light Slate Blue')
+        self.jogEButton.SetForegroundColour('White')
         self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
         self.jogIncrement.SetValue('1.0')
         self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(75,-1), style = wx.CB_DROPDOWN,
@@ -734,7 +747,11 @@ class Initialization(wx.Panel):
         #Buttons
         self.initButton = wx.Button(self, -1, "Initialize Telescope Systems") #Initialization; Begin threads
         self.parkButton= wx.Button(self, -1, "Park Telescope") #Park Telescope, send telescope to park position
+        self.parkButton.SetBackgroundColour('Light Slate Blue')
+        self.parkButton.SetForegroundColour('White')
         self.coverposButton=wx.Button(self,-1,"Slew to Cover Position") # Slew to Cover Position
+        self.coverposButton.SetBackgroundColour('Light Slate Blue')
+        self.coverposButton.SetForegroundColour('White')
 
         #############################################################
 
@@ -987,7 +1004,7 @@ class NightLog(wx.ScrolledWindow):
 class TCC(wx.Frame):
     title='Bifrost Telescope Control Computer'
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, self.title,size=(900,650)) #Wxpython frame object
+        wx.Frame.__init__(self, None, -1, self.title,size=(900,675)) #Wxpython frame object
 
         #############################################################
 
@@ -1199,8 +1216,11 @@ class TCC(wx.Frame):
         dlg.Destroy()
         if result == wx.ID_OK:
             if(self.protocol is not None):
-                d= self.protocol.sendCommand("shutdown")
-                d.addCallback(self.quit)
+                try:
+                    d= self.protocol.sendCommand("shutdown")
+                    d.addCallback(self.quit)
+                except AttributeError:
+                    print "Not Connected to Telescope"
                 self.quit()
             else:
                 self.quit()
@@ -1314,7 +1334,7 @@ class TCC(wx.Frame):
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
-        f_out=open(self.dir+today,'a')
+        f_out=open(self.dir+'/logs/'+today,'a')
         f_out.write(current_time_log+','+str(input)+'\n')
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
@@ -1583,13 +1603,12 @@ class TCC(wx.Frame):
         be transformed into an fk5 skycoord object.
         
         Args:
-                self: points function towards WX application.
                 ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss ,XXhXXmXXs and l=XXhXXmXXs
                 dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss, XXdXXmXXs and b=XXdXXmXXs
                 epoch (string): The epoch that the RA/DEC are specific to (usually J2000).
                 
          Returns:
-                None
+                self.coordinates:
         '''
         
         self.validity=False
@@ -1671,7 +1690,7 @@ class TCC(wx.Frame):
         N=0.5567530*T-0.0001185*(T**2)-0.0000116*(T**3)
         #print T, M, N
     
-        d_ra= M + N*np.cos(ra_in* np.pi / 180.)*np.tan(dec_in* np.pi / 180.)
+        d_ra= M + N*np.sin(ra_in* np.pi / 180.)*np.tan(dec_in* np.pi / 180.)
         d_dec=N*np.cos(ra_in* np.pi / 180.)
         #print d_ra, d_dec
     
@@ -1746,12 +1765,12 @@ class TCC(wx.Frame):
                 self.control.slewButton.SetLabel('Stop Slew')
                 self.control.slewButton.SetBackgroundColour('Light Steel Blue')
                 self.sb.SetStatusText('Slewing: True',1)
-                self.control.currentNamePos.SetLabel(name)
-                self.control.currentNamePos.SetForegroundColour((0,0,0))
-                self.control.currentRaPos.SetLabel(input_ra)
-            	self.control.currentRaPos.SetForegroundColour((0,0,0))
-            	self.control.currentDecPos.SetLabel(input_dec)
-            	self.control.currentDecPos.SetForegroundColour((0,0,0))
+                #self.control.currentNamePos.SetLabel(name)
+                #self.control.currentNamePos.SetForegroundColour((0,0,0))
+                #self.control.currentRaPos.SetLabel(input_ra)
+            	#self.control.currentRaPos.SetForegroundColour((0,0,0))
+            	#self.control.currentDecPos.SetLabel(input_dec)
+            	#self.control.currentDecPos.SetForegroundColour((0,0,0))
                 self.target_coords['Name']=name  #Store name of target for pointing routine
                 self.target_coords['RA']=input_ra #Store target RA for pointing routine
                 self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
@@ -1822,20 +1841,54 @@ class TCC(wx.Frame):
     	self.sb.SetStatusText('Slewing: False',1)
     	
     def getstatus(self):
-    	time.sleep(5.0)
-    	while True:
-    		self.LST=str(self.control.currentLSTPos.GetLabel())
-    		self.epoch=str(self.control.currentEpochPos.GetLabel())
-    		self.UTC=str(self.control.currentUTCPos.GetLabel())
-    		self.UTC=self.UTC.split(" ")
-    		self.UTCdate=self.UTC[0].split("/")
-    		self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
-    		self.UTC=self.UTCdate+"T"+self.UTC[1]
-    		self.sfile="logs/"+self.UTCdate+".txt"
-    		self.LST=self.LST.split(':')
-    		self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-    		self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
-    		time.sleep(15.0)
+        time.sleep(5.0)
+        while True:
+            self.LST=str(self.control.currentLSTPos.GetLabel())
+            self.epoch=str(self.control.currentEpochPos.GetLabel())
+            self.UTC=str(self.control.currentUTCPos.GetLabel())
+            self.UTC=self.UTC.split(" ")
+            self.UTCdate=self.UTC[0].split("/")
+            self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
+            self.UTC=self.UTCdate+"T"+self.UTC[1]
+            self.sfile="logs/"+self.UTCdate+".txt"
+            self.LST=self.LST.split(':')
+            self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+            try:
+                self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
+            except AttributeError:
+                print "Not Connected to Telescope"
+            time.sleep(15.0)
+
+    def displaystatus(self):
+        """
+                Update TCC Status grid with information from the TCC.telescope_status dictionary.
+
+                Args:
+                        None
+
+                Returns:
+                        None
+                """
+        while True:
+            time.sleep(1.0)
+            wx.CallAfter(self.control.currentRaPos.SetLabel,(self.telescope_status['RA']))
+            if self.telescope_status['RA']=='Unknown':
+                wx.CallAfter(self.control.currentRaPos.SetForegroundColour,('Red'))
+            else:
+                wx.CallAfter(self.control.currentRaPos.SetForegroundColour,('k'))
+
+            wx.CallAfter(self.control.currentDecPos.SetLabel,(self.telescope_status['Dec']))
+            if self.telescope_status['Dec'] == 'Unknown':
+                wx.CallAfter(self.control.currentDecPos.SetForegroundColour,('Red'))
+            else:
+                wx.CallAfter(self.control.currentDecPos.SetForegroundColour,('k'))
+
+            if self.telescope_status['pointState'] == False:
+                wx.CallAfter(self.control.currentNamePos.SetLabel,('Not Pointed'))
+                wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ('Red'))
+            else:
+                wx.CallAfter(self.control.currentNamePos.SetLabel,(self.target_coords['Name']))
+                wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ('k'))
     	
     def set_target(self, event):
         """
@@ -2017,7 +2070,7 @@ class TCC(wx.Frame):
         
         """
         try:
-            f_in=open(self.target.fileText.GetValue())
+            f_in=open('targetlists/'+self.target.fileText.GetValue())
         except IOError:
             dlg = wx.MessageDialog(self,
                            "Path Error: File not Found.",
@@ -2325,16 +2378,25 @@ class TCC(wx.Frame):
         
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
         if target_name=="Zenith":
-        	self.protocol.sendCommand("zenith")
+            try:
+                self.protocol.sendCommand("zenith")
+            except AttributeError:
+                print "Not Connected to Telescope"
         return
 
     def parkscope(self,event):
-    	if self.telescope_status.get('slewing')==False:
-    		self.protocol.sendCommand("park")
+        if self.telescope_status.get('slewing')==False:
+            try:
+                self.protocol.sendCommand("park")
+            except AttributeError:
+                print "Not Connected to Telescope"
     		
     def coverpos(self,event):
-    	if self.telescope_status.get('slewing')==False:
-    		self.protocol.sendCommand("coverpos")
+        if self.telescope_status.get('slewing')==False:
+            try:
+                self.protocol.sendCommand("coverpos")
+            except AttributeError:
+                print "Not Connected to Telescope"
     		
     def pointing(self,event):
         """
@@ -2358,7 +2420,10 @@ class TCC(wx.Frame):
     	self.LST=str(self.control.currentLSTPos.GetValue())
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-    	self.protocol.sendCommand("point "+self.targetRA+ " "+self.targetDec+" "+self.LST)
+        try:
+    	    self.protocol.sendCommand("point "+self.targetRA+ " "+self.targetDec+" "+self.LST)
+        except AttributeError:
+            print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
     		
     def setRATrackingRate(self,event):
@@ -2526,6 +2591,7 @@ class TCC(wx.Frame):
             thread.start_new_thread(self.timer,())
             thread.start_new_thread(self.checkslew,())
             thread.start_new_thread(self.getstatus,())
+            thread.start_new_thread(self.displaystatus,())
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
             self.control.currentJDPos.SetForegroundColour('black')
@@ -2544,6 +2610,15 @@ class TCC(wx.Frame):
                 self.log("Failed to connect to telescope. Restart the application.")
 
     def logstatus(self):
+        """
+        Display parameters in telescope status dictionary to the user in each log box.
+
+                Args:
+                        None
+
+                Returns:
+                        None
+                """
         while True:
             message=''
             for key in self.telescope_status:

@@ -1,0 +1,318 @@
+20170330T123042,==== Initializing Parameters ====
+20170330T123042,Reading in config file ....
+20170330T123042,['elevation', '1198']
+20170330T123042,['lastGuiderRot', 'None']
+20170330T123042,['lastRA', 'None']
+20170330T123042,['decWrap', '{-270,270}']
+20170330T123042,['horizonLimit', '20']
+20170330T123042,['lat', '46.9528']
+20170330T123042,['lastFocusPos', '1500']
+20170330T123042,['RAtrackingRate', '15.04']
+20170330T123042,['lon', '-120.7278']
+20170330T123042,['maxdRA', '2']
+20170330T123042,['maxdDEC', '2']
+20170330T123042,['lastDEC', 'None']
+20170330T123042,Configuration parameters read
+20170330T123101,Failed to connect to telescope. Restart the application.
+20170330T123101,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T123301,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T123501,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T123701,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T123800,==== Initializing Parameters ====
+20170330T123800,Reading in config file ....
+20170330T123800,['elevation', '1198']
+20170330T123800,['lastGuiderRot', 'None']
+20170330T123800,['lastRA', 'None']
+20170330T123800,['decWrap', '{-270,270}']
+20170330T123800,['horizonLimit', '20']
+20170330T123800,['lat', '46.9528']
+20170330T123800,['lastFocusPos', '1500']
+20170330T123800,['RAtrackingRate', '15.04']
+20170330T123800,['lon', '-120.7278']
+20170330T123800,['maxdRA', '2']
+20170330T123800,['maxdDEC', '2']
+20170330T123800,['lastDEC', 'None']
+20170330T123800,Configuration parameters read
+20170330T124225,==== Initializing Parameters ====
+20170330T124225,Reading in config file ....
+20170330T124225,['elevation', '1198']
+20170330T124225,['lastGuiderRot', 'None']
+20170330T124225,['lastRA', 'None']
+20170330T124225,['decWrap', '{-270,270}']
+20170330T124225,['horizonLimit', '20']
+20170330T124225,['lat', '46.9528']
+20170330T124225,['lastFocusPos', '1500']
+20170330T124225,['RAtrackingRate', '15.04']
+20170330T124225,['lon', '-120.7278']
+20170330T124225,['maxdRA', '2']
+20170330T124225,['maxdDEC', '2']
+20170330T124225,['lastDEC', 'None']
+20170330T124225,Configuration parameters read
+20170330T124255,Failed to connect to telescope. Restart the application.
+20170330T124255,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T124455,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T124655,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T124855,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T125055,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T125255,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T125455,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T125656,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T125856,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T130056,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T130256,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T130456,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T130656,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T130856,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T131056,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T131256,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T131456,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T131656,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T131856,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T132057,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T132257,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T132457,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T132657,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T132857,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T133057,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T133257,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T133457,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T133657,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T133857,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T134057,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T134257,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T134458,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T134658,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T134858,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T135058,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T135258,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T135458,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T135658,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T135858,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T140005,==== Initializing Parameters ====
+20170330T140005,Reading in config file ....
+20170330T140005,['elevation', '1198']
+20170330T140005,['lastGuiderRot', 'None']
+20170330T140005,['lastRA', 'None']
+20170330T140005,['decWrap', '{-270,270}']
+20170330T140005,['horizonLimit', '20']
+20170330T140005,['lat', '46.9528']
+20170330T140005,['lastFocusPos', '1500']
+20170330T140005,['RAtrackingRate', '15.04']
+20170330T140005,['lon', '-120.7278']
+20170330T140005,['maxdRA', '2']
+20170330T140005,['maxdDEC', '2']
+20170330T140005,['lastDEC', 'None']
+20170330T140005,Configuration parameters read
+20170330T140100,==== Initializing Parameters ====
+20170330T140100,Reading in config file ....
+20170330T140100,['elevation', '1198']
+20170330T140100,['lastGuiderRot', 'None']
+20170330T140100,['lastRA', 'None']
+20170330T140100,['decWrap', '{-270,270}']
+20170330T140100,['horizonLimit', '20']
+20170330T140100,['lat', '46.9528']
+20170330T140100,['lastFocusPos', '1500']
+20170330T140100,['RAtrackingRate', '15.04']
+20170330T140100,['lon', '-120.7278']
+20170330T140100,['maxdRA', '2']
+20170330T140100,['maxdDEC', '2']
+20170330T140100,['lastDEC', 'None']
+20170330T140100,Configuration parameters read
+20170330T140225,==== Initializing Parameters ====
+20170330T140225,Reading in config file ....
+20170330T140225,['elevation', '1198']
+20170330T140225,['lastGuiderRot', 'None']
+20170330T140225,['lastRA', 'None']
+20170330T140225,['decWrap', '{-270,270}']
+20170330T140225,['horizonLimit', '20']
+20170330T140225,['lat', '46.9528']
+20170330T140225,['lastFocusPos', '1500']
+20170330T140225,['RAtrackingRate', '15.04']
+20170330T140225,['lon', '-120.7278']
+20170330T140225,['maxdRA', '2']
+20170330T140225,['maxdDEC', '2']
+20170330T140225,['lastDEC', 'None']
+20170330T140225,Configuration parameters read
+20170330T140413,==== Initializing Parameters ====
+20170330T140413,Reading in config file ....
+20170330T140413,['elevation', '1198']
+20170330T140413,['lastGuiderRot', 'None']
+20170330T140413,['lastRA', 'None']
+20170330T140413,['decWrap', '{-270,270}']
+20170330T140413,['horizonLimit', '20']
+20170330T140413,['lat', '46.9528']
+20170330T140413,['lastFocusPos', '1500']
+20170330T140413,['RAtrackingRate', '15.04']
+20170330T140413,['lon', '-120.7278']
+20170330T140413,['maxdRA', '2']
+20170330T140413,['maxdDEC', '2']
+20170330T140413,['lastDEC', 'None']
+20170330T140413,Configuration parameters read
+20170330T140418,Failed to connect to telescope. Restart the application.
+20170330T140418,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T140442,==== Initializing Parameters ====
+20170330T140442,Reading in config file ....
+20170330T140442,['elevation', '1198']
+20170330T140442,['lastGuiderRot', 'None']
+20170330T140442,['lastRA', 'None']
+20170330T140442,['decWrap', '{-270,270}']
+20170330T140442,['horizonLimit', '20']
+20170330T140442,['lat', '46.9528']
+20170330T140442,['lastFocusPos', '1500']
+20170330T140442,['RAtrackingRate', '15.04']
+20170330T140442,['lon', '-120.7278']
+20170330T140442,['maxdRA', '2']
+20170330T140442,['maxdDEC', '2']
+20170330T140442,['lastDEC', 'None']
+20170330T140442,Configuration parameters read
+20170330T140532,==== Initializing Parameters ====
+20170330T140532,Reading in config file ....
+20170330T140532,['elevation', '1198']
+20170330T140532,['lastGuiderRot', 'None']
+20170330T140532,['lastRA', 'None']
+20170330T140532,['decWrap', '{-270,270}']
+20170330T140532,['horizonLimit', '20']
+20170330T140532,['lat', '46.9528']
+20170330T140532,['lastFocusPos', '1500']
+20170330T140532,['RAtrackingRate', '15.04']
+20170330T140532,['lon', '-120.7278']
+20170330T140532,['maxdRA', '2']
+20170330T140532,['maxdDEC', '2']
+20170330T140532,['lastDEC', 'None']
+20170330T140532,Configuration parameters read
+20170330T140537,Failed to connect to telescope. Restart the application.
+20170330T140537,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T140550,==== Initializing Parameters ====
+20170330T140550,Reading in config file ....
+20170330T140550,['elevation', '1198']
+20170330T140550,['lastGuiderRot', 'None']
+20170330T140550,['lastRA', 'None']
+20170330T140550,['decWrap', '{-270,270}']
+20170330T140550,['horizonLimit', '20']
+20170330T140550,['lat', '46.9528']
+20170330T140550,['lastFocusPos', '1500']
+20170330T140550,['RAtrackingRate', '15.04']
+20170330T140550,['lon', '-120.7278']
+20170330T140550,['maxdRA', '2']
+20170330T140550,['maxdDEC', '2']
+20170330T140550,['lastDEC', 'None']
+20170330T140550,Configuration parameters read
+20170330T140555,Failed to connect to telescope. Restart the application.
+20170330T140555,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T140646,==== Initializing Parameters ====
+20170330T140646,Reading in config file ....
+20170330T140646,['elevation', '1198']
+20170330T140646,['lastGuiderRot', 'None']
+20170330T140646,['lastRA', 'None']
+20170330T140646,['decWrap', '{-270,270}']
+20170330T140646,['horizonLimit', '20']
+20170330T140646,['lat', '46.9528']
+20170330T140646,['lastFocusPos', '1500']
+20170330T140646,['RAtrackingRate', '15.04']
+20170330T140646,['lon', '-120.7278']
+20170330T140646,['maxdRA', '2']
+20170330T140646,['maxdDEC', '2']
+20170330T140646,['lastDEC', 'None']
+20170330T140646,Configuration parameters read
+20170330T140650,Failed to connect to telescope. Restart the application.
+20170330T140650,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T144543,==== Initializing Parameters ====
+20170330T144543,Reading in config file ....
+20170330T144543,['elevation', '1198']
+20170330T144543,['lastGuiderRot', 'None']
+20170330T144543,['lastRA', 'None']
+20170330T144543,['decWrap', '{-270,270}']
+20170330T144543,['horizonLimit', '20']
+20170330T144543,['lat', '46.9528']
+20170330T144543,['lastFocusPos', '1500']
+20170330T144543,['RAtrackingRate', '15.04']
+20170330T144543,['lon', '-120.7278']
+20170330T144543,['maxdRA', '2']
+20170330T144543,['maxdDEC', '2']
+20170330T144543,['lastDEC', 'None']
+20170330T144543,Configuration parameters read
+20170330T144553,Failed to connect to telescope. Restart the application.
+20170330T144553,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T144753,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T144953,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T145153,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T145353,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T145553,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T145754,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T145954,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T150154,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T150322,==== Initializing Parameters ====
+20170330T150322,Reading in config file ....
+20170330T150322,['elevation', '1198']
+20170330T150322,['lastGuiderRot', 'None']
+20170330T150322,['lastRA', 'None']
+20170330T150322,['decWrap', '{-270,270}']
+20170330T150322,['horizonLimit', '20']
+20170330T150322,['lat', '46.9528']
+20170330T150322,['lastFocusPos', '1500']
+20170330T150322,['RAtrackingRate', '15.04']
+20170330T150322,['lon', '-120.7278']
+20170330T150322,['maxdRA', '2']
+20170330T150322,['maxdDEC', '2']
+20170330T150322,['lastDEC', 'None']
+20170330T150322,Configuration parameters read
+20170330T150346,Failed to connect to telescope. Restart the application.
+20170330T150346,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T150546,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T150737,==== Initializing Parameters ====
+20170330T150737,Reading in config file ....
+20170330T150737,['elevation', '1198']
+20170330T150737,['lastGuiderRot', 'None']
+20170330T150737,['lastRA', 'None']
+20170330T150737,['decWrap', '{-270,270}']
+20170330T150737,['horizonLimit', '20']
+20170330T150737,['lat', '46.9528']
+20170330T150737,['lastFocusPos', '1500']
+20170330T150737,['RAtrackingRate', '15.04']
+20170330T150737,['lon', '-120.7278']
+20170330T150737,['maxdRA', '2']
+20170330T150737,['maxdDEC', '2']
+20170330T150737,['lastDEC', 'None']
+20170330T150737,Configuration parameters read
+20170330T150742,Failed to connect to telescope. Restart the application.
+20170330T150742,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T151722,==== Initializing Parameters ====
+20170330T151722,Reading in config file ....
+20170330T151722,['elevation', '1198']
+20170330T151722,['lastGuiderRot', 'None']
+20170330T151722,['lastRA', 'None']
+20170330T151722,['decWrap', '{-270,270}']
+20170330T151722,['horizonLimit', '20']
+20170330T151722,['lat', '46.9528']
+20170330T151722,['lastFocusPos', '1500']
+20170330T151722,['RAtrackingRate', '15.04']
+20170330T151722,['lon', '-120.7278']
+20170330T151722,['maxdRA', '2']
+20170330T151722,['maxdDEC', '2']
+20170330T151722,['lastDEC', 'None']
+20170330T151722,Configuration parameters read
+20170330T151727,Failed to connect to telescope. Restart the application.
+20170330T151727,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T152920,==== Initializing Parameters ====
+20170330T152920,Reading in config file ....
+20170330T152920,['elevation', '1198']
+20170330T152920,['lastGuiderRot', 'None']
+20170330T152920,['lastRA', 'None']
+20170330T152920,['decWrap', '{-270,270}']
+20170330T152920,['horizonLimit', '20']
+20170330T152920,['lat', '46.9528']
+20170330T152920,['lastFocusPos', '1500']
+20170330T152920,['RAtrackingRate', '15.04']
+20170330T152920,['lon', '-120.7278']
+20170330T152920,['maxdRA', '2']
+20170330T152920,['maxdDEC', '2']
+20170330T152920,['lastDEC', 'None']
+20170330T152920,Configuration parameters read
+20170330T152926,Failed to connect to telescope. Restart the application.
+20170330T152926,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T153126,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T153326,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T153526,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T153726,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T153926,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20170330T154126,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
