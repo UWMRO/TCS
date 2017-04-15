@@ -277,8 +277,6 @@ const char *parser(std::string input)
 	const char *out = "Telescope at Zenith";
 	return out;
 	}
-	return "Invalid Command";
-	
 	if(tokens[0] == "point")
 	{
 	double ira_deg, idec_deg;	// initial values
@@ -300,6 +298,9 @@ const char *parser(std::string input)
     const char *out= "Pointing set";
     return out;
 	}
+	return "Invalid Command";
+	
+	
 	
 }
 

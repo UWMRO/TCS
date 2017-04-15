@@ -1932,7 +1932,7 @@ class TCC(wx.Frame):
             else:
                 wx.CallAfter(self.control.currentNamePos.SetLabel,(self.target_coords['Name']))
                 wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ((0,0,0)))
-    		print "Display"
+    		#print "Display"
     def set_target(self, event):
         """
         Take a selected item from the list and set it as the current target.
@@ -2408,22 +2408,25 @@ class TCC(wx.Frame):
         target_dec=self.init.targetDecText.GetValue()
         target_epoch=self.init.targetEpochText.GetValue()
         
-        if target_name=='':
-            self.control.currentNamePos.SetLabel('Unknown')
-            self.control.currentNamePos.SetForegroundColour((255,0,0))
-        else:
-            self.control.currentNamePos.SetLabel(str(target_name))
-            self.control.currentNamePos.SetForegroundColour('black')   
-        
-        self.control.currentRaPos.SetLabel(str(target_ra))
-        self.control.currentRaPos.SetForegroundColour('black')
-        self.control.currentDecPos.SetLabel(str(target_dec))
-        self.control.currentDecPos.SetForegroundColour('black')
-        
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
         if target_name=="Zenith":
             try:
                 self.protocol.sendCommand("zenith")
+            except AttributeError:
+                print "Not Connected to Telescope"
+        else:
+            self.targetRA = str(target_ra)
+            self.targetRA = self.targetRA.split(':')
+            self.targetRA = float(self.targetRA[0]) + float(self.targetRA[1]) / 60. + float(self.targetRA[2]) / 3600.
+            self.targetRA = self.targetRA * 15.0  # Degrees
+            self.targetDEC = str(target_dec)
+            self.targetDEC = self.targetDEC.split(':')
+            self.targetDEC = float(self.targetDEC[0]) + float(self.targetDEC[1]) / 60. + float(self.targetDEC[2]) / 3600.
+            self.LST = str(self.control.currentLSTPos.GetValue())
+            self.LST = self.LST.split(':')
+            self.LST = float(self.LST[0]) + float(self.LST[1]) / 60. + float(self.LST[2]) / 3600.
+            try:
+                self.protocol.sendCommand("point " + self.targetRA + " " + self.targetDec + " " + self.LST)
             except AttributeError:
                 print "Not Connected to Telescope"
         return
