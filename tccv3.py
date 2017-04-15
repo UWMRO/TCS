@@ -30,6 +30,7 @@ from twisted.internet import wxreactor
 wxreactor.install()
 from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
+import subprocess
 
 matplotlib.use('WXAgg')
 
