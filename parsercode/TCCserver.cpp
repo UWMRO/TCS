@@ -169,10 +169,10 @@ const char *parser(std::string input)
 	if(tokens[0] == "offset")
 	{
 		const char *offset;
-		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
+		std::cout << "offset " << tokens[1] << " "<< tokens[2] << tokens[3] << tokens[4] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
 		double RATR= ::atof(tokens[4].c_str());
-		//pmc.stopSlew();
+		pmc.stopSlew();
 		if(tokens[1]=="N")
 		{
 			pmc.Jog(DecAxis,inc);
@@ -395,7 +395,7 @@ void Listener(void) {
 	//std::cout << "results are: " << results << std::endl;
 	//const char *msg = "receive data";
 	std::cout << results << std::endl;
-	send(new_fd, results, strlen(results), 0);
+	//send(new_fd, results, strlen(results), 0);
 
 	
 	//incoming_data_buffer[bytes_received] = '\0';

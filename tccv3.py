@@ -1400,9 +1400,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset N "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset N "+str(self.control.jogIncrement.GetValue()))
+            self.protocol.sendCommand("offset N "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
     		
     def Woffset(self,event):
@@ -1429,9 +1429,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset W "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset W "+str(self.control.jogIncrement.GetValue()))
+            self.protocol.sendCommand("offset W "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
 
     def Eoffset(self,event):
@@ -1459,9 +1459,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset E "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset E "+str(self.control.jogIncrement.GetValue()))
+            self.protocol.sendCommand("offset E "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
 
     def Soffset(self,event):
@@ -1488,9 +1488,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_enc) + ' encoder counts')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue())+"True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset S "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-		    self.protocol.sendCommand("offset S "+str(self.control.jogIncrement.GetValue()))
+		    self.protocol.sendCommand("offset S "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
         
     def focusIncPlus(self,event):
@@ -1829,10 +1829,11 @@ class TCC(wx.Frame):
     		self.control.jogWButton.Enable(bool)
     		self.control.jogEButton.Enable(bool)
     	if track==True:
-    		self.control.jogNButton.Enable(False)
-    		self.control.jogSButton.Enable(False)
-    		self.control.jogWButton.Enable(False)
-    		self.control.jogEButton.Enable(False)
+    		boolval=False
+    		self.control.jogNButton.Enable(boolval)
+    		self.control.jogSButton.Enable(boolval)
+    		self.control.jogWButton.Enable(boolval)
+    		self.control.jogEButton.Enable(boolval)
     	self.control.trackButton.Enable(bool)
     	self.init.parkButton.Enable(bool)
     	self.init.coverposButton.Enable(bool)
@@ -1842,7 +1843,16 @@ class TCC(wx.Frame):
     	self.sb.SetStatusText('Slewing: False',1)
     	
     def getstatus(self):
-        time.sleep(5.0)
+        """
+                Generate a log file for the current utc date. Prompt drivers for status of RA and DEC and add line to log file in form "UTC_DATE RA DEC EPOCH LST".
+
+                Args:
+                        None
+
+                Returns:
+                        None
+        """
+    	time.sleep(2.0)
         while True:
             self.LST=str(self.control.currentLSTPos.GetLabel())
             self.epoch=str(self.control.currentEpochPos.GetLabel())
@@ -1851,15 +1861,45 @@ class TCC(wx.Frame):
             self.UTCdate=self.UTC[0].split("/")
             self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
             self.UTC=self.UTCdate+"T"+self.UTC[1]
-            self.sfile="logs/"+self.UTCdate+".txt"
+            self.sfile="positionlogs/"+self.UTCdate+".txt"
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+            print "Get"
             try:
                 self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
             except AttributeError:
                 print "Not Connected to Telescope"
-            time.sleep(15.0)
+            time.sleep(1.0)
+    def watchstatus(self):
+    	"""
+                Update TCC Status Dictionaries with information from the physical logs generated in TCC.getstatus(). 
 
+                Args:
+                        None
+
+                Returns:
+                        None
+        """
+        time.sleep(3.0)
+        while True:
+  			time.sleep(1.0)
+  			self.UTC=str(self.control.currentUTCPos.GetLabel())
+  			self.UTC=self.UTC.split(" ")
+  			self.UTCdate=self.UTC[0].split("/")
+  			self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
+  			status_file = open("positionlogs/"+str(self.UTCdate)+".txt","r")
+  			current_pos = status_file.readlines()[-1].split()
+  			status_file.close()
+  			current_RA = current_pos[1]
+  			current_DEC = current_pos[2]
+  			current_SkyCoord = SkyCoord(ra=float(current_RA)*u.hourangle, dec=float		(current_DEC)*u.degree, frame='icrs')
+  			current_RADEC = current_SkyCoord.to_string('hmsdms')
+  			current_RA, current_DEC = current_RADEC.split(' ')
+  			self.telescope_status['RA']=current_RA
+  			self.telescope_status['Dec']=current_DEC
+  			#print "Watch"
+    	
+    	
     def displaystatus(self):
         """
                 Update TCC Status grid with information from the TCC.telescope_status dictionary.
@@ -1869,28 +1909,30 @@ class TCC(wx.Frame):
 
                 Returns:
                         None
-                """
+        """
+        #time.sleep(1.0)
         while True:
+            #print "Display"
             time.sleep(1.0)
             wx.CallAfter(self.control.currentRaPos.SetLabel,(self.telescope_status['RA']))
             if self.telescope_status['RA']=='Unknown':
                 wx.CallAfter(self.control.currentRaPos.SetForegroundColour,('Red'))
             else:
-                wx.CallAfter(self.control.currentRaPos.SetForegroundColour,('k'))
+                wx.CallAfter(self.control.currentRaPos.SetForegroundColour,((0,0,0)))
 
             wx.CallAfter(self.control.currentDecPos.SetLabel,(self.telescope_status['Dec']))
             if self.telescope_status['Dec'] == 'Unknown':
                 wx.CallAfter(self.control.currentDecPos.SetForegroundColour,('Red'))
             else:
-                wx.CallAfter(self.control.currentDecPos.SetForegroundColour,('k'))
+                wx.CallAfter(self.control.currentDecPos.SetForegroundColour,((0,0,0)))
 
             if self.telescope_status['pointState'] == False:
                 wx.CallAfter(self.control.currentNamePos.SetLabel,('Not Pointed'))
                 wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ('Red'))
             else:
                 wx.CallAfter(self.control.currentNamePos.SetLabel,(self.target_coords['Name']))
-                wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ('k'))
-    	
+                wx.CallAfter(self.control.currentNamePos.SetForegroundColour, ((0,0,0)))
+    		print "Display"
     def set_target(self, event):
         """
         Take a selected item from the list and set it as the current target.
@@ -2589,11 +2631,14 @@ class TCC(wx.Frame):
             self.init.parkButton.Enable()
             self.init.coverposButton.Enable()
             self.init.onTargetButton.Enable()
-
+			
+			#Watch Dog Threads
             thread.start_new_thread(self.timer,())
             thread.start_new_thread(self.checkslew,())
             thread.start_new_thread(self.getstatus,())
+            thread.start_new_thread(self.watchstatus,())
             thread.start_new_thread(self.displaystatus,())
+            
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
             self.control.currentJDPos.SetForegroundColour('black')
@@ -2830,13 +2875,13 @@ class TCCClient(protocol.ClientFactory):
         reactor.stop()
 
 if __name__=="__main__":
+	global pipe
 	try:
   		app = wx.App(False)
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
   		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
-  		thread.start_new_thread(os.system,("./parsercode/test",))
   		time.sleep(3)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
