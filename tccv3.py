@@ -1892,11 +1892,12 @@ class TCC(wx.Frame):
     	
     def set_target(self, event):
         """
-        Take a selected item from the list and set it as the current target. Load it into the control tab and load it's coordinates into the guider control tab for finder charts
+        Take a selected item from the list and set it as the current target.
+        Load it into the control tab and load it's coordinates into the guider control tab for finder charts
         
         Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "Select as Current Target" button in the target list tab.
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Select as Current
+                Target" button in the target list tab.
                 
         Returns:
                 None
@@ -2833,8 +2834,8 @@ if __name__=="__main__":
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		#pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
-  		#thread.start_new_thread(os.system,("./parsercode/test",))
+  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		thread.start_new_thread(os.system,("./parsercode/test",))
   		time.sleep(3)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
