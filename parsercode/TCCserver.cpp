@@ -396,7 +396,7 @@ void Listener(void) {
 	//std::cout << "results are: " << results << std::endl;
 	//const char *msg = "receive data";
 	std::cout << results << std::endl;
-	//send(new_fd, results, strlen(results), 0);
+	send(new_fd, results, strlen(results), 0);
 
 	
 	//incoming_data_buffer[bytes_received] = '\0';

@@ -32,7 +32,7 @@ from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
 
-matplotlib.use('WXAgg')
+#matplotlib.use('WXAgg')
 
 global pipe
 pipe=None
@@ -1764,7 +1764,7 @@ class TCC(wx.Frame):
                 thread.start_new_thread(self.velwatch,())
                 #d.addCallback(self.vcback)
                 self.control.slewButton.SetLabel('Stop Slew')
-                self.control.slewButton.SetBackgroundColour('Light Steel Blue')
+                self.control.slewButton.SetBackgroundColour('Firebrick')
                 self.sb.SetStatusText('Slewing: True',1)
                 #self.control.currentNamePos.SetLabel(name)
                 #self.control.currentNamePos.SetForegroundColour((0,0,0))
@@ -1791,7 +1791,7 @@ class TCC(wx.Frame):
         elif self.telescope_status.get('slewing')==True:
             self.protocol.sendCommand("stop")
             self.control.slewButton.SetLabel('Start Slew')
-            self.control.slewButton.SetBackgroundColour(self.d_color)
+            self.control.slewButton.SetBackgroundColour("Light Slate Blue")
             self.sb.SetStatusText('Slewing: False',1)
 
             self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
@@ -1840,6 +1840,7 @@ class TCC(wx.Frame):
     	
     def slewbutton_toggle(self):
     	self.control.slewButton.SetLabel('Start Slew')
+        self.control.slewButton.SetBackgroundColour('Light Slate Blue')
     	self.sb.SetStatusText('Slewing: False',1)
     	
     def getstatus(self):
@@ -1861,10 +1862,10 @@ class TCC(wx.Frame):
             self.UTCdate=self.UTC[0].split("/")
             self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
             self.UTC=self.UTCdate+"T"+self.UTC[1]
-            self.sfile="positionlogs/"+self.UTCdate+".txt"
+            self.sfile=self.dir+"/positionlogs/"+self.UTCdate+".txt"
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-            print "Get"
+            #print "Get"
             try:
                 self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
             except AttributeError:
@@ -1887,7 +1888,7 @@ class TCC(wx.Frame):
   			self.UTC=self.UTC.split(" ")
   			self.UTCdate=self.UTC[0].split("/")
   			self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
-  			status_file = open("positionlogs/"+str(self.UTCdate)+".txt","r")
+  			status_file = open(self.dir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
   			current_pos = status_file.readlines()[-1].split()
   			status_file.close()
   			current_RA = current_pos[1]
@@ -2818,7 +2819,7 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui = self.factory.gui
         gui.protocol = self
         gui.control.protocol= self
-        print "data recieved from server" ,data
+        print "data received from server:" ,data
 
         if gui:
             val = gui.control.logBox.GetValue()
@@ -2878,7 +2879,7 @@ class TCCClient(protocol.ClientFactory):
         reactor.stop()
 
 if __name__=="__main__":
-	global pipe
+	#global pipe
 	try:
   		app = wx.App(False)
   		app.frame = TCC()
