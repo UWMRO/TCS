@@ -1,5 +1,5 @@
 # Telescope Control Computer (TCC)
-
+Check the Wiki Tab for more information.
 
 ## Purpose
 This repository contains code for use at Manastash Ridge Observatory (MRO). It provides a
