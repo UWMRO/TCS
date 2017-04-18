@@ -1325,11 +1325,11 @@ class TCC(wx.Frame):
         Necessary to define command structure for easy expansion.
         
          Args:
-                self: points function towards WX application.
-                input (string): The desired message to be logged.
+            self: points function towards WX application.
+            input (string): The desired message to be logged.
                 
          Returns:
-                None
+            None
         
         """
         today=time.strftime('%Y%m%d.log')
@@ -1348,10 +1348,10 @@ class TCC(wx.Frame):
         Get the basic telescope information if it is available.  It would be nice if the dictionary was defined external to the program.
         
          Args:
-                self: points function towards WX application.
+            self: points function towards WX application.
                 
          Returns:
-                None
+            None
         """
         self.log('==== Initializing Parameters ====')
         self.log('Reading in config file ....')
@@ -1381,11 +1381,11 @@ class TCC(wx.Frame):
         Jog Command; apply a coordinate offset in the North direction.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "N" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget. Tethered to the "N" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         unit=self.control.jogUnits.GetValue()
         arcsec_to_enc_counts= 20.0
@@ -1410,11 +1410,11 @@ class TCC(wx.Frame):
         Jog Command; apply a coordinate offset in the West direction.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "W" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget. Tethered to the "W" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         unit = self.control.jogUnits.GetValue()
         arcsec_to_enc_counts = 20.0
@@ -1439,11 +1439,11 @@ class TCC(wx.Frame):
         Jog Command; apply a coordinate offset in the East direction.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.Tethered to the "E" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget.Tethered to the "E" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
 
         unit = self.control.jogUnits.GetValue()
@@ -1469,11 +1469,11 @@ class TCC(wx.Frame):
         Jog Command; apply a coordinate offset in the South direction.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.Tethered to the "S" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget.Tethered to the "S" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         unit = self.control.jogUnits.GetValue()
         arcsec_to_enc_counts = 20.0
@@ -1498,11 +1498,11 @@ class TCC(wx.Frame):
         Focus Increment; apply a positive focus increment of 1500.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.Tethered to the "Increment Positive" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget.Tethered to the "Increment Positive" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         val=self.control.focusAbsText.GetValue()
         val=float(val)+1500.0
@@ -1515,11 +1515,11 @@ class TCC(wx.Frame):
         Focus Increment; apply a negative focus increment of 1500.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "Increment Negative" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget. Tethered to the "Increment Negative" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         val=self.control.focusAbsText.GetValue()
         val=float(val)-1500.0
@@ -1533,11 +1533,11 @@ class TCC(wx.Frame):
         Overwrites current TCC focus value and sends value to drivers.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "Move Absolute" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget. Tethered to the "Move Absolute" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         """
         inc=self.control.focusAbsText.GetValue()
         curFocus=self.control.currentFocusPos.GetLabel()
@@ -1554,11 +1554,11 @@ class TCC(wx.Frame):
         Halt Telescope motion, emergency button, use stop slew during slewing if possible.
         
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "HALT MOTION" button in the telescope control tab.
+            self: points function towards WX application.
+            event: handler to allow function to be tethered to a wx widget. Tethered to the "HALT MOTION" button in the telescope control tab.
                 
          Returns:
-                None
+            None
          
         '''
         self.protocol.sendCommand("halt")
@@ -1570,11 +1570,11 @@ class TCC(wx.Frame):
         Passes a command to the telescope to toggle tracking.
         
          Args:
-                self: points function towards WX application.
-                evt: handler to allow function to be tethered to a wx widget. Tethered to the "Start Tracking" button in the telescope control tab.
+            self: points function towards WX application.
+            evt: handler to allow function to be tethered to a wx widget. Tethered to the "Start Tracking" button in the telescope control tab.
                 
          Returns:
-                None
+            None
         '''
         RATR=self.control.currentRATRPos.GetLabel()
         DECTR=self.control.currentDECTRPos.GetLabel()
@@ -1604,12 +1604,12 @@ class TCC(wx.Frame):
         be transformed into an fk5 skycoord object.
         
         Args:
-                ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss ,XXhXXmXXs and l=XXhXXmXXs
-                dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss, XXdXXmXXs and b=XXdXXmXXs
-                epoch (string): The epoch that the RA/DEC are specific to (usually J2000).
+            ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss ,XXhXXmXXs and l=XXhXXmXXs
+            dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss, XXdXXmXXs and b=XXdXXmXXs
+            epoch (string): The epoch that the RA/DEC are specific to (usually J2000).
                 
-         Returns:
-                self.coordinates:
+        Returns:
+            self.coordinates:
         '''
         
         self.validity=False
