@@ -1965,6 +1965,7 @@ class TCC(wx.Frame):
         self.control.targetDecText.SetValue(input_dec)
         self.control.targetEpochText.SetValue(input_epoch)
         self.control.targetMagText.SetValue(mag)
+        self.init.onTargetButton.Enable()
         
         self.log("Current target is '"+name+"'")
         
@@ -2634,7 +2635,6 @@ class TCC(wx.Frame):
             self.target.airmass_button.Enable()
             self.init.parkButton.Enable()
             self.init.coverposButton.Enable()
-            self.init.onTargetButton.Enable()
 			
 			#Watch Dog Threads
             thread.start_new_thread(self.timer,())
