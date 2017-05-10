@@ -40,7 +40,7 @@ pipe=None
 class Control(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
-        
+
         self.parent = parent
 
 
@@ -247,7 +247,7 @@ class Control(wx.Panel):
         self.gbox.Add(self.targetMagText, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.slewButton,0, wx.ALIGN_CENTER)
         self.gbox.Add(self.trackButton,0, wx.ALIGN_CENTER)
-        
+
         self.vbox3.Add(self.gbox,0,wx.ALIGN_CENTER)
         self.vbox1.Add(self.vbox3,0,wx.ALIGN_CENTER)
 
@@ -274,7 +274,7 @@ class Control(wx.Panel):
         self.gbox2.Add(self.currentRATRPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
-        
+
         self.vbox4.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
         self.vbox7.Add(self.vbox4,0,wx.ALIGN_CENTER)
@@ -285,9 +285,9 @@ class Control(wx.Panel):
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsMove, 0, wx.ALIGN_LEFT)
-        
+
         self.vbox5.Add(self.gbox3,0,wx.ALIGN_CENTER)
-        
+
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
@@ -295,7 +295,7 @@ class Control(wx.Panel):
         self.hbox4.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
         self.hbox4.AddSpacer(5)
         self.hbox4.Add(self.jogUnits, 0, wx.ALIGN_LEFT)
-        
+
         self.vbox6.Add(self.jogNButton,0,wx.ALIGN_CENTER)
         self.vbox6.AddSpacer(5)
         self.vbox6.Add(self.hbox3,0,wx.ALIGN_CENTER)
@@ -303,11 +303,11 @@ class Control(wx.Panel):
         self.vbox6.Add(self.jogSButton,0,wx.ALIGN_CENTER)
         self.vbox6.AddSpacer(5)
         self.vbox6.Add(self.hbox4 ,0, wx.ALIGN_CENTER)
-        
+
         self.vbox2.Add(self.vbox5,0,wx.ALIGN_CENTER)
         self.vbox2.AddSpacer(15)
         self.vbox2.Add(self.vbox6,0,wx.ALIGN_CENTER)
-    
+
 
         self.hbox1.Add(self.vbox7, 0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(25)
@@ -392,6 +392,7 @@ class Target(wx.Panel):
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
+        self.finder_button=wx.Button(self,-1,"Load Finder Chart")
 
         #Turn Buttons off initially, enable on initialization
         self.listButton.Disable()
@@ -401,6 +402,7 @@ class Target(wx.Panel):
         self.exportButton.Disable()
         self.plot_button.Disable()
         self.airmass_button.Disable()
+        self.finder_button.Disable()
 
         #Sizers: Create Box Sizers
         self.vbox=wx.BoxSizer(wx.VERTICAL)
@@ -431,16 +433,18 @@ class Target(wx.Panel):
         self.hbox2.Add(self.gbox,0,wx.ALIGN_CENTER)
 
         self.hbox3.Add(self.selectButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        self.hbox3.AddSpacer(10)
         self.hbox3.Add(self.enterButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        self.hbox3.AddSpacer(10)
         self.hbox3.Add(self.removeButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        self.hbox3.AddSpacer(10)
         self.hbox3.Add(self.exportButton,0, wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        self.hbox3.AddSpacer(10)
         self.hbox3.Add(self.plot_button,0,wx.ALIGN_CENTER)
-        self.hbox3.AddSpacer(25)
+        self.hbox3.AddSpacer(10)
         self.hbox3.Add(self.airmass_button,0,wx.ALIGN_CENTER)
+        self.hbox3.AddSpacer(10)
+        self.hbox3.Add(self.finder_button,0,wx.ALIGN_CENTER)
 
         self.logbox_h.AddSpacer(30)
         self.logbox_h.Add(self.logBox, wx.ALIGN_CENTER, wx.EXPAND)
@@ -460,7 +464,7 @@ class Target(wx.Panel):
 
         debug==True
         self.dir=os.getcwd()
-			
+
 class ScienceFocus(wx.Panel):
     def __init__(self,parent, debug, night):
         wx.Panel.__init__(self,parent)
@@ -531,7 +535,7 @@ class GuiderControl(wx.Panel):
         self.fig_r.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
 
         #############################################################
-        
+
         #Lefthand Figure; finder image with periscope overlay
         self.fig_l = Figure((4,4))
         self.canvas_l = FigCanvas(self,-1, self.fig_l)
@@ -560,13 +564,13 @@ class GuiderControl(wx.Panel):
         self.guiderRotLabel.SetLabel('Rot. Angle: ')
         self.guiderRotText = wx.TextCtrl(self, size=(100, -1))
         self.guiderRotText.SetValue('0.0')
-        self.guiderRotButton = wx.Button(self, -1, 'Set Guider Rotation', size=(125, -1))
+        self.guiderRotButton = wx.Button(self, -1, 'Set Rotation', size=(125, -1))
         #Row 3: Generate Finder Chart
-        self.finderLabel=wx.StaticText(self, size=(100,-1))
-        self.finderLabel.SetLabel('Radius (arcmin): ')
-        self.finderText=wx.TextCtrl(self,size=(100,-1))
-        self.finderText.SetValue('18.0')
-        self.finderButton=wx.Button(self,-1,"Load Finder Chart",size=(125,-1))
+        #self.finderLabel=wx.StaticText(self, size=(100,-1))
+        #self.finderLabel.SetLabel('Radius (arcmin): ')
+        #self.finderText=wx.TextCtrl(self,size=(100,-1))
+        #self.finderText.SetValue('18.0')
+        #self.finderButton=wx.Button(self,-1,"Load Finder Chart",size=(125,-1))
         #Row 4: Guiding Controls
         self.findStarsButton = wx.Button(self, -1, "Auto Find Guide Stars",size=(150,-1))
         self.startGuidingButton = wx.Button(self, -1, "Start Guiding",size=(150,-1))
@@ -595,7 +599,7 @@ class GuiderControl(wx.Panel):
         self.hbox=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
-        self.gbox=wx.GridSizer(rows=3, cols=3, hgap=0, vgap=5)
+        self.gbox=wx.GridSizer(rows=2, cols=3, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
         self.ghbox=wx.BoxSizer(wx.HORIZONTAL)
 
@@ -606,7 +610,7 @@ class GuiderControl(wx.Panel):
         self.flabel=wx.StaticBox(self,label="Focus Guider")
         self.vboxf= wx.StaticBoxSizer(self.flabel, wx.VERTICAL)
         #Jog Guider Field Box Sizer
-        self.jlabel=wx.StaticBox(self,label="Jog Guider Field")
+        self.jlabel=wx.StaticBox(self,label="Jog Telescope")
         self.vboxj= wx.StaticBoxSizer(self.jlabel, wx.VERTICAL)
 
         #Sizers: Populate Box Sizers
@@ -614,37 +618,37 @@ class GuiderControl(wx.Panel):
         self.gbox3.Add(self.focusAbsText, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusIncNegButton, 0, wx.ALIGN_LEFT)
         self.gbox3.Add(self.focusAbsMove, 0, wx.ALIGN_LEFT)
-        
+
         self.vboxf.Add(self.gbox3,0,wx.ALIGN_CENTER)
-        
+
         self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
         self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
-        
+
         self.vboxj.Add(self.jogNButton,0,wx.ALIGN_CENTER)
         self.vboxj.AddSpacer(5)
         self.vboxj.Add(self.hbox3,0,wx.ALIGN_CENTER)
         self.vboxj.AddSpacer(5)
         self.vboxj.Add(self.jogSButton,0,wx.ALIGN_CENTER)
-        
+
         self.gbox.Add(self.guiderTimeLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderTimeText, 0, wx.ALIGN_LEFT)
         self.gbox.Add(self.guiderExposureButton,0,wx.ALIGN_LEFT)
         self.gbox.Add(self.guiderRotLabel, 0, wx.ALIGN_RIGHT)
         self.gbox.Add(self.guiderRotText, 0, wx.ALIGN_LEFT)
         self.gbox.Add(self.guiderRotButton,0,wx.ALIGN_LEFT)
-        self.gbox.Add(self.finderLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox.Add(self.finderText, 0, wx.ALIGN_LEFT)
-        self.gbox.Add(self.finderButton,0,wx.ALIGN_LEFT)
+        #self.gbox.Add(self.finderLabel, 0, wx.ALIGN_RIGHT)
+        #self.gbox.Add(self.finderText, 0, wx.ALIGN_LEFT)
+        #self.gbox.Add(self.finderButton,0,wx.ALIGN_LEFT)
 
         self.hbox.Add(self.findStarsButton, 0, wx.ALIGN_LEFT)
         self.hbox.AddSpacer(15)
         self.hbox.Add(self.startGuidingButton, 0, wx.ALIGN_RIGHT)
-        
+
         self.vboxc.Add(self.gbox,0,wx.ALIGN_CENTER)
         self.vboxc.AddSpacer(10)
         self.vboxc.Add(self.hbox,0,wx.ALIGN_CENTER)
-        
+
         self.ghbox.AddSpacer(20)
         self.ghbox.Add(self.vboxc,0,wx.ALIGN_LEFT)
         self.ghbox.AddSpacer(20)
@@ -1077,7 +1081,7 @@ class TCC(wx.Frame):
         '''
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(1)
-        
+
         nb.AddPage(guiderControlPage,"Guider Control")
         self.guiderControl=nb.GetPage(2)
         '''
@@ -1093,7 +1097,7 @@ class TCC(wx.Frame):
 
         nb.AddPage(logPage,"Night Log")
         self.nl=nb.GetPage(4)
-        
+
         #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
@@ -1105,7 +1109,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.focusIncPlus,self.control.focusIncPlusButton)
         self.Bind(wx.EVT_BUTTON,self.focusIncNeg,self.control.focusIncNegButton)
         self.Bind(wx.EVT_BUTTON,self.setfocus,self.control.focusAbsMove)
-        
+
         #Target Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
@@ -1114,11 +1118,12 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.ExportOpen,self.target.exportButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
-        
+        self.Bind(wx.EVT_BUTTON,self.FinderOpen,self.target.finder_button)
+
         #Guider Control Tab Bindings
-        self.Bind(wx.EVT_BUTTON, self.LoadFinder, self.guiderControl.finderButton)
+        #self.Bind(wx.EVT_BUTTON, self.LoadFinder, self.guiderControl.finderButton)
         self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
-        
+
         # Init Tab Bindings
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
@@ -1130,7 +1135,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
         self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
         self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
-        
+
         self.createMenu()
 
         self.sb = self.CreateStatusBar(5)
@@ -1159,8 +1164,8 @@ class TCC(wx.Frame):
     def createMenu(self):
         '''
         Generates the menu bar for the WX application.
-        
-         Args: 
+
+         Args:
                 self: points function towards WX application
          Returns:
                 None
@@ -1169,22 +1174,22 @@ class TCC(wx.Frame):
 
         menu_file = wx.Menu()
         m_exit = menu_file.Append(-1, "E&xit\tCtrl-X", "Exit")
-    
+
         tool_file = wx.Menu()
         m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
-        
+
         tz_choice = wx.Menu()
         tz_choice.Append(1110, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
         tz_choice.Append(1111, "Mountain", "Set Time Zone", kind=wx.ITEM_RADIO)
         tz_choice.Check(id=1110, check=True)
         tool_file.AppendMenu(1112,'Time Zone',tz_choice)
-        
+
         precess = wx.Menu()
         precess.Append(1120, "On", "Set Precession", kind=wx.ITEM_RADIO)
         precess.Append(1121, "Off", "Set Precession", kind=wx.ITEM_RADIO)
         precess.Check(id=1120, check=True)
         tool_file.AppendMenu(1122,'Precession',precess)
-        
+
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
         self.Bind(wx.EVT_CLOSE, self.on_exit)
         self.Bind(wx.EVT_MENU, self.on_night, m_night)
@@ -1201,14 +1206,14 @@ class TCC(wx.Frame):
     def on_exit(self, event):
         """
         Exit in a graceful way so that the telescope information can be saved and used at a later time.
-        
+
          Args:
                 self: points function towards WX application
                 event: handler to allow function to be tethered to a wx widget
-                
+
          Returns:
                 None
-         
+
         """
         dlg = wx.MessageDialog(self,
                                "Exit the TCC?",
@@ -1244,13 +1249,13 @@ class TCC(wx.Frame):
     def on_night(self,event):
         """
         Event handle for the night mode option in the menu. Aesthetic change to make the GUI background color redder.
-        
+
          Args:
                 self: points function towards WX application
                 event: handler to allow function to be tethered to a wx widget
          Returns:
                 None
-        
+
         """
         if self.night:
             self.control.SetBackgroundColour((176,23,23))
@@ -1264,11 +1269,11 @@ class TCC(wx.Frame):
     def on_Pacific(self,event):
         """
         Event handle for the pacific time zone option. Changes time to the current pacific time representation.
-        
+
          Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget.
-                
+
          Returns:
                 None
         """
@@ -1279,11 +1284,11 @@ class TCC(wx.Frame):
     def on_Mountain(self,event):
         """
         Event handle for the Mountain time zone option. Changes time to the current Mountain time representation.
-        
+
          Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget.
-                
+
          Returns:
                 None
         """
@@ -1297,40 +1302,40 @@ class TCC(wx.Frame):
             Args:
                     self: points function towards WX application.
                     event: handler to allow function to be tethered to a wx widget.
-                
+
             Returns:
                     self.precession: Sets self.precession = True
         """
         self.telescope_status['precession']=True
         self.log("Precession enabled")
         return
-        
+
     def pre_off(self,event):
         """
         Turns precession off for the entire GUI.
             Args:
                     self: points function towards WX application.
                     event: handler to allow function to be tethered to a wx widget.
-                
+
             Returns:
                     self.precession: Sets self.precession = True
         """
         self.telescope_status['precession']=False
         self.log("Precession disabled")
         return
-        
+
     def log(self, input):
         """
         Take input from the any system and log both on screen and to a file.
         Necessary to define command structure for easy expansion.
-        
+
          Args:
             self: points function towards WX application.
             input (string): The desired message to be logged.
-                
+
          Returns:
             None
-        
+
         """
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
@@ -1346,10 +1351,10 @@ class TCC(wx.Frame):
     def readConfig(self):
         """
         Get the basic telescope information if it is available.  It would be nice if the dictionary was defined external to the program.
-        
+
          Args:
             self: points function towards WX application.
-                
+
          Returns:
             None
         """
@@ -1375,15 +1380,15 @@ class TCC(wx.Frame):
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
         self.init.maxdDECText.SetValue(str(self.dict['maxdDEC']))
         return
-        
+
     def Noffset(self,event):
         """
         Jog Command; apply a coordinate offset in the North direction.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "N" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1404,15 +1409,15 @@ class TCC(wx.Frame):
         if self.telescope_status.get('tracking')==False:
             self.protocol.sendCommand("offset N "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
-    		
+
     def Woffset(self,event):
         """
         Jog Command; apply a coordinate offset in the West direction.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "W" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1437,11 +1442,11 @@ class TCC(wx.Frame):
     def Eoffset(self,event):
         """
         Jog Command; apply a coordinate offset in the East direction.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget.Tethered to the "E" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1467,11 +1472,11 @@ class TCC(wx.Frame):
     def Soffset(self,event):
         """
         Jog Command; apply a coordinate offset in the South direction.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget.Tethered to the "S" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1492,15 +1497,15 @@ class TCC(wx.Frame):
         if self.telescope_status.get('tracking')==False:
 		    self.protocol.sendCommand("offset S "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
-        
+
     def focusIncPlus(self,event):
         """
         Focus Increment; apply a positive focus increment of 1500.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget.Tethered to the "Increment Positive" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1513,11 +1518,11 @@ class TCC(wx.Frame):
     def focusIncNeg(self,event):
         """
         Focus Increment; apply a negative focus increment of 1500.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "Increment Negative" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1526,16 +1531,16 @@ class TCC(wx.Frame):
         val=int(val)
         self.control.focusAbsText.SetValue(str(val))
         return
-        
+
     def setfocus(self,event):
         """
         Focus Command; set current TCC focus to the value entered in the WX textctrl box.
         Overwrites current TCC focus value and sends value to drivers.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "Move Absolute" button in the telescope control tab.
-                
+
          Returns:
             None
         """
@@ -1548,18 +1553,18 @@ class TCC(wx.Frame):
         self.control.currentFocusPos.SetForegroundColour('black')
         self.protocol.sendCommand(str("focus")+' '+str(inc))
         return
-        
+
     def haltmotion(self,event):
         '''
         Halt Telescope motion, emergency button, use stop slew during slewing if possible.
-        
+
          Args:
             self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "HALT MOTION" button in the telescope control tab.
-                
+
          Returns:
             None
-         
+
         '''
         self.protocol.sendCommand("halt")
         self.log("WARNING: Halt Motion Button pressed. A full restart of the TCC is required.")
@@ -1568,11 +1573,11 @@ class TCC(wx.Frame):
     def toggletracksend(self,evt):
         '''
         Passes a command to the telescope to toggle tracking.
-        
+
          Args:
             self: points function towards WX application.
             evt: handler to allow function to be tethered to a wx widget. Tethered to the "Start Tracking" button in the telescope control tab.
-                
+
          Returns:
             None
         '''
@@ -1602,19 +1607,19 @@ class TCC(wx.Frame):
         Take in any valid RA/DEC format and read it into an Astropy SkyCoord object. Format of RA must be consistent with format of DEC. Supports galactic coordinates as well, to
         input galactic coordinates, set the ra argument to be l=00h00m00s and the dec argument to be b=+00h00m00s. These will be put into a galactic skycoord frame which will then
         be transformed into an fk5 skycoord object.
-        
+
         Args:
             ra (string): Right Ascension of object. Valid forms are decimal degrees, hh:mm:ss , hh mm ss ,XXhXXmXXs and l=XXhXXmXXs
             dec (string): Declination of object. Valid forms are decimal degrees, hh:mm:ss, hh mm ss, XXdXXmXXs and b=XXdXXmXXs
             epoch (string): The epoch that the RA/DEC are specific to (usually J2000).
-                
+
         Returns:
             self.coordinates:
         '''
-        
+
         self.validity=False
         self.galactic_coords=False
-        
+
         #first check to see if galactic coordinates
         if str(ra)[0:2]== 'l=' or str(ra)[0:2] == 'L=':
             self.galactic_coords=True
@@ -1622,14 +1627,14 @@ class TCC(wx.Frame):
             self.coordinates=self.galcoordinates.transform_to('fk5')
             self.validity=True
             return self.coordinates
-                
+
         deg_input=True
-        
+
         try:
             val=float(ra)
         except ValueError:
             deg_input=False
-        
+
         if deg_input==True:
             self.coordinates=SkyCoord(ra=float(ra)*u.degree,dec=float(dec)*u.degree,frame='icrs',equinox=str(epoch))
             self.validity=True
@@ -1651,7 +1656,7 @@ class TCC(wx.Frame):
                            "Not a valid RA or DEC format. Please input an RA and DEC in any of the following forms: decimal degrees, 00h00m00s, 00:00:00, 00 00 00. If attempting to input galactic coordinates\n please enter in form l=00h00m00s and b=+00d00m00s in RA and DEC fields.",
                            "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
             return
         '''
         else:
@@ -1660,7 +1665,7 @@ class TCC(wx.Frame):
                                "Not a transformable input epoch. Coordinate types supported are J2000 and J1950. Leave epoch blank to assume J2000.",
                                "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
             return
         '''
 
@@ -1670,80 +1675,80 @@ class TCC(wx.Frame):
         Precession is calculated using astronomical precession approximations centered on J2000. Note that
         while this function allows flexibility in coordinate epoch, it may fail at arbitrary coordinate epochs.
         It is recommended that when using an epoch that is not J2000, that the user transform to J2000 first.
-    
+
             Args:
                       coords(astropy.skycoord): astropy.skycoord object containing the unprecessed coordinates.
                       epoch_now(string): The epoch of the date the user desires precession to. Usually the current epoch.
                       epoch(string): The epoch of the coordinates. J2000 is recommended.
             Returns:
                      self.coordinates(astropy.skycoord): astropy.skycoord object containing the new precessed coordinates.
-    
+
         '''
-    
+
         ra_in=coords.ra.deg
         dec_in=coords.dec.deg
         ep_in=float(epoch[1:])
         ep_now_in=float(epoch_now)
         print ra_in, dec_in, ep_in, ep_now_in
-    
+
         T=(ep_now_in - ep_in)/100.0
         M=1.2812323*T+0.0003879*(T**2)+0.0000101*(T**3)
         N=0.5567530*T-0.0001185*(T**2)-0.0000116*(T**3)
         #print T, M, N
-    
+
         d_ra= M + N*np.sin(ra_in* np.pi / 180.)*np.tan(dec_in* np.pi / 180.)
         d_dec=N*np.cos(ra_in* np.pi / 180.)
         #print d_ra, d_dec
-    
+
         self.ra_out=ra_in+d_ra
         self.dec_out=dec_in+d_dec
         print self.ra_out,self.dec_out
-    
+
         self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
         return self.coordinates, self.ra_out, self.dec_out
-    
+
     def startSlew(self,event):
         '''
         Slew Command from coordinates in control tab, also acts as a toggle. If telescope is slewing, this will stop current slewing. Stop slewing command acts as the ideal
         method for stopping the telescope. Halt Motion is the alternative intended for emergencies only. Before sending a slew command, startslew() checks the altitude of the
         target. If the altitude is below the altitude set in the configuration file, it will only return an error.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Slew to Target" button in the telescope control tab.
-                
+
         Returns:
                 None
-                
-        Information needed by Server: RA (Degrees), DEC (Degrees), 
+
+        Information needed by Server: RA (Degrees), DEC (Degrees),
         '''
         name=self.control.targetNameText.GetValue()
         input_ra=self.control.targetRaText.GetValue()
         input_dec=self.control.targetDecText.GetValue()
         input_epoch=self.control.targetEpochText.GetValue()
         current_epoch=self.control.currentEpochPos.GetLabel()
-        
-        
-        
+
+
+
         if self.telescope_status.get('slewing')==False:
 
             self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
             self.inputcoordSorter(input_ra,input_dec,input_epoch)
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
-            
+
             if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,current_epoch,input_epoch)
-                
+
             self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
 
             self.alt=str("{0.alt:.2}".format(self.target_altaz))
             self.split_alt=self.alt.split(' ')
             self.slew_altitude=self.split_alt[0]
-            
+
             ''' Debug code
             self.decimalcoords=self.coordinates.to_string('decimal')
-            
-            
+
+
             self.log([input_ra,input_dec,current_epoch])
             self.protocol.sendCommand("slew"+' '+str(self.decimalcoords))
             self.control.slewButton.SetLabel('Stop Slew')
@@ -1754,7 +1759,7 @@ class TCC(wx.Frame):
             if float(self.slew_altitude) > float(self.horizonlimit):
 
                 self.decimalcoords=self.coordinates.to_string('decimal')
-            
+
             	self.LST=str(self.control.currentLSTPos.GetLabel())
             	self.LST=self.LST.split(':')
             	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
@@ -1776,9 +1781,9 @@ class TCC(wx.Frame):
                 self.target_coords['RA']=input_ra #Store target RA for pointing routine
                 self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
                 self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
-                
+
                 return
-                         
+
             elif float(self.slew_altitude) < float(self.horizonlimit):
                 dlg = wx.MessageDialog(self,
                                "Target is below current minimum altitude, cannot slew.",
@@ -1787,7 +1792,7 @@ class TCC(wx.Frame):
                 dlg.Destroy()
                 self.log("Error: Attempted slew altitude below 20 degrees.")
                 return
-                
+
         elif self.telescope_status.get('slewing')==True:
             self.protocol.sendCommand("stop")
             self.control.slewButton.SetLabel('Start Slew')
@@ -1795,7 +1800,7 @@ class TCC(wx.Frame):
             self.sb.SetStatusText('Slewing: False',1)
 
             self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
-            
+
         return
 
     def velwatch(self):
@@ -1804,7 +1809,7 @@ class TCC(wx.Frame):
     		d=self.protocol.sendCommand("velmeasure")
     		d.addCallback(self.velmeasure)
     		time.sleep(0.5)
-    		
+
     def velmeasure(self,msg):
     	print repr(msg)
     	msg=int(msg)
@@ -1837,12 +1842,12 @@ class TCC(wx.Frame):
     	self.control.trackButton.Enable(bool)
     	self.init.parkButton.Enable(bool)
     	self.init.coverposButton.Enable(bool)
-    	
+
     def slewbutton_toggle(self):
     	self.control.slewButton.SetLabel('Start Slew')
         self.control.slewButton.SetBackgroundColour('Light Slate Blue')
     	self.sb.SetStatusText('Slewing: False',1)
-    	
+
     def getstatus(self):
         """
                 Generate a log file for the current utc date. Prompt drivers for status of RA and DEC and add line to log file in form "UTC_DATE RA DEC EPOCH LST".
@@ -1873,7 +1878,7 @@ class TCC(wx.Frame):
             time.sleep(1.0)
     def watchstatus(self):
     	"""
-                Update TCC Status Dictionaries with information from the physical logs generated in TCC.getstatus(). 
+                Update TCC Status Dictionaries with information from the physical logs generated in TCC.getstatus().
 
                 Args:
                         None
@@ -1899,8 +1904,8 @@ class TCC(wx.Frame):
   			self.telescope_status['RA']=current_RA
   			self.telescope_status['Dec']=current_DEC
   			#print "Watch"
-    	
-    	
+
+
     def displaystatus(self):
         """
                 Update TCC Status grid with information from the TCC.telescope_status dictionary.
@@ -1938,23 +1943,22 @@ class TCC(wx.Frame):
         """
         Take a selected item from the list and set it as the current target.
         Load it into the control tab and load it's coordinates into the guider control tab for finder charts
-        
+
         Args:
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Select as Current
                 Target" button in the target list tab.
-                
+
         Returns:
                 None
         """
         sel_item=self.target.targetList.GetFocusedItem()
-        
+
         name=str(self.target.targetList.GetItem(sel_item,col=0).GetText())
         input_ra=str(self.target.targetList.GetItem(sel_item,col=1).GetText())
         input_dec=str(self.target.targetList.GetItem(sel_item,col=2).GetText())
         input_epoch=str(self.target.targetList.GetItem(sel_item,col=3).GetText())
         mag = str(self.target.targetList.GetItem(sel_item,4).GetText())
 
-        #self.coordinates=SkyCoord(ra,dec,frame='icrs')
         #self.guiderControl.current_target=FixedTarget(name=None,coord=self.coordinates)
         #self.image.current_target=FixedTarget(name=None,coord=self.coordinates)
         #self.load_finder_chart()
@@ -1966,18 +1970,23 @@ class TCC(wx.Frame):
         self.control.targetEpochText.SetValue(input_epoch)
         self.control.targetMagText.SetValue(mag)
         self.init.onTargetButton.Enable()
-        
+
         self.log("Current target is '"+name+"'")
-        
+
+        #Load Finder Chart
+        self.inputcoordSorter(input_ra,input_dec,input_epoch)
+        self.finder_object=FixedTarget(name=None,coord=self.coordinates)
+        plot_finder_image(self.finder_object, fov_radius=18*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False)
+
         return
 
     def LoadFinder(self,event):
         """
         Use Astroplan's plot_finder_image function to plot the finder image of the current target. Current location of finder chart is an axes object on the guider control tab.
-        
+
         Args:
                 self: points function towards WX application.
-                
+
         Returns:
                 None
         """
@@ -1985,14 +1994,14 @@ class TCC(wx.Frame):
         ra=self.control.targetRaText.GetValue()
         dec=self.control.targetDecText.GetValue()
         epoch=self.control.targetEpochText.GetValue()
-        
+
         self.inputcoordSorter(ra,dec,epoch)
         self.finder_object=FixedTarget(name=None,coord=self.coordinates)
         plot_finder_image(self.finder_object, fov_radius=float(self.guiderControl.finderText.GetValue())*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False)
         return
         #self.image.fig.savefig("testfinder.png")
         #image_file = 'testfinder.png'
-        
+
     def on_pick(self,event):
         artist = event.artist
         if isinstance(artist, AxesImage):
@@ -2012,7 +2021,7 @@ class TCC(wx.Frame):
             print A.shape,rho,phi_or
 	    if self.telescope_status.get('guider_rot')==False:
                 thread.start_new_thread(self.Rotate,(phi_or,))
-            
+
     def on_Rot(self,event):
         #move = float(self.guiderRotText.GetValue()) - self.rotAng
         try:
@@ -2022,7 +2031,7 @@ class TCC(wx.Frame):
                            "Input Error: Please input a valid number.",
                            "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
             return
 	if val>0:
 		while val>=360.0:
@@ -2033,7 +2042,7 @@ class TCC(wx.Frame):
 
 	if self.telescope_status.get('guider_rot')==False:
         	thread.start_new_thread(self.Rotate,(-1*val,))
-	   
+
     def Rotate(self,Rot_angle):
         self.telescope_status['guider_rot']=True
         current_pos=self.guiderControl.rotAng
@@ -2051,19 +2060,19 @@ class TCC(wx.Frame):
             time.sleep(0.025)
         self.telescope_status['guider_rot']=False
         return
-    
+
     def addToList(self,event):
         """
         Add a manual text item from the target panel to the list control. Requires valid inputs for coordinate sorter. This includes valid formats for RA and DEC which are consistent with one another.
         Epoch should be inputted as J2000 or J1950. addToList runs a dynamic airmass calculation as per these inputs.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Add Item to List" button in the target list tab.
-                
+
         Returns:
                 None
-        
+
         """
         t_name = self.target.nameText.GetValue()
         input_ra = self.target.raText.GetValue()
@@ -2071,23 +2080,23 @@ class TCC(wx.Frame):
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
         epoch_now = self.control.currentEpochPos.GetLabel()
-        
+
         self.inputcoordSorter(input_ra,input_dec,epoch)
-        
+
         if self.galactic_coords==True:
             input_ra=self.coordinates.ra.degree
             input_dec=self.coordinates.dec.degree
-        
+
         if self.telescope_status.get('precession')==True:
             self.coordprecess(self.coordinates,epoch_now,epoch)
-            
+
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
-       
-        
+
+
         #add transformation, the epoch should be current
         if self.validity==True:
-            
+
             self.target.targetList.InsertStringItem(self.list_count,str(t_name))
             self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
             self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
@@ -2101,19 +2110,19 @@ class TCC(wx.Frame):
             self.active_threads["airmass_"+str(self.list_count)] = t
             self.list_count+=1
         return
-        
+
     def readToList(self,event):
         """
         Read in a target list file to the ctrl list.
         Format is: name;ra;dec;epoch
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
-                
+
         Returns:
                 None
-        
+
         """
         try:
             f_in=open('targetlists/'+self.target.fileText.GetValue())
@@ -2122,7 +2131,7 @@ class TCC(wx.Frame):
                            "Path Error: File not Found.",
                            "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
             return
         #f_in=open(self.target.fileText.GetValue())
         for line in f_in:
@@ -2134,20 +2143,20 @@ class TCC(wx.Frame):
             epoch = l[3]
             mag=l[4][0:-1]
             epoch_now = self.control.currentEpochPos.GetLabel()
-            
+
             self.inputcoordSorter(input_ra,input_dec,epoch)
-        
+
             if self.galactic_coords==True:
                 input_ra=self.coordinates.ra.degree
                 input_dec=self.coordinates.dec.degree
-        
+
             if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,epoch_now,epoch)
-            
+
             self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
-       
+
             if self.validity==True:
-            
+
                 self.target.targetList.InsertStringItem(self.list_count,str(t_name))
                 self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
                 self.target.targetList.SetStringItem(self.list_count,2,str(input_dec))
@@ -2163,24 +2172,24 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-            
+
     def removeFromList(self,event):
         """
         Remove selected item from list. Operates by clearing list and then regenerating surviving entries.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
-                
+
         Returns:
                 None
-        
+
         """
         del_item=self.target.targetList.GetFocusedItem()
-        self.calculate=False        
+        self.calculate=False
         for key in self.active_threads:
             self.active_threads[key].join()
-            
+
         self.object_list=[]
         self.listrange=np.arange(0,self.target.targetList.GetItemCount())
         for row in self.listrange:
@@ -2190,15 +2199,15 @@ class TCC(wx.Frame):
                 dec=self.target.targetList.GetItem(itemId=row, col=2).GetText()
                 epoch=self.target.targetList.GetItem(itemId=row, col=3).GetText()
                 vmag=self.target.targetList.GetItem(itemId=row, col=4).GetText()
-            
+
                 objectdata=str(name)+';'+str(ra)+';'+str(dec)+';'+str(epoch)+';'+str(vmag)
                 self.object_list.append(objectdata)
-            
+
         self.target.targetList.DeleteAllItems()
-        self.active_threads={} 
+        self.active_threads={}
         self.list_count=0
         self.calculate=True
-        
+
         for entry in self.object_list:
             l=entry.split(';')
             t_name = l[0]
@@ -2207,12 +2216,12 @@ class TCC(wx.Frame):
             epoch = l[3]
             mag=l[4]
             epoch_now = self.control.currentEpochPos.GetLabel()
-                
+
             self.inputcoordSorter(input_ra,input_dec,epoch)
-                
+
             if self.telescope_status.get('precession')==True:
                 self.coordprecess(self.coordinates,epoch_now,epoch)
-            
+
             self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
             self.target.targetList.InsertStringItem(self.list_count,str(t_name))
             self.target.targetList.SetStringItem(self.list_count,1,str(input_ra))
@@ -2224,38 +2233,37 @@ class TCC(wx.Frame):
             t.start()
             self.active_threads["airmass_"+str(self.list_count)] = t
             self.list_count+=1
-    
-    def FinderOpen(self,event):
-        
-        name=self.control.targetNameText.GetValue()
-        ra=self.control.targetRaText.GetValue()
-        dec=self.control.targetDecText.GetValue()
-        epoch=self.control.targetEpochText.GetValue()
-        
-        self.window=FinderImageWindow(self, Finder_name=name)
-        self.window.Show()
-        
-        self.inputcoordSorter(ra,dec,epoch)
-        self.window.finder_object=FixedTarget(name=None,coord=self.coordinates)
-        
-        self.window.LoadFinder()
 
-    def ExportOpen(self,event):  
+    def FinderOpen(self,event):
+
+        sel_item=self.target.targetList.GetFocusedItem()
+        input_ra=self.target.targetList.GetItem(sel_item,col=1).GetText()
+        input_dec=self.target.targetList.GetItem(sel_item,col=2).GetText()
+        input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
+
+        self.inputcoordSorter(input_ra,input_dec,input_epoch)
+
+        self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
+        plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
+        plt.show()
+        return
+
+    def ExportOpen(self,event):
         """
         Launch Export Window. Pull in current target list to window.
-        
+
          Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Retrieve List" button in the target list tab.
-                
+
         Returns:
                 Export Window.
         """
         self.window=TargetExportWindow(self)
         self.window.Show()
-        
+
         self.window.list=[]
-        
+
         self.listrange=np.arange(0,self.target.targetList.GetItemCount())
 
         for row in self.listrange:
@@ -2264,26 +2272,26 @@ class TCC(wx.Frame):
             dec=self.target.targetList.GetItem(itemId=row, col=2).GetText()
             epoch=self.target.targetList.GetItem(itemId=row, col=3).GetText()
             vmag=self.target.targetList.GetItem(itemId=row, col=4).GetText()
-            
+
             objectdata=str(name)+';'+str(ra)+';'+str(dec)+';'+str(epoch)+';'+str(vmag)
             self.window.list.append(objectdata)
-            
-        
+
+
         self.export_active=True
 
     def dyn_airmass(self,tgt,obs,count):
         """
-        Continuously calculates the airmass using observer information and target information. Airmass is calculated using the secz function in astropy. 
+        Continuously calculates the airmass using observer information and target information. Airmass is calculated using the secz function in astropy.
         Dynamically updates in the target list and allows a quick read of the airmass for any given target.
-        
+
         Args:
                 tgt (FixedTarget): Astroplan FixedTarget object for the target, details target name and RA/DEC coordinates.
                 obs (astroplan.Observer): Astroplan Observer object for observer location, details longitude, latitude and elevation of observer.
                 count (integer): list counter that tracks the position of the target in the wx listctrl object, used to append airmass to correct row.
-                
+
         Returns:
                 a (float): airmass at current time.
-        
+
         """
         while self.calculate==True:
             a= obs.altaz(Time.now(),tgt).secz
@@ -2296,69 +2304,69 @@ class TCC(wx.Frame):
     def target_plot(self,event):
         '''
         Plot the selected targets position over the next 8 hours utilizing astroplan's plot_sky() method. This method plot with respect to target selected in
-        the target list tab and not the GUI-set current target. Individual points are plotted with 1 hour cadence. Red point indicates current position 
-        to specify direction of target trajectory. Note: Using this while a currentplot is being displayed will overwrite the current plot, this 
+        the target list tab and not the GUI-set current target. Individual points are plotted with 1 hour cadence. Red point indicates current position
+        to specify direction of target trajectory. Note: Using this while a currentplot is being displayed will overwrite the current plot, this
         overplotting has complications between radial and cartesian plots and will produce strange results. Exit the working plot before sending a new plot command.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Plot Target" button in the target list tab.
-                
+
         Returns:
                 Radial plot of target altitude and azimuth in new window or current plotting window (overplotting not advised).
-        
+
         '''
         sel_item=self.target.targetList.GetFocusedItem()
         input_ra=self.target.targetList.GetItem(sel_item,col=1).GetText()
         input_dec=self.target.targetList.GetItem(sel_item,col=2).GetText()
         input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
-        
+
         current_epoch=self.control.currentEpochPos.GetLabel()
-        
+
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
-        
+
         if self.telescope_status.get('precession')==True:
-            self.coordprecess(self.coordinates,current_epoch,input_epoch) 
-            
+            self.coordprecess(self.coordinates,current_epoch,input_epoch)
+
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
         self.target_style={'color':'Black'}
         self.initial_style={'color':'r'}
-        
+
         plot_sky(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
         plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
         plt.show()
-        
+
     def airmass_plot(self,event):
         '''
         Plot the selected targets airmass curve over the next 10 hours utilizing astroplan's plot_airmass() method. This method plot with respect to target selected in
         the target list tab and not the GUI-set current target. Airmass warning limits at 2 and 2.5 are given as yellow and red lines respectively. Note: Using this while a current
         plot is being displayed will overwrite the current plot, this overplotting has complications between radial and cartesian plots and will produce strange results. Exit the working plot
         before sending a new plot command.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Airmass Curve" button in the target list tab.
-                
+
         Returns:
                 Airmass curve of target in new window or current plotting window (overplotting not advised).
-        
+
         '''
         sel_item=self.target.targetList.GetFocusedItem()
         input_ra=self.target.targetList.GetItem(sel_item,col=1).GetText()
         input_dec=self.target.targetList.GetItem(sel_item,col=2).GetText()
         input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
         current_epoch=self.control.currentEpochPos.GetLabel()
-        
+
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
-        
+
         if self.telescope_status.get('precession')==True:
-            self.coordprecess(self.coordinates,current_epoch,input_epoch) 
-            
+            self.coordprecess(self.coordinates,current_epoch,input_epoch)
+
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
-        
+
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
         self.target_style={'color':'Black'}
@@ -2367,17 +2375,17 @@ class TCC(wx.Frame):
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
         plt.show()
-            
+
     def setTelescopeZenith(self, event):
         """
-        This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position. When the telescope is at Zenith the RA is the current LST, the 
+        This is the basic pointing protocol for the telescope.  A bubble level is used to set the telescope to a known position. When the telescope is at Zenith the RA is the current LST, the
         DEC is the Latitude of the telescope, and the Epoch is the current date transformed to the current epoch. setTelescopeZenith() produces these parameters and writes them to the
         initialization text boxes. Pushing these to the telescope is then accomplished by Set Telescope Position.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Load Zenith Coordinates" button in the initialization tab.
-                
+
         Returns:
                 None
         """
@@ -2385,23 +2393,23 @@ class TCC(wx.Frame):
         ra=self.control.currentLSTPos.GetLabel() #set to current LST
         dec='+46:57:10.08' #set to LAT
         epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
-        
+
         self.init.targetNameText.SetValue(name)
         self.init.targetRaText.SetValue(ra)
         self.init.targetDecText.SetValue(dec)
         self.init.targetEpochText.SetValue(epoch)
-        
+
         return
 
     def setTelescopePosition(self,event):
         """
         Sends contents of the name, RA, DEC and EPOCH text boxes in the initialization tab to the control tab. Overwrites current control tab values in the status column with the sent values.
         Used to sync TCC values with physical position of telescope.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Telescope Position" button in the initialization tab.
-                
+
         Returns:
                 None
         """
@@ -2409,7 +2417,7 @@ class TCC(wx.Frame):
         target_ra=self.init.targetRaText.GetValue()
         target_dec=self.init.targetDecText.GetValue()
         target_epoch=self.init.targetEpochText.GetValue()
-        
+
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
         if target_name=="Zenith":
             try:
@@ -2439,14 +2447,14 @@ class TCC(wx.Frame):
                 self.protocol.sendCommand("park")
             except AttributeError:
                 print "Not Connected to Telescope"
-    		
+
     def coverpos(self,event):
         if self.telescope_status.get('slewing')==False:
             try:
                 self.protocol.sendCommand("coverpos")
             except AttributeError:
                 print "Not Connected to Telescope"
-    		
+
     def pointing(self,event):
         """
         Pointing aligns the telescopes position coordinates with a target has been slewed to. Pointing is called
@@ -2474,27 +2482,27 @@ class TCC(wx.Frame):
         except AttributeError:
             print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
-    		
+
     def setRATrackingRate(self,event):
         """
         Sets telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set RA Tracking Rate" button in the initialization tab.
-                
+
         Returns:
                 None
         """
         RArate=self.init.trackingRateRAText.GetValue()
-        
+
         valid_input=True
-        
+
         try:
             val=float(RArate)
         except ValueError:
             valid_input=False
-        
+
         if valid_input==True:
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
@@ -2505,29 +2513,29 @@ class TCC(wx.Frame):
                                "Please input an integer or float number.",
                                "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
         return
-        
+
     def setDECTrackingRate(self,event):
         """
         Sets telescope DEC tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set DEC Tracking Rate" button in the initialization tab.
-                
+
         Returns:
                 None
         """
         DECrate=self.init.trackingRateDECText.GetValue()
-        
+
         valid_input=True
-        
+
         try:
             val=float(DECrate)
         except ValueError:
             valid_input=False
-        
+
         if valid_input==True:
             self.control.currentDECTRPos.SetLabel(DECrate)
             self.control.currentDECTRPos.SetForegroundColour('black')
@@ -2538,7 +2546,7 @@ class TCC(wx.Frame):
                                "Please input an integer or float number.",
                                "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
-            dlg.Destroy() 
+            dlg.Destroy()
         return
 
     def setmaxdRA(self,event):
@@ -2606,11 +2614,11 @@ class TCC(wx.Frame):
     def onInit(self,event):
         """
         Initialize telescope systems according to values set in the TCC config file. Enables buttons throughout the GUI that depend on initialized systems to function.
-        
+
         Args:
                 self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Initialize Telescope Systems" button in the initialization tab.
-                
+
         Returns:
                 None
         """
@@ -2619,13 +2627,13 @@ class TCC(wx.Frame):
             self.mro.lat=self.dict['lat']
             self.horizonlimit=self.dict['horizonLimit']
             self.RA_trackrate=self.dict['RAtrackingRate']
-        
-        
+
+
             self.control.slewButton.Enable()
             self.control.trackButton.Enable()
             self.control.currentRATRPos.SetLabel(str(self.RA_trackrate))
             self.init.atZenithButton.Enable()
-        
+
             self.target.listButton.Enable()
             self.target.selectButton.Enable()
             self.target.enterButton.Enable()
@@ -2633,16 +2641,17 @@ class TCC(wx.Frame):
             self.target.exportButton.Enable()
             self.target.plot_button.Enable()
             self.target.airmass_button.Enable()
+            self.target.finder_button.Enable()
             self.init.parkButton.Enable()
             self.init.coverposButton.Enable()
-			
+
 			#Watch Dog Threads
             thread.start_new_thread(self.timer,())
             thread.start_new_thread(self.checkslew,())
             thread.start_new_thread(self.getstatus,())
             thread.start_new_thread(self.watchstatus,())
             thread.start_new_thread(self.displaystatus,())
-            
+
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
             self.control.currentJDPos.SetForegroundColour('black')
@@ -2680,10 +2689,10 @@ class TCC(wx.Frame):
     def timer(self):
         """
         Dynamically updates Julian Date, LST, UTC, Local Time and current Epoch in the telescope control tab.
-        
+
         Args:
                 self: points function towards WX application.
-                
+
         Returns:
                 None
         """
@@ -2699,10 +2708,10 @@ class TCC(wx.Frame):
     def timeCalc(self):
         """
        Calculates current time values for Julian Date, Epoch, Local Time and LST.
-        
+
         Args:
                 self: points function towards WX application.
-                
+
         Returns:
                 None
         """
@@ -2711,7 +2720,7 @@ class TCC(wx.Frame):
         jdt=t.jd
         mjdt = t.mjd
         epoch = 1900.0 + ((float(jdt)-2415020.31352)/365.242198781)
-        
+
         if self.current_timezone=="PST":
             local = time.strftime('%Y/%m/%d %H:%M:%S')
         if self.current_timezone=="MST":
@@ -2728,7 +2737,7 @@ class TCC(wx.Frame):
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
             self.focusLog.AppendText(l)
-            
+
 '''
 Additional Frames called during GUI operation
 '''
@@ -2736,63 +2745,63 @@ Additional Frames called during GUI operation
 class TargetExportWindow(wx.Frame):
     def __init__(self,parent):
         wx.Frame.__init__(self, parent, -1, "Export to Target List File", size=(300,200))
-        
+
         self.parent=parent
         self.defaultdirectory='targetlists'
-        
+
         self.panel=Export(self)
-        
+
         self.panel.pathText.SetValue(self.defaultdirectory)
-        
+
         self.Bind(wx.EVT_BUTTON, self.onExport, self.panel.ExButton)
         self.Bind(wx.EVT_BUTTON, self.onCancel, self.panel.CancelButton)
-        
+
     def onExport(self,event):
         f = open(str(self.panel.pathText.GetValue()+'/'+self.panel.filenameText.GetValue()), 'w')
         for item in self.list:
             f.write(str(item)+'\n')
         f.close()
         self.Close()
-        
+
     def onCancel(self, event):
         self.Close()
 
-class Export(wx.Panel): 
+class Export(wx.Panel):
     def __init__(self,parent):
         wx.Panel.__init__(self,parent)
-        
+
         self.parent=parent
-        
+
         self.pathLabel = wx.StaticText(self, size=(75,-1))
         self.pathLabel.SetLabel('Output Path: ')
         self.pathText = wx.TextCtrl(self,size=(-1,-1))
-        
+
         self.filenameLabel = wx.StaticText(self, size=(75,-1))
         self.filenameLabel.SetLabel('File Name: ')
         self.filenameText = wx.TextCtrl(self,size=(-1,-1))
-        
+
         self.ExButton=wx.Button(self,-1,"Export")
         self.CancelButton=wx.Button(self,-1,"Cancel")
-        
+
         self.vbox=wx.BoxSizer(wx.VERTICAL)
         self.hbox1=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox2=wx.BoxSizer(wx.HORIZONTAL)
         self.hbox3=wx.BoxSizer(wx.HORIZONTAL)
-        
+
         self.hbox1.AddSpacer(15)
         self.hbox1.Add(self.pathLabel,0,wx.ALIGN_LEFT)
         self.hbox1.Add(self.pathText,1,wx.ALIGN_LEFT)
         self.hbox1.AddSpacer(15)
-        
+
         self.hbox2.AddSpacer(15)
         self.hbox2.Add(self.filenameLabel,0,wx.ALIGN_LEFT)
         self.hbox2.Add(self.filenameText,1,wx.ALIGN_LEFT)
         self.hbox2.AddSpacer(15)
-        
+
         self.hbox3.Add(self.CancelButton,0,wx.ALIGN_CENTER)
         self.hbox3.AddSpacer(20)
         self.hbox3.Add(self.ExButton,1,wx.ALIGN_CENTER)
-        
+
         self.vbox.AddSpacer(15)
         self.vbox.Add(self.hbox1,0,wx.ALIGN_LEFT|wx.EXPAND)
         self.vbox.AddSpacer(15)
@@ -2800,10 +2809,10 @@ class Export(wx.Panel):
         self.vbox.AddSpacer(15)
         self.vbox.Add(self.hbox3,0,wx.ALIGN_CENTER)
         self.vbox.AddSpacer(15)
-        
+
         self.SetSizer(self.vbox)
-        
-        
+
+
 '''
 Twisted Python
 '''
@@ -2834,7 +2843,7 @@ class DataForwardingProtocol(basic.LineReceiver):
         self.transport.write(data)
         d=self._deferreds[data.split(" ")[0]]=defer.Deferred()
         return d
-    
+
     def connectionMade(self):
         gui=self.factory.gui
         gui.protocol=self
