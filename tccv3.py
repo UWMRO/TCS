@@ -1435,9 +1435,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset W "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset W "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset W "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset W "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
 
     # ----------------------------------------------------------------------------------
@@ -1455,7 +1455,7 @@ class TCC(wx.Frame):
         unit = self.control.jogUnits.GetValue()
         arcsec_to_enc_counts = 20.0
         if unit == "arcsec":
-            delta_arcs = float(self.control.jogIncrement.GetValue())
+            delta_arcs = -1*float(self.control.jogIncrement.GetValue())
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == "arcmin":
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
@@ -1494,9 +1494,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset S "+str(delta_enc)+" True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset S "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-		    self.protocol.sendCommand("offset S "+str(delta_enc)+" False "+str(self.control.currentRATRPos.GetLabel()))
+		    self.protocol.sendCommand("offset S "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
 
     # ----------------------------------------------------------------------------------
