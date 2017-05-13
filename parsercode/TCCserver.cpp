@@ -17,7 +17,7 @@
 #include "bct30.h"
 #endif
 
-#include <cstring> // Needed for memset 
+#include <cstring> // Needed for memset
 #include <sys/socket.h>  // Needed for the socket functions
 #include <netdb.h>  // Needed for the socket functions
 
@@ -40,18 +40,18 @@ void paddletimer()
 		int x;
 		x=300;
 		std::this_thread::sleep_for(std::chrono::milliseconds(x));
-		int isSlew = pmc.checkHandPaddle();	// has side-effect of setting 
-		if (isSlew == 0 && tracking) 
+		int isSlew = pmc.checkHandPaddle();	// has side-effect of setting
+		if (isSlew == 0 && tracking)
 			{
 			pmc.track(RaAxis, RaRate);
-			}	
+			}
 	}
 }
 
 const char *parser(std::string input)
-{	
+{
 	//std::cout << "reached parser" << std::endl;
-	
+
 	//std::cout << "through parser" << std::endl;
 	std::string s = input;
 	double RArate,Decrate;
@@ -68,21 +68,21 @@ const char *parser(std::string input)
 		//std::cout << "loop " << i << ": " << token << std::endl;
 		tokens[i]=token;
 		s=s.substr(s.find(' ')+1,s.length());
-	}  
+	}
 
 	if(tokens[0]=="slew")
 	{
 		std::cout << "slew " << tokens[1] << " "<< tokens[2] << " "<< tokens[3] <<std::endl;
-		
+		//pmc.stopSlew();
 		double RAtarget_degrees = ::atof(tokens[1].c_str());
 		double DECtarget_degrees = ::atof(tokens[2].c_str());
 		double LST = ::atof(tokens[3].c_str());
 		double RAtarget_hrs, RAmove_2_deg, DECmove_2_deg;
 		double RAvel, DECvel;
-		
+
 		RAtarget_hrs = RAtarget_degrees/15.0;
-		
-		RAmove_2_deg = (RAtarget_hrs - LST)*15.0; 
+
+		RAmove_2_deg = (RAtarget_hrs - LST)*15.0;
    		DECmove_2_deg = DECtarget_degrees - 46.951166666667; //mrolat
 		const char *slew = "slew 1";
 		if(fabs(RAmove_2_deg) > (8.0*15.0)) //maxHourAngle
@@ -102,12 +102,12 @@ const char *parser(std::string input)
 		pmc.getVelocity(RaAxis,&RAvel);
 		//std::cout << RAvel <<std::endl;
 		return slew;
-		
+
 	}
 	if(tokens[0] == "velmeasure")
 	{
 		double curRApos, curDECpos; // axis velocity
-		
+
 		pmc.getPosition(RaAxis, &curRApos); //ra in degrees
 		pmc.getPosition(DecAxis, &curDECpos); //dec in degrees
 		std::cout << curRApos << ' ' << curDECpos << std::endl;
@@ -135,7 +135,7 @@ const char *parser(std::string input)
 	if(tokens[0]=="status")
 	{
 		double ira_deg, idec_deg;
-		
+
 		//std::cout << "status begin" <<std::endl;
 		pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
    		pmc.getPosition(DecAxis, &idec_deg);  //RA and DEC in degrees off zenith
@@ -169,10 +169,10 @@ const char *parser(std::string input)
 	if(tokens[0] == "offset")
 	{
 		const char *offset;
-		std::cout << "offset " << tokens[1] << " "<< tokens[2] << tokens[3] << tokens[4] << std::endl;
+		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
-		double RATR= ::atof(tokens[4].c_str());
-		pmc.stopSlew();
+		//double RATR= ::atof(tokens[4].c_str());
+		//pmc.stopSlew();
 		if(tokens[1]=="N")
 		{
 			pmc.Jog(DecAxis,inc);
@@ -193,11 +193,11 @@ const char *parser(std::string input)
 			pmc.Jog(RaAxis,-inc);
 			offset = "offset W";
 		}
-		if(tokens[3]=="True")
-		{
-			pmc.track(RaAxis, RATR);
-		}
-		return offset;
+		//if(tokens[3]=="True")
+		//{
+		//	pmc.track(RaAxis, RATR);
+		//}
+		return inc, offset;
 	}
 	if(tokens[0] == "stop")
 	{
@@ -212,19 +212,19 @@ const char *parser(std::string input)
 		{
 			tracking = true;
 			RaRate = ::atof(tokens[2].c_str());
-			DecRate = ::atof(tokens[3].c_str());
+			//DecRate = ::atof(tokens[3].c_str());
 		 	if((RaRate > 25) || (RaRate < -10))
 		 	{
       			const char *out= "Ra rate must be between -10 and 25 deg/hr.";
       			return out;
    			}
-      		if((DecRate > 25) || (RaRate < -10)) 
-	 		{
-      			const char *out= "Dec rate must be between -10 and 25 deg/hr.";
-      			
-      			return out;
-   			}
-   			pmc.stopSlew();
+      		//if((DecRate > 25) || (RaRate < -10))
+	 		//{
+      		//	const char *out= "Dec rate must be between -10 and 25 deg/hr.";
+
+      		//	return out;
+   			//}
+   			//pmc.stopSlew();
 			pmc.track(RaAxis, RaRate);
 	 		//pmc.track(DecAxis, DecRate);
 	 		//pmc.track();
@@ -257,8 +257,8 @@ const char *parser(std::string input)
 	{
 	static double RaCover = 0;
     static double DecCover = 5115086;
-    
-	pmc.stopSlew();	// stop any motion. 
+
+	pmc.stopSlew();	// stop any motion.
 	pmc.MoveAbsolute(RaAxis, RaCover);	// see globals.h for Ra/DecCover values
     pmc.MoveAbsolute(DecAxis, DecCover);
     const char *out = "Slewed to Cover Position";
@@ -283,32 +283,33 @@ const char *parser(std::string input)
     double ra_deg, dec_deg;	//encoder positions in decimal degrees
     double LST = ::atof(tokens[3].c_str());
     double RA = ::atof(tokens[1].c_str());
-    
+		double DEC = ::atof(tokens[2].c_str());
+
     pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
     pmc.getPosition(DecAxis, &idec_deg); //
-    
+
     ra_deg = RA - (LST*15.0);
    	//ra_deg = -ra_deg; //pmc.setPosition input fix
-   	
-   	dec_deg = 46.951166666667 - LST;
-   	
+
+   	dec_deg = 46.951166666667 - DEC;
+
    	pmc.setPosition(RaAxis, &ra_deg);
     pmc.setPosition(DecAxis, &dec_deg);
-    
+
     const char *out= "Pointing set";
     return out;
 	}
 	return "Invalid Command";
-	
-	
-	
+
+
+
 }
 
 void Listener(void) {
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
-     for the other methods.  One then needs to bind the socket which is to essentially reserve the 
-     port for use.  After the code listens on that now open and reserved port.  Data is then 
+     for the other methods.  One then needs to bind the socket which is to essentially reserve the
+     port for use.  After the code listens on that now open and reserved port.  Data is then
      explicitely accepted and waits to recieve bites.*/
   int status;
   struct addrinfo host_info; // The struct that getaddrinfo() fills up with data.
@@ -329,9 +330,9 @@ void Listener(void) {
 
   if(status != 0) {
 	std::cout << "getaddrinfo error" << gai_strerror(status) << std::endl;
-   
+
   }
-  
+
   std::cout << "Creating a socket..." << std::endl;
   int socketfd; // Socket descriptor; passed a lot to function
   socketfd = socket(host_info_list->ai_family, host_info_list->ai_socktype, host_info_list->ai_protocol);
@@ -348,17 +349,17 @@ void Listener(void) {
 
   std::cout << "Listen()ing for connections.." << std::endl;
   status = listen(socketfd, 5); // up to five connections (can't handle all of them yet)
-  
+
   // Check if successfully listen on binded port
   if(status == -1) {
 	std::cout << "listen error" << std::endl;
   }
-  
+
   int new_fd;
   struct sockaddr_storage their_addr;
   socklen_t addr_size = sizeof(their_addr);
   new_fd = accept(socketfd, (struct sockaddr*) &their_addr, &addr_size);
-  
+
   if(new_fd == -1) {
 	std::cout << "listen error" << std::endl;
   }
@@ -367,7 +368,7 @@ void Listener(void) {
   }
 
   std::cout << "Waiting to recieve data..." << std::endl;
-  
+
   while(1) {
 
 	ssize_t bytes_received;
@@ -384,10 +385,10 @@ void Listener(void) {
 	}
 
 	/* Place parser code here.  Return a string up and then send that string with send.*/
-	
+
 	//std::cout << bytes_received << " bytes recieved" << std::endl;
 	incoming_data_buffer[bytes_received] = '\0';
-	
+
 	std::string input = (std::string) incoming_data_buffer;
 	//std::cout << "reached " <<input << std::endl;
 	//std::cout << "reached line 229" << std::endl;
@@ -398,14 +399,14 @@ void Listener(void) {
 	std::cout << results << std::endl;
 	send(new_fd, results, strlen(results), 0);
 
-	
+
 	//incoming_data_buffer[bytes_received] = '\0';
 	//std::cout << incoming_data_buffer << std::endl;
-  } 
+  }
   // clean up
   close(new_fd);
   close(socketfd);
-  
+
 
 }
 
@@ -425,12 +426,10 @@ int main(int argc, char *argv[])
 	data.append(std::string(argv[i]));
 	}
 	//std::cout << data;
-	
+
 	std::string input = data.c_str();
 	//std::cout << input;
 	parser(input);
 	*/
 	return 0;
 }
-
-

@@ -392,9 +392,9 @@ class Target(wx.Panel):
 
         #Buttons
         self.listButton = wx.Button(self, -1, "Retrieve List")
-        self.selectButton = wx.Button(self, -1, "Select as Current Target")
-        self.enterButton = wx.Button(self, -1, "Add Item to List")
-        self.removeButton=wx.Button(self,-1,"Remove Item from List")
+        self.selectButton = wx.Button(self, -1, "Select Target")
+        self.enterButton = wx.Button(self, -1, "Add to List")
+        self.removeButton=wx.Button(self,-1,"Remove Selected from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
@@ -720,7 +720,7 @@ class Initialization(wx.Panel):
 
         # this should autofill from tcc.conf
 
-        #Right Ascension Tracking Rate; Suggested value of 15.04
+        #Right Ascension Tracking Rate; Suggested value of 15.0418
         self.trackingRateRALabel=wx.StaticText(self)
         self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
@@ -766,6 +766,7 @@ class Initialization(wx.Panel):
         #Disable Buttons not usable before Initialization
 
         self.atZenithButton.Disable()
+        self.syncButton.Disable()
         self.parkButton.Disable()
         self.coverposButton.Disable()
         self.onTargetButton.Disable()
@@ -861,9 +862,9 @@ class Initialization(wx.Panel):
         self.leftbox_v.Add(self.gbox_v, 0, wx.ALIGN_LEFT)
 
 
-        self.main_h.AddSpacer(20)
+        self.main_h.AddSpacer(10)
         self.main_h.Add(self.leftbox_v, wx.ALIGN_LEFT)
-        self.main_h.AddSpacer(15)
+        self.main_h.AddSpacer(10)
         self.main_h.Add(self.tcbox_v, wx.ALIGN_LEFT)
 
         self.logbox_h.AddSpacer(30)
@@ -1069,6 +1070,12 @@ class TCC(wx.Frame):
         self.SetIcon(ico)
         self.dir=os.getcwd() #Current path for file IO
 
+        self.code_timer_W = wx.Timer(self)
+        self.code_timer_E = wx.Timer(self)
+        self.code_timer_N = wx.Timer(self)
+        self.code_timer_S = wx.Timer(self)
+        self.code_timer_Slew = wx.Timer(self)
+
         #############################################################
 
         #Setup Notebook
@@ -1132,6 +1139,13 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
         self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
         self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
+
+        self.Bind(wx.EVT_TIMER,self.timeW,self.code_timer_W)
+        self.Bind(wx.EVT_TIMER,self.timeE,self.code_timer_E)
+        self.Bind(wx.EVT_TIMER,self.timeN,self.code_timer_N)
+        self.Bind(wx.EVT_TIMER,self.timeS,self.code_timer_S)
+
+        self.Bind(wx.EVT_TIMER,self.timeSlew,self.code_timer_Slew)
 
         self.createMenu()
 
@@ -1404,15 +1418,53 @@ class TCC(wx.Frame):
         if unit == 'deg':
             delta_arcs =(float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-
+        """
         if self.telescope_status.get('tracking')==True:
             self.protocol.sendCommand("offset N "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
             self.protocol.sendCommand("offset N "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
+        """
+        if self.telescope_status.get("tracking") == True:
+        	self.protocol.sendCommand("track off")
+        	print "Turning off Tracking"
+        	self.code_timer_N.Start(2000, oneShot = True)
+        	return
+        elif self.telescope_status.get("tracking") == False:
+        	self.protocol.sendCommand("offset N "+str(delta_arcs))
+        	self.telescope_status['slewing'] = True
+        	thread.start_new_thread(self.velwatch,())
+        	return
+     # ----------------------------------------------------------------------------------
+    def timeN(self,event):
+        """
+        After tracking is turned off, execute north jog.
+
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+
+            Returns:
+                None
+        """
+        print "Timer Ended"
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_arcs = float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == "arcmin":
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == 'deg':
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
+        self.protocol.sendCommand("offset N "+str(delta_arcs))
+        self.telescope_status['slewing'] = True
+        thread.start_new_thread(self.velwatch,())
         return
 
     # ----------------------------------------------------------------------------------
-    def Woffset(self,event):
+    def Woffset(self,event, first = True):
         """
         Jog Command; apply a coordinate offset in the West direction.
 
@@ -1434,12 +1486,43 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
-        if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset W "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
-        if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset W "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
-        return
+        if self.telescope_status.get("tracking") == True:
+        	self.protocol.sendCommand("track off")
+        	print "Turning off Tracking"
+        	self.code_timer_W.Start(2000, oneShot = True)
+        	return
+        elif self.telescope_status.get("tracking") == False:
+        	self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+        	self.telescope_status['slewing'] = True
+        	thread.start_new_thread(self.velwatch,())
+        	return
+	 # ----------------------------------------------------------------------------------
+    def timeW(self,event):
+        """
+        After tracking is turned off, execute west jog.
 
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+
+            Returns:
+                None
+        """
+        print "Timer Ended"
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_arcs = float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == "arcmin":
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == 'deg':
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+        self.telescope_status['slewing'] = True
+        thread.start_new_thread(self.velwatch,())
+        return
     # ----------------------------------------------------------------------------------
     def Eoffset(self,event):
         """
@@ -1464,12 +1547,42 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
-        if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0)+" True "+str(self.control.currentRATRPos.GetLabel()))
-        if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0)+" False "+str(self.control.currentRATRPos.GetLabel()))
-        return
+        if self.telescope_status.get("tracking") == True:
+        	self.protocol.sendCommand("track off")
+        	print "Turning off Tracking"
+        	self.code_timer_E.Start(2000, oneShot = True)
+        elif self.telescope_status.get("tracking") == False:
+        	self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+        	self.telescope_status['slewing'] = True
+        	thread.start_new_thread(self.velwatch,())
+        	return
+	 # ----------------------------------------------------------------------------------
+    def timeE(self,event):
+        """
+        After tracking is turned off, execute east jog.
 
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+
+            Returns:
+                None
+        """
+        print "Timer Ended"
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_arcs = float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == "arcmin":
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == 'deg':
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+        self.telescope_status['slewing'] = True
+        thread.start_new_thread(self.velwatch,())
+        return
     # ----------------------------------------------------------------------------------
     def Soffset(self,event):
         """
@@ -1493,10 +1606,41 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
-        if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset S "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
-        if self.telescope_status.get('tracking')==False:
-		    self.protocol.sendCommand("offset S "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
+        if self.telescope_status.get("tracking") == True:
+        	self.protocol.sendCommand("track off")
+        	print "Turning off Tracking"
+        	self.code_timer_S.Start(2000, oneShot = True)
+        elif self.telescope_status.get("tracking") == False:
+        	self.protocol.sendCommand("offset S "+str(delta_arcs))
+        	self.telescope_status['slewing'] = True
+        	thread.start_new_thread(self.velwatch,())
+        	return
+	 # ----------------------------------------------------------------------------------
+    def timeS(self,event):
+        """
+        After tracking is turned off, execute south jog.
+
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+
+            Returns:
+                None
+        """
+        print "Timer Ended"
+        unit = self.control.jogUnits.GetValue()
+        arcsec_to_enc_counts = 20.0
+        if unit == "arcsec":
+            delta_arcs = float(self.control.jogIncrement.GetValue())
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == "arcmin":
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        if unit == 'deg':
+            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+        self.protocol.sendCommand("offset S "+str(delta_arcs))
+        self.telescope_status['slewing'] = True
+        thread.start_new_thread(self.velwatch,())
         return
 
     # ----------------------------------------------------------------------------------
@@ -1586,20 +1730,20 @@ class TCC(wx.Frame):
         DECTR=self.control.currentDECTRPos.GetLabel()
         print RATR, DECTR
         if str(RATR)=='Unknown':
-        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 15.04 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
+        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 15.0418 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
         	dlg.ShowModal()
         	dlg.Destroy()
         	return
         if self.telescope_status.get('tracking')==False:
             self.sb.SetStatusText('Tracking: True',0)
-            self.protocol.sendCommand("track on "+str(RATR)+' '+str(DECTR))
+            self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
             self.control.trackButton.SetLabel('Stop Tracking')
             self.control.trackButton.SetBackgroundColour('Light Steel Blue')
         if self.telescope_status.get('tracking')==True:
             self.sb.SetStatusText('Tracking: False',0)
             self.protocol.sendCommand("track off")
             self.control.trackButton.SetLabel('Start Tracking')
-            self.control.trackButton.SetBackgroundColour('Light Steel Blue')
+            self.control.trackButton.SetBackgroundColour('Light Slate Blue')
         self.telescope_status['tracking']= not self.telescope_status.get('tracking')
         return
 
@@ -1746,19 +1890,19 @@ class TCC(wx.Frame):
             	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
                 self.log([input_ra,input_dec,current_epoch])
                 command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
-                self.protocol.sendCommand(command)
-                thread.start_new_thread(self.velwatch,())
-                #d.addCallback(self.vcback)
-                self.control.slewButton.SetLabel('Stop Slew')
-                self.control.slewButton.SetBackgroundColour('Firebrick')
-                self.sb.SetStatusText('Slewing: True',1)
-
-                self.target_coords['Name']=name  #Store name of target for pointing routine
-                self.target_coords['RA']=input_ra #Store target RA for pointing routine
-                self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
-                self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
-
-                return
+                if self.telescope_status.get("tracking") == True:
+                    self.protocol.sendCommand("track off")
+                    print "Turning off Tracking"
+                    self.code_timer_Slew.Start(2000, oneShot = True)
+                    return
+                elif self.telescope_status.get("tracking") == False:
+                    self.protocol.sendCommand(command)
+                    self.target_coords['Name']=name  #Store name of target for pointing routine
+                    self.target_coords['RA']=input_ra #Store target RA for pointing routine
+                    self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+                    self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
+                    thread.start_new_thread( self.velwatch,(True, self.decimalcoords,) )
+                    return
 
             elif float(self.slew_altitude) < float(self.horizonlimit):
                 dlg = wx.MessageDialog(self,
@@ -1771,16 +1915,56 @@ class TCC(wx.Frame):
 
         elif self.telescope_status.get('slewing')==True:
             self.protocol.sendCommand("stop")
-            self.control.slewButton.SetLabel('Start Slew')
-            self.control.slewButton.SetBackgroundColour("Light Slate Blue")
-            self.sb.SetStatusText('Slewing: False',1)
 
-            self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
+            #self.control.slewButton.SetLabel('Start Slew')
+            #self.control.slewButton.SetBackgroundColour("Light Slate Blue")
+            #self.sb.SetStatusText('Slewing: False',1)
+
+            self.telescope_status['slewing'] = False
 
         return
-
     # ----------------------------------------------------------------------------------
-    def velwatch(self):
+    def timeSlew(self,event):
+        """
+        After tracking is turned off, execute slew.
+
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+
+            Returns:
+                None
+        """
+        print "Timer Ended"
+        name=self.control.targetNameText.GetValue()
+        input_ra=self.control.targetRaText.GetValue()
+        input_dec=self.control.targetDecText.GetValue()
+        input_epoch=self.control.targetEpochText.GetValue()
+        current_epoch=self.control.currentEpochPos.GetLabel()
+
+        self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
+        self.inputcoordSorter(input_ra,input_dec,input_epoch)
+        self.obstarget=FixedTarget(name=name,coord=self.coordinates)
+
+        if self.telescope_status.get('precession')==True:
+            self.coordprecess(self.coordinates,current_epoch,input_epoch)
+
+        self.decimalcoords=self.coordinates.to_string('decimal')
+
+        self.LST=str(self.control.currentLSTPos.GetLabel())
+        self.LST=self.LST.split(':')
+        self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+        self.log([input_ra,input_dec,current_epoch])
+        command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
+
+        self.protocol.sendCommand(command)
+        self.target_coords['Name']=name  #Store name of target for pointing routine
+        self.target_coords['RA']=input_ra #Store target RA for pointing routine
+        self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+        self.telescope_status['slewing'] = True
+        thread.start_new_thread(self.velwatch,(True,self.decimalcoords,))
+        return
+    # ----------------------------------------------------------------------------------
+    def velwatch(self, secondary_slew = False, data=None):
         """
         During a slew, continually track telescope velocity through velmeasure.
             Args:
@@ -1788,11 +1972,33 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
+        #d=self.protocol.sendCommand("velmeasure")
+    	#d.addCallback(self.velmeasure)
     	time.sleep(0.5)
     	while self.telescope_status.get('slewing')==True:
-    		d=self.protocol.sendCommand("velmeasure")
-    		d.addCallback(self.velmeasure)
-    		time.sleep(0.5)
+            d=self.protocol.sendCommand("velmeasure")
+            if secondary_slew:
+                print "Beginning First Slew"
+                d.addCallback(self.velmeasureSS)
+                time.sleep(0.5)
+            else:
+                d.addCallback(self.velmeasure)
+                time.sleep(0.5)
+        if secondary_slew:
+            print "Completed First Slew"
+            self.LST=str(self.control.currentLSTPos.GetLabel())
+            self.LST=self.LST.split(':')
+            self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+            command="slew"+' '+str(data)+' '+str(self.LST)
+            print "Beginning Secondary Slew"
+            self.protocol.sendCommand(command)
+            self.telescope_status["slewing"]=True
+            while self.telescope_status.get('slewing')==True:
+                d=self.protocol.sendCommand("velmeasure")
+                d.addCallback(self.velmeasure)
+                time.sleep(0.5)
+            print "Completed Secondary Slew"
+
 
     # ----------------------------------------------------------------------------------
     def velmeasure(self,msg):
@@ -1809,9 +2015,37 @@ class TCC(wx.Frame):
     	msg=int(msg)
     	if msg==1:
             self.telescope_status['slewing']=False
+            print "Slewing == False"
             wx.CallAfter(self.slewbutton_toggle)
+            if self.telescope_status.get('tracking')==True:
+            	self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
+            	print "I made it"
+
     	if msg==0:
             self.telescope_status['slewing']=True
+    # ----------------------------------------------------------------------------------
+    def velmeasureSS(self,msg):
+        """
+        Get telescope velocity. Server sends back a boolean value to indicate if the
+        telescope has stopped moving. Secondary Slew attempts a second slew to counteract
+        movement of target over the slew period, then sends back to velmeasure.
+            Args:
+                None
+            Returns:
+                None
+        """
+    	print repr(msg)
+    	msg=int(msg)
+    	if msg==1:
+            self.telescope_status['slewing']=False
+            #wx.CallAfter(self.slewbutton_toggle)
+            #if self.telescope_status.get('tracking')==True:
+            	#self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
+            	#print "I made it"
+
+    	if msg==0:
+            self.telescope_status['slewing']=True
+
 
     # ----------------------------------------------------------------------------------
     def checkslew(self):
@@ -1828,7 +2062,7 @@ class TCC(wx.Frame):
                 wx.CallAfter(self.slewbuttons_on,True,self.telescope_status.get('tracking'))
             if self.telescope_status.get('slewing')==True:
                 wx.CallAfter(self.slewbuttons_on,False,self.telescope_status.get('tracking'))
-            time.sleep(2.0)
+            time.sleep(0.25)
 
     # ----------------------------------------------------------------------------------
     def slewbuttons_on(self,bool,track):
@@ -1840,20 +2074,21 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
-    	if track==False:
-    		self.control.jogNButton.Enable(bool)
-    		self.control.jogSButton.Enable(bool)
-    		self.control.jogWButton.Enable(bool)
-    		self.control.jogEButton.Enable(bool)
-    	if track==True:
-    		boolval=False
-    		self.control.jogNButton.Enable(boolval)
-    		self.control.jogSButton.Enable(boolval)
-    		self.control.jogWButton.Enable(boolval)
-    		self.control.jogEButton.Enable(boolval)
     	self.control.trackButton.Enable(bool)
     	self.init.parkButton.Enable(bool)
     	self.init.coverposButton.Enable(bool)
+    	self.control.jogNButton.Enable(bool)
+    	self.control.jogWButton.Enable(bool)
+    	self.control.jogEButton.Enable(bool)
+    	self.control.jogSButton.Enable(bool)
+    	if not bool:
+    		self.control.slewButton.SetLabel('Stop Slew')
+    		self.control.slewButton.SetBackgroundColour('Firebrick')
+    		self.sb.SetStatusText('Slewing: True',1)
+        elif bool:
+        	self.control.slewButton.SetLabel('Start Slew')
+        	self.control.slewButton.SetBackgroundColour('Light Slate Blue')
+        	self.sb.SetStatusText('Slewing: False',1)
 
     # ----------------------------------------------------------------------------------
     def slewbutton_toggle(self):
@@ -2475,11 +2710,11 @@ class TCC(wx.Frame):
             self.targetDEC = str(target_dec)
             self.targetDEC = self.targetDEC.split(':')
             self.targetDEC = float(self.targetDEC[0]) + float(self.targetDEC[1]) / 60. + float(self.targetDEC[2]) / 3600.
-            self.LST = str(self.control.currentLSTPos.GetValue())
+            self.LST = str(self.control.currentLSTPos.GetLabel())
             self.LST = self.LST.split(':')
             self.LST = float(self.LST[0]) + float(self.LST[1]) / 60. + float(self.LST[2]) / 3600.
             try:
-                self.protocol.sendCommand("point " + self.targetRA + " " + self.targetDec + " " + self.LST)
+                self.protocol.sendCommand("point " + str(self.targetRA) + " " + str(self.targetDEC) + " " + str(self.LST))
             except AttributeError:
                 print "Not Connected to Telescope"
         return
@@ -2512,17 +2747,22 @@ class TCC(wx.Frame):
                 None
         """
         self.targetRA=str(self.target_coords.get('RA'))
-        self.targetRA=self.targetRA.split(':')
-        self.targetRA=float(self.targetRA[0])+float(self.targetRA[1])/60.+float(self.targetRA[2])/3600.
+        self.targetRA_h, self.targetRA=self.targetRA.split('h')
+        self.targetRA_m, self.targetRA=self.targetRA.split('m')
+        self.targetRA_s = self.targetRA[:-1]
+        self.targetRA=float(self.targetRA_h)+float(self.targetRA_m)/60.+float(self.targetRA_s)/3600.
         self.targetRA=self.targetRA*15.0 #Degrees
         self.targetDEC=str(self.target_coords.get('DEC'))
-    	self.targetDEC=self.targetDEC.split(':')
-    	self.targetDEC=float(self.targetDEC[0])+float(self.targetDEC[1])/60.+float(self.targetDEC[2])/3600.
-    	self.LST=str(self.control.currentLSTPos.GetValue())
+    	self.targetDEC_d, self.targetDEC=self.targetDEC.split('d')
+        self.targetDEC_m, self.targetDEC=self.targetDEC.split('m')
+        self.targetDEC_s = self.targetDEC[:-1]
+    	self.targetDEC=float(self.targetDEC_d)+float(self.targetDEC_m)/60.+float(self.targetDEC_s)/3600.
+    	self.LST=str(self.control.currentLSTPos.GetLabel())
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+        print "point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST)
         try:
-    	    self.protocol.sendCommand("point "+self.targetRA+ " "+self.targetDec+" "+self.LST)
+    	    self.protocol.sendCommand("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
         except AttributeError:
             print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
@@ -2675,6 +2915,7 @@ class TCC(wx.Frame):
             self.control.trackButton.Enable()
             self.control.currentRATRPos.SetLabel(str(self.RA_trackrate))
             self.init.atZenithButton.Enable()
+            self.init.syncButton.Enable()
 
             self.target.listButton.Enable()
             self.target.selectButton.Enable()
@@ -2950,11 +3191,13 @@ if __name__=="__main__":
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
-  		time.sleep(3)
+  		#pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		#time.sleep(3)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
   		app.MainLoop()
-	except KeyboardInterrupt:
-		os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
-		sys.exit(0)
+		#except KeyboardInterrupt:
+		#os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
+		#sys.exit(0)
+	except ValueError:
+		pass
