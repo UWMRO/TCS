@@ -1465,9 +1465,9 @@ class TCC(wx.Frame):
             self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
         if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset E "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0)+" True "+str(self.control.currentRATRPos.GetLabel()))
         if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset E "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
+            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0)+" False "+str(self.control.currentRATRPos.GetLabel()))
         return
 
     # ----------------------------------------------------------------------------------
