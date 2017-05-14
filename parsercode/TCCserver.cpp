@@ -201,7 +201,13 @@ const char *parser(std::string input)
 	}
 	if(tokens[0] == "stop")
 	{
-		pmc.stopSlew();
+		//pmc.stopSlew();
+		while(pmc.IsStopped(RaAxis) == false
+		|| pmc.IsStopped(DecAxis) == false
+		|| pmc.IsStopped(FocusAxis) == false)
+		{
+			 pmc.stopSlew();
+		}
 		const char *nstop = "stop slew";
 		return nstop;
 	}
@@ -210,7 +216,7 @@ const char *parser(std::string input)
 		std::cout << "toggling tracking\n";
 		if(tokens[1] == "on")
 		{
-			tracking = true;
+			//tracking = true;
 			RaRate = ::atof(tokens[2].c_str());
 			//DecRate = ::atof(tokens[3].c_str());
 		 	if((RaRate > 25) || (RaRate < -10))
@@ -233,8 +239,14 @@ const char *parser(std::string input)
 		}
 		if(tokens[1] == "off")
 		{
-			tracking = false;
-			pmc.stopSlew();
+			//tracking = false;
+			//pmc.stopSlew();
+			while(pmc.IsStopped(RaAxis) == false
+	 	  || pmc.IsStopped(DecAxis) == false
+	 	  || pmc.IsStopped(FocusAxis) == false)
+	    {
+	       pmc.stopSlew();
+	    }
 			const char *out= "Tracking Disabled";
       		return out;
 		}
@@ -413,9 +425,9 @@ void Listener(void) {
 int main(int argc, char *argv[])
 {
 	pmc.init();
-	std::thread t1(paddletimer);
+	//std::thread t1(paddletimer);
 	Listener();
-	t1.join();
+	//t1.join();
 	/*
 	std::string data;
 	std::string spacer= " ";

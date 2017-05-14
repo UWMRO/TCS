@@ -472,6 +472,7 @@ class Target(wx.Panel):
         self.dir=os.getcwd()
 
 
+
 ###########################################################################################
 class GuiderPerformance(wx.Panel):
     """Secondary tab for guider operation, view guider performance from this panel"""
@@ -1065,16 +1066,23 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
+        self.at_MRO = True #Dev variable for ease of development offsite
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
         self.dir=os.getcwd() #Current path for file IO
+        if self.at_MRO == True:
+            self.stordir = "/home/mro/storage/tcc_data"
+        else:
+            self.stordir = self.dir
 
         self.code_timer_W = wx.Timer(self)
         self.code_timer_E = wx.Timer(self)
         self.code_timer_N = wx.Timer(self)
         self.code_timer_S = wx.Timer(self)
         self.code_timer_Slew = wx.Timer(self)
+
+        self.stop_time = 1000 #Waiting time for tracking to finish
 
         #############################################################
 
@@ -1355,7 +1363,7 @@ class TCC(wx.Frame):
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
-        f_out=open(self.dir+'/logs/'+today,'a')
+        f_out=open(self.stordir+'/logs/'+today,'a')
         f_out.write(current_time_log+','+str(input)+'\n')
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
@@ -1489,7 +1497,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
-        	self.code_timer_W.Start(2000, oneShot = True)
+        	self.code_timer_W.Start(self.stop_time, oneShot = True)
         	return
         elif self.telescope_status.get("tracking") == False:
         	self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
@@ -1550,7 +1558,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
-        	self.code_timer_E.Start(2000, oneShot = True)
+        	self.code_timer_E.Start(self.stop_time, oneShot = True)
         elif self.telescope_status.get("tracking") == False:
         	self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
         	self.telescope_status['slewing'] = True
@@ -1609,7 +1617,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
-        	self.code_timer_S.Start(2000, oneShot = True)
+        	self.code_timer_S.Start(self.stop_time, oneShot = True)
         elif self.telescope_status.get("tracking") == False:
         	self.protocol.sendCommand("offset S "+str(delta_arcs))
         	self.telescope_status['slewing'] = True
@@ -1840,7 +1848,8 @@ class TCC(wx.Frame):
         self.ra_out=ra_in+d_ra
         self.dec_out=dec_in+d_dec
         print self.ra_out,self.dec_out
-
+        self.log(self.ra_out)
+        self.log(self.dec_out)
         self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
         return self.coordinates, self.ra_out, self.dec_out
 
@@ -1893,7 +1902,7 @@ class TCC(wx.Frame):
                 if self.telescope_status.get("tracking") == True:
                     self.protocol.sendCommand("track off")
                     print "Turning off Tracking"
-                    self.code_timer_Slew.Start(2000, oneShot = True)
+                    self.code_timer_Slew.Start(self.stop_time, oneShot = True)
                     return
                 elif self.telescope_status.get("tracking") == False:
                     self.protocol.sendCommand(command)
@@ -1997,8 +2006,9 @@ class TCC(wx.Frame):
                 d=self.protocol.sendCommand("velmeasure")
                 d.addCallback(self.velmeasure)
                 time.sleep(0.5)
+            #self.protocol.sendCommand("stop")
             print "Completed Secondary Slew"
-
+        return
 
     # ----------------------------------------------------------------------------------
     def velmeasure(self,msg):
@@ -2020,6 +2030,7 @@ class TCC(wx.Frame):
             if self.telescope_status.get('tracking')==True:
             	self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
             	print "I made it"
+            return
 
     	if msg==0:
             self.telescope_status['slewing']=True
@@ -2122,7 +2133,7 @@ class TCC(wx.Frame):
             self.UTCdate=self.UTC[0].split("/")
             self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
             self.UTC=self.UTCdate+"T"+self.UTC[1]
-            self.sfile=self.dir+"/positionlogs/"+self.UTCdate+".txt"
+            self.sfile=self.stordir+"/positionlogs/"+self.UTCdate+".txt"
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
             #print "Get"
@@ -2148,7 +2159,7 @@ class TCC(wx.Frame):
   			self.UTC=self.UTC.split(" ")
   			self.UTCdate=self.UTC[0].split("/")
   			self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
-  			status_file = open(self.dir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
+  			status_file = open(self.stordir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
   			current_pos = status_file.readlines()[-1].split()
   			status_file.close()
   			current_RA = current_pos[1]
@@ -2944,9 +2955,18 @@ class TCC(wx.Frame):
             self.control.currentEpochPos.SetForegroundColour('black')
             self.control.currentRATRPos.SetForegroundColour('black')
             thread.start_new_thread(self.logstatus,())
-            try: self.telescope_status['connectState']=self.server.connectState
-            except NameError: self.telescope_status['connectState']= False
-            if self.telescope_status['connectState']:
+            if self.protocol != None:
+                self.telescope_status['connectState'] = True
+            else:
+                self.telescope_status['connectState'] = False
+            """
+            try:
+                self.telescope_status['connectState']=self.server.connectState
+            except NameError:
+                self.telescope_status['connectState']= False
+            """
+            if self.telescope_status.get('connectState'):
+                self.log("Successfully connected to the telescope.")
                 self.sb.SetStatusText('Connected to Telescope', 3)
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
