@@ -228,7 +228,7 @@ const char *parser(std::string input)
 		{
 			//pmc.Jog(RaAxis,-inc);
 			double ira_deg, idec_deg;	// initial values
-			pmc.GetPosition(RaAxis, &ira_deg);
+			pmc.getPosition(RaAxis, &ira_deg);
 			double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
 			pmc.MoveAbsolute(RaAxis, offset_pos);
 			offset = "offset W";
@@ -468,24 +468,14 @@ void Listener(void) {
 	  break;
 	}
 
-	/* Place parser code here.  Return a string up and then send that string with send.*/
 
-	//std::cout << bytes_received << " bytes recieved" << std::endl;
 	incoming_data_buffer[bytes_received] = '\0';
 
 	std::string input = (std::string) incoming_data_buffer;
-	//std::cout << "reached " <<input << std::endl;
-	//std::cout << "reached line 229" << std::endl;
 	const char* results = parser((std::string) incoming_data_buffer);
-	//std::cout << "reached line 231" << std::endl;
-	//std::cout << "results are: " << results << std::endl;
-	//const char *msg = "receive data";
 	std::cout << results << std::endl;
 	send(new_fd, results, strlen(results), 0);
 
-
-	//incoming_data_buffer[bytes_received] = '\0';
-	//std::cout << incoming_data_buffer << std::endl;
   }
   // clean up
   close(new_fd);
