@@ -84,15 +84,10 @@ void paddletimer()
 	}
 }
 */
-const char *parser(std::string input)
-{
-	//std::cout << "reached parser" << std::endl;
+const char *parser(std::string input) {
 
-	//std::cout << "through parser" << std::endl;
 	std::string s = input;
 	double RArate,Decrate;
-	//test print
-	//std::cout << "line 27: " << s << std::endl;
 
 	std::string delimiter = " ";
 	size_t n = std::count(s.begin(), s.end(), ' ')+1;
@@ -352,10 +347,10 @@ const char *parser(std::string input)
 	}
 	if(tokens[0] == "park")
 	{
-	pmc.MoveAbsolute(RaAxis, 0.0);
+		pmc.MoveAbsolute(RaAxis, 0.0);
     pmc.MoveAbsolute(DecAxis, 0.0);
     const char *out = "Parked Telescope";
-	return out;
+		return out;
 	}
 	if(tokens[0] == "zenith")
 	{
@@ -386,9 +381,7 @@ const char *parser(std::string input)
     return out;
 	}
 	return "Invalid Command";
-
 }
-
 void Listener(void) {
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
