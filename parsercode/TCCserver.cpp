@@ -51,6 +51,7 @@ void paddletimer()
 	}
 }
 */
+/*
 void paddletimer()
 {
 	int x;
@@ -80,7 +81,7 @@ void paddletimer()
  	 resumeTracking = false; // since we just resumed
 	}
 }
-
+*/
 const char *parser(std::string input)
 {
 	//std::cout << "reached parser" << std::endl;
@@ -261,9 +262,8 @@ const char *parser(std::string input)
        if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)
  	  && (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
        {
-
  	 	 		pmc.track(RaAxis, RaRate); // if issues persist
- 	 			resumeTracking = false; // since we just resumed
+ 	 			resumetracking = false; // since we just resumed
 			 }
 			return tracking;
 		 }
