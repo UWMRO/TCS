@@ -222,22 +222,18 @@ const char *parser(std::string input) {
 	if(tokens[0] == "checkhandPaddle")
 	{
 
-		if(pmc.checkHandPaddle() == 1)
-		{
+		if(pmc.checkHandPaddle() == 1) {
 
-			if(tracking == true)
-			{
+			if(tracking == true) {
 				resumetracking = true;
 			}
 
-			else
-			{
+			else {
 				resumetracking = false;
 			}
 
 		}
-		if( pmc.checkHandPaddle() == 0 && resumetracking == true)
-    {
+		if( pmc.checkHandPaddle() == 0 && resumetracking == true) {
 			 const char *paddle;
        // make sure scope has slowed first
 			 double RAvel, DECvel;
@@ -251,7 +247,7 @@ const char *parser(std::string input) {
 			 paddle = "Checked Hand Paddle";
 			 return paddle;
 		}
-
+	}
 	if(tokens[0] == "stop")
 	{
 		//pmc.stopSlew();
