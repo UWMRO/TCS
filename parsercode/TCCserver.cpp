@@ -258,6 +258,7 @@ const char *parser(std::string input)
 		}
 		if( pmc.checkHandPaddle() == 0 && resumetracking == true)
     {
+			 const char *paddle;
        // make sure scope has slowed first
 			 double RAvel, DECvel;
        pmc.getVelocity(RaAxis, &RAvel);
@@ -386,12 +387,9 @@ const char *parser(std::string input)
 	}
 	return "Invalid Command";
 
-
-
 }
 
-void Listener(void)
-{
+void Listener(void) {
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
      for the other methods.  One then needs to bind the socket which is to essentially reserve the
