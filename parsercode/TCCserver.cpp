@@ -32,6 +32,8 @@ double pastDECpos=0.0;
 double RaRate=0.0;
 double DecRate=0.0;
 
+double SIDEREAL_CNT_PER_SEC = 15.04108/0.05;
+
 bool tracking=false;
 bool resumetracking=false;
 //Attempt 1: Instability --  Maybe calling pmc.track once every 10 milliseconds
@@ -189,7 +191,7 @@ const char *parser(std::string input)
    		//myfile.open (tokens[4]);
    		log << data+"\n";
   		log.close();
-  		const char *out = "File Written";
+  		const char *out = "File Written";double SIDEREAL_CNT_PER_SEC = 15.04108/0.05;
   		return out;
 	}
 	if(tokens[0] == "focus")
@@ -257,6 +259,7 @@ const char *parser(std::string input)
 		if( pmc.checkHandPaddle() == 0 && resumetracking == true)
     {
        // make sure scope has slowed first
+			 double RAvel, DECvel;
        pmc.getVelocity(RaAxis, &RAvel);
        pmc.getVelocity(RaAxis, &DECvel);
        if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)
@@ -265,7 +268,8 @@ const char *parser(std::string input)
  	 	 		pmc.track(RaAxis, RaRate); // if issues persist
  	 			resumetracking = false; // since we just resumed
 			 }
-			return tracking;
+			paddle = "Checked Hand Paddle";
+			return paddle;
 		 }
 
 	if(tokens[0] == "stop")
@@ -386,7 +390,8 @@ const char *parser(std::string input)
 
 }
 
-void Listener(void) {
+void Listener(void)
+{
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
      for the other methods.  One then needs to bind the socket which is to essentially reserve the
