@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include "mcapi.h"
 #include "iomappings.h"
+#include <mutex>
 #ifndef __BCT30__
 #include "bct30.h"
 #endif
@@ -21,6 +22,7 @@
 #include <sys/socket.h>  // Needed for the socket functions
 #include <netdb.h>  // Needed for the socket functions
 
+std::mutex m;
 
 bct30 pmc;
 
@@ -31,20 +33,51 @@ double RaRate=0.0;
 double DecRate=0.0;
 
 bool tracking=false;
-//bool resumetracking=false;
-
+bool resumetracking=false;
+//Attempt 1: Instability --  Maybe calling pmc.track once every 10 milliseconds
+/*
 void paddletimer()
 {
 	while ( 1 )
 	{
 		int x;
-		x=300;
+		x=10;
 		std::this_thread::sleep_for(std::chrono::milliseconds(x));
 		int isSlew = pmc.checkHandPaddle();	// has side-effect of setting
 		if (isSlew == 0 && tracking)
 			{
 			pmc.track(RaAxis, RaRate);
 			}
+	}
+}
+*/
+void paddletimer()
+{
+	int x;
+	x=10;
+	while ( 1 )
+	{
+		std::lock_guard<std::mutex> lock(m);
+		std::this_thread::sleep_for(std::chrono::milliseconds(x));
+		if(pmc.checkHandPaddle() == 1)
+		{
+
+			if(tracking == true)
+		resumetracking = true;
+			else
+		resumetracking = false;
+		}
+		if( pmc.checkHandPaddle() == 0 && resumetracking == true)
+    {
+       // make sure scope has slowed first
+       pmc.getVelocity(RaAxis, &RAvel);
+       pmc.getVelocity(RaAxis, &DECvel);
+       if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)
+ 	  && (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
+       {
+
+ 	 pmc.track(); // if issues persist
+ 	 resumeTracking = false; // since we just resumed
 	}
 }
 
@@ -190,7 +223,11 @@ const char *parser(std::string input)
 		}
 		if(tokens[1]=="W")
 		{
-			pmc.Jog(RaAxis,-inc);
+			//pmc.Jog(RaAxis,-inc);
+			double ira_deg, idec_deg;	// initial values
+			pmc.GetPosition(RaAxis, &ira_deg);
+			double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
+			pmc.MoveAbsolute(RaAxis, offset_pos);
 			offset = "offset W";
 		}
 		//if(tokens[3]=="True")
@@ -199,6 +236,38 @@ const char *parser(std::string input)
 		//}
 		return inc, offset;
 	}
+	if(tokens[0] == "checkhandPaddle")
+	{
+
+		if(pmc.checkHandPaddle() == 1)
+		{
+
+			if(tracking == true)
+			{
+				resumetracking = true;
+			}
+
+			else
+			{
+				resumetracking = false;
+			}
+
+		}
+		if( pmc.checkHandPaddle() == 0 && resumetracking == true)
+    {
+       // make sure scope has slowed first
+       pmc.getVelocity(RaAxis, &RAvel);
+       pmc.getVelocity(RaAxis, &DECvel);
+       if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)
+ 	  && (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
+       {
+
+ 	 	 		pmc.track(RaAxis, RaRate); // if issues persist
+ 	 			resumeTracking = false; // since we just resumed
+			 }
+			return tracking;
+		 }
+
 	if(tokens[0] == "stop")
 	{
 		//pmc.stopSlew();
@@ -216,7 +285,7 @@ const char *parser(std::string input)
 		std::cout << "toggling tracking\n";
 		if(tokens[1] == "on")
 		{
-			//tracking = true;
+			tracking = true;
 			RaRate = ::atof(tokens[2].c_str());
 			//DecRate = ::atof(tokens[3].c_str());
 		 	if((RaRate > 25) || (RaRate < -10))
@@ -239,7 +308,7 @@ const char *parser(std::string input)
 		}
 		if(tokens[1] == "off")
 		{
-			//tracking = false;
+			tracking = false;
 			//pmc.stopSlew();
 			while(pmc.IsStopped(RaAxis) == false
 	 	  || pmc.IsStopped(DecAxis) == false
@@ -428,20 +497,6 @@ int main(int argc, char *argv[])
 	//std::thread t1(paddletimer);
 	Listener();
 	//t1.join();
-	/*
-	std::string data;
-	std::string spacer= " ";
-	data.append(std::string(argv[1]));
-	for(int i = 2;i < argc; i++)
-	{
-	data.append(spacer);
-	data.append(std::string(argv[i]));
-	}
-	//std::cout << data;
 
-	std::string input = data.c_str();
-	//std::cout << input;
-	parser(input);
-	*/
 	return 0;
 }

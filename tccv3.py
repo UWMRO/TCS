@@ -1066,7 +1066,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = True #Dev variable for ease of development offsite
+        self.at_MRO = False #Dev variable for ease of development offsite
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
@@ -1415,33 +1415,26 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
-        unit=self.control.jogUnits.GetValue()
-        #arcsec_to_enc_counts= 20.0 This is handled in drivers
-        if unit == "arcsec":
-            delta_arcs=float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == "arcmin":
-            delta_arcs=(float(self.control.jogIncrement.GetValue())*u.arcmin).to(u.arcsec).value
-            self.log(unit+' '+str(delta_arcs)+' arcseconds')
-        if unit == 'deg':
-            delta_arcs =(float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        """
-        if self.telescope_status.get('tracking')==True:
-            self.protocol.sendCommand("offset N "+str(delta_arcs)+" True "+str(self.control.currentRATRPos.GetLabel()))
-        if self.telescope_status.get('tracking')==False:
-            self.protocol.sendCommand("offset N "+str(delta_arcs)+" False "+str(self.control.currentRATRPos.GetLabel()))
-        """
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
         	self.code_timer_N.Start(2000, oneShot = True)
         	return
         elif self.telescope_status.get("tracking") == False:
+
+            unit=self.control.jogUnits.GetValue()
+            if unit == "arcsec":
+                delta_arcs=float(self.control.jogIncrement.GetValue())
+            if unit == "arcmin":
+                delta_arcs=(float(self.control.jogIncrement.GetValue())*u.arcmin).to(u.arcsec).value
+            if unit == 'deg':
+                delta_arcs =(float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+
         	self.protocol.sendCommand("offset N "+str(delta_arcs))
-        	self.telescope_status['slewing'] = True
-        	thread.start_new_thread(self.velwatch,())
-        	return
+            self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
+            self.telescope_status['slewing'] = True
+            thread.start_new_thread(self.velwatch,())
+            return
      # ----------------------------------------------------------------------------------
     def timeN(self,event):
         """
@@ -1458,15 +1451,14 @@ class TCC(wx.Frame):
         arcsec_to_enc_counts = 20.0
         if unit == "arcsec":
             delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
         if unit == "arcmin":
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == 'deg':
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
         self.protocol.sendCommand("offset N "+str(delta_arcs))
+        self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1482,17 +1474,6 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
-        unit = self.control.jogUnits.GetValue()
-        arcsec_to_enc_counts = 20.0
-        if unit == "arcsec":
-            delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == "arcmin":
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == 'deg':
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
 
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
@@ -1500,10 +1481,21 @@ class TCC(wx.Frame):
         	self.code_timer_W.Start(self.stop_time, oneShot = True)
         	return
         elif self.telescope_status.get("tracking") == False:
-        	self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
-        	self.telescope_status['slewing'] = True
-        	thread.start_new_thread(self.velwatch,())
-        	return
+
+            unit = self.control.jogUnits.GetValue()
+            arcsec_to_enc_counts = 20.0
+            if unit == "arcsec":
+                delta_arcs = float(self.control.jogIncrement.GetValue())
+            if unit == "arcmin":
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            if unit == 'deg':
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+
+            self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
+            self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+            self.telescope_status['slewing'] = True
+            thread.start_new_thread(self.velwatch,())
+            return
 	 # ----------------------------------------------------------------------------------
     def timeW(self,event):
         """
@@ -1520,13 +1512,12 @@ class TCC(wx.Frame):
         arcsec_to_enc_counts = 20.0
         if unit == "arcsec":
             delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == "arcmin":
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == 'deg':
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
+        self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
         self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
@@ -1543,27 +1534,26 @@ class TCC(wx.Frame):
                 None
         """
 
-        unit = self.control.jogUnits.GetValue()
-        arcsec_to_enc_counts = 20.0
-        if unit == "arcsec":
-            delta_arcs = -1*float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == "arcmin":
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == 'deg':
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
 
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
         	self.code_timer_E.Start(self.stop_time, oneShot = True)
         elif self.telescope_status.get("tracking") == False:
-        	self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
-        	self.telescope_status['slewing'] = True
-        	thread.start_new_thread(self.velwatch,())
-        	return
+            unit = self.control.jogUnits.GetValue()
+            if unit == "arcsec":
+                delta_arcs = -1*float(self.control.jogIncrement.GetValue())
+            if unit == "arcmin":
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            if unit == 'deg':
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+
+            self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
+            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+            self.telescope_status['slewing'] = True
+            thread.start_new_thread(self.velwatch,())
+            return
 	 # ----------------------------------------------------------------------------------
     def timeE(self,event):
         """
@@ -1580,13 +1570,12 @@ class TCC(wx.Frame):
         arcsec_to_enc_counts = 20.0
         if unit == "arcsec":
             delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == "arcmin":
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == 'deg':
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
+        self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
         self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
@@ -1602,28 +1591,28 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
-        unit = self.control.jogUnits.GetValue()
-        arcsec_to_enc_counts = 20.0
-        if unit == "arcsec":
-            delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == "arcmin":
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
-        if unit == 'deg':
-            delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
 
         if self.telescope_status.get("tracking") == True:
         	self.protocol.sendCommand("track off")
         	print "Turning off Tracking"
         	self.code_timer_S.Start(self.stop_time, oneShot = True)
+
         elif self.telescope_status.get("tracking") == False:
-        	self.protocol.sendCommand("offset S "+str(delta_arcs))
-        	self.telescope_status['slewing'] = True
-        	thread.start_new_thread(self.velwatch,())
-        	return
-	 # ----------------------------------------------------------------------------------
+            unit = self.control.jogUnits.GetValue()
+            if unit == "arcsec":
+                delta_arcs = float(self.control.jogIncrement.GetValue())
+            if unit == "arcmin":
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
+            if unit == 'deg':
+                delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
+
+            self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
+            self.protocol.sendCommand("offset S "+str(delta_arcs))
+            self.telescope_status['slewing'] = True
+            thread.start_new_thread(self.velwatch,())
+            return
+	# ----------------------------------------------------------------------------------
     def timeS(self,event):
         """
         After tracking is turned off, execute south jog.
@@ -1639,17 +1628,32 @@ class TCC(wx.Frame):
         arcsec_to_enc_counts = 20.0
         if unit == "arcsec":
             delta_arcs = float(self.control.jogIncrement.GetValue())
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == "arcmin":
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.arcmin).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
         if unit == 'deg':
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
-            self.log(unit + ' ' + str(delta_arcs) + ' arcseconds')
+
+        self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
         self.protocol.sendCommand("offset S "+str(delta_arcs))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
+    # ----------------------------------------------------------------------------------
+    def checkhandPaddle(self):
+        """
+        Tell the server to check for a handpaddle signal. This is done client side due to stability issues
+        in multithreaded server application. GTCC matched rate should be a command every 10 ms, will push down to that
+        if testing shows the server can handle it.
+
+            Args:
+                None
+
+            Returns:
+                None
+        """
+        while True:
+            self.protocol.sendCommand("checkhandPaddle")
+            time.sleep(0.1)
 
     # ----------------------------------------------------------------------------------
     def focusIncPlus(self,event):
@@ -2945,6 +2949,7 @@ class TCC(wx.Frame):
             thread.start_new_thread(self.getstatus,())
             thread.start_new_thread(self.watchstatus,())
             thread.start_new_thread(self.displaystatus,())
+            thread.start_new_thread(self.checkhandPaddle())
 
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
@@ -2968,6 +2973,7 @@ class TCC(wx.Frame):
             if self.telescope_status.get('connectState'):
                 self.log("Successfully connected to the telescope.")
                 self.sb.SetStatusText('Connected to Telescope', 3)
+                self.at_MRO = True #Dev Variable
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
