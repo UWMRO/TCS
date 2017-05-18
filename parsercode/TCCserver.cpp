@@ -96,15 +96,12 @@ const char *parser(std::string input) {
 	for(int i = 0;i < n; i++)
 	{
 		std::string token = s.substr(0,s.find(' '));
-		//std::cout << "loop " << i << ": " << token << std::endl;
 		tokens[i]=token;
 		s=s.substr(s.find(' ')+1,s.length());
 	}
 
-	if(tokens[0]=="slew")
-	{
+	if(tokens[0]=="slew") {
 		std::cout << "slew " << tokens[1] << " "<< tokens[2] << " "<< tokens[3] <<std::endl;
-		//pmc.stopSlew();
 		double RAtarget_degrees = ::atof(tokens[1].c_str());
 		double DECtarget_degrees = ::atof(tokens[2].c_str());
 		double LST = ::atof(tokens[3].c_str());
@@ -131,9 +128,7 @@ const char *parser(std::string input) {
 		pmc.moveTo(RaAxis, &RAmove_2_deg);
 		pmc.moveTo(DecAxis, &DECmove_2_deg);
 		pmc.getVelocity(RaAxis,&RAvel);
-		//std::cout << RAvel <<std::endl;
 		return slew;
-
 	}
 	if(tokens[0] == "velmeasure")
 	{
@@ -154,40 +149,30 @@ const char *parser(std::string input) {
 			const char *out="velmeasure 0";
 			return out;
 		}
-		//std::ostringstream RAvelstr;
-		//std::ostringstream DECvelstr;
-		//RAvelstr << RAvel;
-		//DECvelstr << DECvel;
-		//std::string RAstr = RAvelstr.str();
-		//std::string DECstr = DECvelstr.str();
-		//return RAstr.c_str();
-		//return key,RAstr.c_str(),DECstr.c_str();
+
 	}
 	if(tokens[0]=="status")
 	{
 		double ira_deg, idec_deg;
 
-		//std::cout << "status begin" <<std::endl;
 		pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
-   		pmc.getPosition(DecAxis, &idec_deg);  //RA and DEC in degrees off zenith
-   		//std::cout << ira_deg <<std::endl;
-   		//std::cout << idec_deg <<std::endl;
-   		double ira_hrs;
-   		double LST_hrs = ::atof(tokens[3].c_str());
-   		ira_hrs=ira_deg/15.0;
-   		std::ostringstream RAstr;
+   	pmc.getPosition(DecAxis, &idec_deg);  //RA and DEC in degrees off zenith
+   	double ira_hrs;
+   	double LST_hrs = ::atof(tokens[3].c_str());
+   	ira_hrs=ira_deg/15.0;
+   	std::ostringstream RAstr;
 		std::ostringstream DECstr;
 		RAstr << LST_hrs-ira_hrs; //current RA in hours
 		DECstr << 46.951166666667-idec_deg; //current DEC in degrees
-   		std::string curRAstr = RAstr.str();
-   		std::string curDECstr = DECstr.str();
-   		std::string data=tokens[1]+" "+curRAstr+" "+curDECstr+" "+tokens[2]+" "+tokens[3];
-   		std::ofstream log(tokens[4], std::ios_base::app | std::ios_base::out);
-   		//myfile.open (tokens[4]);
-   		log << data+"\n";
-  		log.close();
-  		const char *out = "File Written";double SIDEREAL_CNT_PER_SEC = 15.04108/0.05;
-  		return out;
+   	std::string curRAstr = RAstr.str();
+   	std::string curDECstr = DECstr.str();
+   	std::string data=tokens[1]+" "+curRAstr+" "+curDECstr+" "+tokens[2]+" "+tokens[3];
+   	std::ofstream log(tokens[4], std::ios_base::app | std::ios_base::out);
+   	//myfile.open (tokens[4]);
+   	log << data+"\n";
+  	log.close();
+  	const char *out = "File Written";double SIDEREAL_CNT_PER_SEC = 15.04108/0.05;
+  	return out;
 	}
 	if(tokens[0] == "focus")
 	{
@@ -258,15 +243,14 @@ const char *parser(std::string input) {
 			 double RAvel, DECvel;
        pmc.getVelocity(RaAxis, &RAvel);
        pmc.getVelocity(RaAxis, &DECvel);
-       if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)
- 	  && (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
+       if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)&& (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
        {
  	 	 		pmc.track(RaAxis, RaRate); // if issues persist
  	 			resumetracking = false; // since we just resumed
 			 }
-			paddle = "Checked Hand Paddle";
-			return paddle;
-		 }
+			 paddle = "Checked Hand Paddle";
+			 return paddle;
+		}
 
 	if(tokens[0] == "stop")
 	{
@@ -290,21 +274,14 @@ const char *parser(std::string input) {
 			//DecRate = ::atof(tokens[3].c_str());
 		 	if((RaRate > 25) || (RaRate < -10))
 		 	{
-      			const char *out= "Ra rate must be between -10 and 25 deg/hr.";
-      			return out;
-   			}
-      		//if((DecRate > 25) || (RaRate < -10))
-	 		//{
-      		//	const char *out= "Dec rate must be between -10 and 25 deg/hr.";
-
-      		//	return out;
-   			//}
-   			//pmc.stopSlew();
-			pmc.track(RaAxis, RaRate);
-	 		//pmc.track(DecAxis, DecRate);
-	 		//pmc.track();
-	 		const char *out= "Tracking Enabled";
+      		const char *out= "Ra rate must be between -10 and 25 deg/hr.";
       		return out;
+   		}
+
+			pmc.track(RaAxis, RaRate);
+
+	 		const char *out= "Tracking Enabled";
+      return out;
 		}
 		if(tokens[1] == "off")
 		{
@@ -336,14 +313,14 @@ const char *parser(std::string input) {
 	}
 	if(tokens[0] == "coverpos")
 	{
-	static double RaCover = 0;
-    static double DecCover = 5115086;
+		static double RaCover = 0;
+  	static double DecCover = 5115086;
 
-	pmc.stopSlew();	// stop any motion.
-	pmc.MoveAbsolute(RaAxis, RaCover);	// see globals.h for Ra/DecCover values
+		pmc.stopSlew();	// stop any motion.
+		pmc.MoveAbsolute(RaAxis, RaCover);	// see globals.h for Ra/DecCover values
     pmc.MoveAbsolute(DecAxis, DecCover);
     const char *out = "Slewed to Cover Position";
-	return out;
+		return out;
 	}
 	if(tokens[0] == "park")
 	{
@@ -354,13 +331,13 @@ const char *parser(std::string input) {
 	}
 	if(tokens[0] == "zenith")
 	{
-	pmc.setZenith();	// reset encoders to zeros
-	const char *out = "Telescope at Zenith";
-	return out;
+		pmc.setZenith();	// reset encoders to zeros
+		const char *out = "Telescope at Zenith";
+		return out;
 	}
 	if(tokens[0] == "point")
 	{
-	double ira_deg, idec_deg;	// initial values
+		double ira_deg, idec_deg;	// initial values
     double ra_deg, dec_deg;	//encoder positions in decimal degrees
     double LST = ::atof(tokens[3].c_str());
     double RA = ::atof(tokens[1].c_str());
@@ -368,20 +345,17 @@ const char *parser(std::string input) {
 
     pmc.getPosition(RaAxis, &ira_deg);	// for calculating the offsets
     pmc.getPosition(DecAxis, &idec_deg); //
-
     ra_deg = RA - (LST*15.0);
    	//ra_deg = -ra_deg; //pmc.setPosition input fix
-
    	dec_deg = 46.951166666667 - DEC;
-
    	pmc.setPosition(RaAxis, &ra_deg);
     pmc.setPosition(DecAxis, &dec_deg);
-
     const char *out= "Pointing set";
     return out;
 	}
 	return "Invalid Command";
 }
+
 void Listener(void) {
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
