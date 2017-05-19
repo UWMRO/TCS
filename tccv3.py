@@ -31,6 +31,7 @@ wxreactor.install()
 from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
+import Queue
 
 global pipe
 pipe=None
@@ -1242,8 +1243,9 @@ class TCC(wx.Frame):
         if result == wx.ID_OK:
             if(self.protocol is not None):
                 try:
-                    d= self.protocol.sendCommand("shutdown")
-                    d.addCallback(self.quit)
+                    #d= self.protocol.sendCommand("shutdown")
+                    self.command_queue.put("shutdown")
+                    #d.addCallback(self.quit)
                 except AttributeError:
                     print "Not Connected to Telescope"
                 self.quit()
@@ -1416,10 +1418,11 @@ class TCC(wx.Frame):
                 None
         """
         if self.telescope_status.get("tracking") == True:
-        	self.protocol.sendCommand("track off")
-        	print "Turning off Tracking"
-        	self.code_timer_N.Start(2000, oneShot = True)
-        	return
+        	#self.protocol.sendCommand("track off")
+            self.command_queue.put("track off")
+            print "Turning off Tracking"
+            self.code_timer_N.Start(2000, oneShot = True)
+            return
         elif self.telescope_status.get("tracking") == False:
 
             unit=self.control.jogUnits.GetValue()
@@ -1430,7 +1433,8 @@ class TCC(wx.Frame):
             if unit == 'deg':
                 delta_arcs =(float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
-        	self.protocol.sendCommand("offset N "+str(delta_arcs))
+        	#self.protocol.sendCommand("offset N "+str(delta_arcs))
+            self.command_queue.put("offset N "+str(delta_arcs))
             self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
@@ -1457,7 +1461,8 @@ class TCC(wx.Frame):
         if unit == 'deg':
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
-        self.protocol.sendCommand("offset N "+str(delta_arcs))
+        #self.protocol.sendCommand("offset N "+str(delta_arcs))
+        self.command_queue.put("offset N "+str(delta_arcs))
         self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
@@ -1476,10 +1481,11 @@ class TCC(wx.Frame):
         """
 
         if self.telescope_status.get("tracking") == True:
-        	self.protocol.sendCommand("track off")
-        	print "Turning off Tracking"
-        	self.code_timer_W.Start(self.stop_time, oneShot = True)
-        	return
+        	#self.protocol.sendCommand("track off")
+            self.command_queue.put("track off")
+            print "Turning off Tracking"
+            self.code_timer_W.Start(self.stop_time, oneShot = True)
+            return
         elif self.telescope_status.get("tracking") == False:
 
             unit = self.control.jogUnits.GetValue()
@@ -1492,7 +1498,8 @@ class TCC(wx.Frame):
                 delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
             self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
-            self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+            #self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+            self.command_queue.put("offset W "+str(delta_arcs/15.0))
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1518,7 +1525,8 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
         self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
-        self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+        #self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
+        self.command_queue.put("offset W "+str(delta_arcs)/15.0)
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1537,9 +1545,10 @@ class TCC(wx.Frame):
 
 
         if self.telescope_status.get("tracking") == True:
-        	self.protocol.sendCommand("track off")
-        	print "Turning off Tracking"
-        	self.code_timer_E.Start(self.stop_time, oneShot = True)
+        	#self.protocol.sendCommand("track off")
+            self.command_queue.put("track off")
+            print "Turning off Tracking"
+            self.code_timer_E.Start(self.stop_time, oneShot = True)
         elif self.telescope_status.get("tracking") == False:
             unit = self.control.jogUnits.GetValue()
             if unit == "arcsec":
@@ -1550,7 +1559,8 @@ class TCC(wx.Frame):
                 delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
             self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
-            self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+            #self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+            self.command_queue.put("offset E "+str(delta_arcs)/15.0)
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1576,7 +1586,8 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
         self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
-        self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+        #self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
+        self.command_queue.put("offset E "+str(delta_arcs/15.0))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1594,9 +1605,10 @@ class TCC(wx.Frame):
 
 
         if self.telescope_status.get("tracking") == True:
-        	self.protocol.sendCommand("track off")
-        	print "Turning off Tracking"
-        	self.code_timer_S.Start(self.stop_time, oneShot = True)
+        	#self.protocol.sendCommand("track off")
+            self.command_queue.put("track off")
+            print "Turning off Tracking"
+            self.code_timer_S.Start(self.stop_time, oneShot = True)
 
         elif self.telescope_status.get("tracking") == False:
             unit = self.control.jogUnits.GetValue()
@@ -1608,7 +1620,8 @@ class TCC(wx.Frame):
                 delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
             self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
-            self.protocol.sendCommand("offset S "+str(delta_arcs))
+            #self.protocol.sendCommand("offset S "+str(delta_arcs))
+            self.command_queue.put("offset S "+str(delta_arcs))
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1634,7 +1647,8 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
         self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
-        self.protocol.sendCommand("offset S "+str(delta_arcs))
+        #self.protocol.sendCommand("offset S "+str(delta_arcs))
+        self.command_queue.put("offset S "+str(delta_arcs))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1652,7 +1666,8 @@ class TCC(wx.Frame):
                 None
         """
         while True:
-            self.protocol.sendCommand("checkhandPaddle")
+            #self.protocol.sendCommand("checkhandPaddle")
+            self.command_queue.put("checkhandPaddle")
             time.sleep(0.1)
 
     # ----------------------------------------------------------------------------------
@@ -1708,7 +1723,8 @@ class TCC(wx.Frame):
         newfocus=float(curFocus)+float(inc)
         self.control.currentFocusPos.SetLabel(str(newfocus))
         self.control.currentFocusPos.SetForegroundColour('black')
-        self.protocol.sendCommand(str("focus")+' '+str(inc))
+        #self.protocol.sendCommand(str("focus")+' '+str(inc))
+        self.command_queue.put(str("focus")+' '+str(inc))
         return
 
     # ----------------------------------------------------------------------------------
@@ -1723,7 +1739,9 @@ class TCC(wx.Frame):
                 None
 
         '''
-        self.protocol.sendCommand("halt")
+        #self.protocol.sendCommand("halt")
+        self.command_queue.put("halt")
+
         self.log("WARNING: Halt Motion Button pressed. A full restart of the TCC is required.")
         return
 
@@ -1748,12 +1766,14 @@ class TCC(wx.Frame):
         	return
         if self.telescope_status.get('tracking')==False:
             self.sb.SetStatusText('Tracking: True',0)
-            self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
+            #self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
+            self.command_queue.put("track on "+str(self.dict.get('RAtrackingRate')))
             self.control.trackButton.SetLabel('Stop Tracking')
             self.control.trackButton.SetBackgroundColour('Light Steel Blue')
         if self.telescope_status.get('tracking')==True:
             self.sb.SetStatusText('Tracking: False',0)
-            self.protocol.sendCommand("track off")
+            #self.protocol.sendCommand("track off")
+            self.command_queue.put("track off")
             self.control.trackButton.SetLabel('Start Tracking')
             self.control.trackButton.SetBackgroundColour('Light Slate Blue')
         self.telescope_status['tracking']= not self.telescope_status.get('tracking')
@@ -1904,12 +1924,14 @@ class TCC(wx.Frame):
                 self.log([input_ra,input_dec,current_epoch])
                 command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
                 if self.telescope_status.get("tracking") == True:
-                    self.protocol.sendCommand("track off")
+                    #self.protocol.sendCommand("track off")
+                    self.command_queue.put("track off")
                     print "Turning off Tracking"
                     self.code_timer_Slew.Start(self.stop_time, oneShot = True)
                     return
                 elif self.telescope_status.get("tracking") == False:
-                    self.protocol.sendCommand(command)
+                    #self.protocol.sendCommand(command)
+                    self.command_queue.put(command)
                     self.target_coords['Name']=name  #Store name of target for pointing routine
                     self.target_coords['RA']=input_ra #Store target RA for pointing routine
                     self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
@@ -1927,7 +1949,8 @@ class TCC(wx.Frame):
                 return
 
         elif self.telescope_status.get('slewing')==True:
-            self.protocol.sendCommand("stop")
+            #self.protocol.sendCommand("stop")
+            self.command_queue.put("stop")
 
             #self.control.slewButton.SetLabel('Start Slew')
             #self.control.slewButton.SetBackgroundColour("Light Slate Blue")
@@ -1969,7 +1992,8 @@ class TCC(wx.Frame):
         self.log([input_ra,input_dec,current_epoch])
         command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
 
-        self.protocol.sendCommand(command)
+        #self.protocol.sendCommand(command)
+        self.command_queue.put(command)
         self.target_coords['Name']=name  #Store name of target for pointing routine
         self.target_coords['RA']=input_ra #Store target RA for pointing routine
         self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
@@ -1989,13 +2013,15 @@ class TCC(wx.Frame):
     	#d.addCallback(self.velmeasure)
     	time.sleep(0.5)
     	while self.telescope_status.get('slewing')==True:
-            d=self.protocol.sendCommand("velmeasure")
+            #d=self.protocol.sendCommand("velmeasure")
             if secondary_slew:
+                self.command_queue.put("velmeasureSS")
                 print "Beginning First Slew"
-                d.addCallback(self.velmeasureSS)
+                #d.addCallback(self.velmeasureSS)
                 time.sleep(0.5)
             else:
-                d.addCallback(self.velmeasure)
+                self.command_queue.put("velmeasure")
+                #d.addCallback(self.velmeasure)
                 time.sleep(0.5)
         if secondary_slew:
             print "Completed First Slew"
@@ -2004,11 +2030,13 @@ class TCC(wx.Frame):
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
             command="slew"+' '+str(data)+' '+str(self.LST)
             print "Beginning Secondary Slew"
-            self.protocol.sendCommand(command)
+            #self.protocol.sendCommand(command)
+            self.command_queue.put(command)
             self.telescope_status["slewing"]=True
             while self.telescope_status.get('slewing')==True:
-                d=self.protocol.sendCommand("velmeasure")
-                d.addCallback(self.velmeasure)
+                #d=self.protocol.sendCommand("velmeasure")
+                self.command_queue.put("velmeasure")
+                #d.addCallback(self.velmeasure)
                 time.sleep(0.5)
             #self.protocol.sendCommand("stop")
             print "Completed Secondary Slew"
@@ -2032,8 +2060,9 @@ class TCC(wx.Frame):
             print "Slewing == False"
             wx.CallAfter(self.slewbutton_toggle)
             if self.telescope_status.get('tracking')==True:
-            	self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
-            	print "I made it"
+            	#self.protocol.sendCommand("track on "+str(self.dict.get('RAtrackingRate')))
+                self.command_queue.put("track on "+str(self.dict.get('RAtrackingRate')))
+                #print "I made it"
             return
 
     	if msg==0:
@@ -2142,7 +2171,9 @@ class TCC(wx.Frame):
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
             #print "Get"
             try:
-                self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
+                #self.protocol.sendCommand("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
+                self.command_queue.put("status "+str(self.UTC)+" "+str(self.epoch)+" "+str(self.LST)+" "+self.sfile)
+
             except AttributeError:
                 print "Not Connected to Telescope"
             time.sleep(1.0)
@@ -2158,21 +2189,25 @@ class TCC(wx.Frame):
         """
         time.sleep(3.0)
         while True:
-  			time.sleep(1.0)
-  			self.UTC=str(self.control.currentUTCPos.GetLabel())
-  			self.UTC=self.UTC.split(" ")
-  			self.UTCdate=self.UTC[0].split("/")
-  			self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
-  			status_file = open(self.stordir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
-  			current_pos = status_file.readlines()[-1].split()
-  			status_file.close()
-  			current_RA = current_pos[1]
-  			current_DEC = current_pos[2]
-  			current_SkyCoord = SkyCoord(ra=float(current_RA)*u.hourangle, dec=float		(current_DEC)*u.degree, frame='icrs')
-  			current_RADEC = current_SkyCoord.to_string('hmsdms')
-  			current_RA, current_DEC = current_RADEC.split(' ')
-  			self.telescope_status['RA']=current_RA
-  			self.telescope_status['Dec']=current_DEC
+            time.sleep(1.0)
+            self.UTC=str(self.control.currentUTCPos.GetLabel())
+            self.UTC=self.UTC.split(" ")
+            self.UTCdate=self.UTC[0].split("/")
+            self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
+            if self.at_MRO == True:
+  			    status_file = open(self.stordir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
+            else:
+  			    status_file = open(self.dir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
+
+            current_pos = status_file.readlines()[-1].split()
+            status_file.close()
+            current_RA = current_pos[1]
+            current_DEC = current_pos[2]
+            current_SkyCoord = SkyCoord(ra=float(current_RA)*u.hourangle, dec=float		(current_DEC)*u.degree, frame='icrs')
+            current_RADEC = current_SkyCoord.to_string('hmsdms')
+            current_RA, current_DEC = current_RADEC.split(' ')
+            self.telescope_status['RA']=current_RA
+            self.telescope_status['Dec']=current_DEC
   			#print "Watch"
 
     # ----------------------------------------------------------------------------------
@@ -2714,7 +2749,8 @@ class TCC(wx.Frame):
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
         if target_name=="Zenith":
             try:
-                self.protocol.sendCommand("zenith")
+                #self.protocol.sendCommand("zenith")
+                self.command_queue.put("zenith")
             except AttributeError:
                 print "Not Connected to Telescope"
         else:
@@ -2729,7 +2765,8 @@ class TCC(wx.Frame):
             self.LST = self.LST.split(':')
             self.LST = float(self.LST[0]) + float(self.LST[1]) / 60. + float(self.LST[2]) / 3600.
             try:
-                self.protocol.sendCommand("point " + str(self.targetRA) + " " + str(self.targetDEC) + " " + str(self.LST))
+                #self.protocol.sendCommand("point " + str(self.targetRA) + " " + str(self.targetDEC) + " " + str(self.LST))
+                self.command_queue.put("point " + str(self.targetRA) + " " + str(self.targetDEC) + " " + str(self.LST))
             except AttributeError:
                 print "Not Connected to Telescope"
         return
@@ -2737,14 +2774,16 @@ class TCC(wx.Frame):
     def parkscope(self,event):
         if self.telescope_status.get('slewing')==False:
             try:
-                self.protocol.sendCommand("park")
+                #self.protocol.sendCommand("park")
+                self.command_queue.put("park")
             except AttributeError:
                 print "Not Connected to Telescope"
 
     def coverpos(self,event):
         if self.telescope_status.get('slewing')==False:
             try:
-                self.protocol.sendCommand("coverpos")
+                #self.protocol.sendCommand("coverpos")
+                self.command_queue.put("coverpos")
             except AttributeError:
                 print "Not Connected to Telescope"
 
@@ -2777,7 +2816,8 @@ class TCC(wx.Frame):
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
         print "point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST)
         try:
-    	    self.protocol.sendCommand("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
+    	    #self.protocol.sendCommand("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
+            self.command_queue.put("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
         except AttributeError:
             print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
@@ -2925,6 +2965,8 @@ class TCC(wx.Frame):
             self.horizonlimit=self.dict['horizonLimit']
             self.RA_trackrate=self.dict['RAtrackingRate']
 
+            self.command_queue = Queue.Queue() #Set up the command queue which pushes commands to the server in a single thread.
+
 
             self.control.slewButton.Enable()
             self.control.trackButton.Enable()
@@ -2949,7 +2991,8 @@ class TCC(wx.Frame):
             thread.start_new_thread(self.getstatus,())
             thread.start_new_thread(self.watchstatus,())
             thread.start_new_thread(self.displaystatus,())
-            thread.start_new_thread(self.checkhandPaddle())
+            thread.start_new_thread(self.checkhandPaddle,())
+            thread.start_new_thread(self.watchcommand,())
 
             self.telescope_status['initState']=True
         if self.telescope_status.get('initState')==True:
@@ -2977,7 +3020,33 @@ class TCC(wx.Frame):
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
-
+    # ----------------------------------------------------------------------------------
+    def watchcommand(self):
+        """
+        Watch self.command_queue and send commands to the server in a first-in first-out basis
+        Args:
+            None
+        Returns:
+            None
+        """
+        while True:
+            if not self.command_queue.empty():
+                command = self.command_queue.get()
+                if command == "velmeasureSS":
+                    d = self.protocol.sendCommand("velmeasure")
+                    d.addCallback(self.velmeasureSS)
+                    return
+                elif command == "velmeasure":
+                    d = self.protocol.sendCommand("velmeasure")
+                    d.addCallback(self.velmeasure)
+                    return
+                elif command == "shutdown":
+                    d= self.protocol.sendCommand("shutdown")
+                    d.addCallback(self.quit)
+                    return
+                else:
+                    self.protocol.sendCommand(command)
+                    return
     # ----------------------------------------------------------------------------------
     def logstatus(self):
         """
