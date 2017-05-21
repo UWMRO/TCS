@@ -367,27 +367,27 @@ class Target(wx.Panel):
         #Target Name
         self.nameLabel=wx.StaticText(self, size=(50,-1))
         self.nameLabel.SetLabel('Name: ')
-        self.nameText=wx.TextCtrl(self,size=(100,-1))
+        self.nameText=wx.TextCtrl(self,size=(125,-1))
 
         #Target RA
         self.raLabel=wx.StaticText(self, size=(50,-1))
         self.raLabel.SetLabel('RA: ')
-        self.raText=wx.TextCtrl(self,size=(100,-1))
+        self.raText=wx.TextCtrl(self,size=(125,-1))
 
         #Target DEC
         self.decLabel=wx.StaticText(self, size=(50,-1))
         self.decLabel.SetLabel('DEC: ')
-        self.decText=wx.TextCtrl(self,size=(100,-1))
+        self.decText=wx.TextCtrl(self,size=(125,-1))
 
         #Target Coordinate Epoch
         self.epochLabel=wx.StaticText(self, size=(75,-1))
         self.epochLabel.SetLabel('EPOCH: ')
-        self.epochText=wx.TextCtrl(self,size=(100,-1))
+        self.epochText=wx.TextCtrl(self,size=(125,-1))
 
         #Target V Magnitude
         self.magLabel=wx.StaticText(self, size=(75,-1))
         self.magLabel.SetLabel('V Mag: ')
-        self.magText=wx.TextCtrl(self,size=(100,-1))
+        self.magText=wx.TextCtrl(self,size=(125,-1))
 
         #############################################################
 
@@ -1067,7 +1067,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = False #Dev variable for ease of development offsite
+        self.at_MRO = True #Dev variable for ease of development offsite
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
@@ -1076,6 +1076,7 @@ class TCC(wx.Frame):
             self.stordir = "/home/mro/storage/tcc_data"
         else:
             self.stordir = self.dir
+        self.plot_open = False
 
         self.code_timer_W = wx.Timer(self)
         self.code_timer_E = wx.Timer(self)
@@ -1499,7 +1500,10 @@ class TCC(wx.Frame):
 
             self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
             #self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
-            self.command_queue.put("offset W "+str(delta_arcs/15.0))
+            self.LST=str(self.control.currentLSTPos.GetLabel())
+            self.LST=self.LST.split(':')
+            self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+            self.command_queue.put("offset W "+str(delta_arcs)+" "+str(self.LST))
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1526,7 +1530,10 @@ class TCC(wx.Frame):
 
         self.log('W' + ' ' + str(delta_arcs) + ' arcseconds')
         #self.protocol.sendCommand("offset W "+str(delta_arcs/15.0))
-        self.command_queue.put("offset W "+str(delta_arcs)/15.0)
+        self.LST=str(self.control.currentLSTPos.GetLabel())
+        self.LST=self.LST.split(':')
+        self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+        self.command_queue.put("offset W "+str(delta_arcs)+ " "+str(self.LST))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1560,7 +1567,7 @@ class TCC(wx.Frame):
 
             self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
             #self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
-            self.command_queue.put("offset E "+str(delta_arcs)/15.0)
+            self.command_queue.put("offset E "+str(delta_arcs))
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1587,7 +1594,7 @@ class TCC(wx.Frame):
 
         self.log('E' + ' ' + str(delta_arcs) + ' arcseconds')
         #self.protocol.sendCommand("offset E "+str(delta_arcs/15.0))
-        self.command_queue.put("offset E "+str(delta_arcs/15.0))
+        self.command_queue.put("offset E "+str(delta_arcs))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
@@ -1665,10 +1672,11 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
+        time.sleep(2.0)
         while True:
-            #self.protocol.sendCommand("checkhandPaddle")
+            #self.protocol.sendCommand("paddle")
             self.command_queue.put("checkhandPaddle")
-            time.sleep(0.1)
+            time.sleep(0.123)
 
     # ----------------------------------------------------------------------------------
     def focusIncPlus(self,event):
@@ -1869,7 +1877,7 @@ class TCC(wx.Frame):
         d_dec=N*np.cos(ra_in* np.pi / 180.)
         #print d_ra, d_dec
 
-        self.ra_out=ra_in+d_ra
+        self.ra_out=ra_in+d_ra 
         self.dec_out=dec_in+d_dec
         print self.ra_out,self.dec_out
         self.log(self.ra_out)
@@ -1906,7 +1914,7 @@ class TCC(wx.Frame):
             self.obstarget=FixedTarget(name=name,coord=self.coordinates)
 
             if self.telescope_status.get('precession')==True:
-                self.coordprecess(self.coordinates,current_epoch,input_epoch)
+                self.coordinates, self.ra_out, self.dec_out = self.coordprecess(self.coordinates,current_epoch,input_epoch)
 
             self.target_altaz = self.coordinates.transform_to(AltAz(obstime=Time.now(),location=self.MRO_loc))
 
@@ -1933,8 +1941,12 @@ class TCC(wx.Frame):
                     #self.protocol.sendCommand(command)
                     self.command_queue.put(command)
                     self.target_coords['Name']=name  #Store name of target for pointing routine
-                    self.target_coords['RA']=input_ra #Store target RA for pointing routine
-                    self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+                    if self.telescope_status.get('precession')==True:
+                        self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
+                        self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
+                    else:
+                        self.target_coords['RA']= input_ra #Store target RA for pointing routine
+                        self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
                     self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
                     thread.start_new_thread( self.velwatch,(True, self.decimalcoords,) )
                     return
@@ -1982,7 +1994,7 @@ class TCC(wx.Frame):
         self.obstarget=FixedTarget(name=name,coord=self.coordinates)
 
         if self.telescope_status.get('precession')==True:
-            self.coordprecess(self.coordinates,current_epoch,input_epoch)
+            self.coordinate, self.ra_out, self.dec_out = self.coordprecess(self.coordinates,current_epoch,input_epoch)
 
         self.decimalcoords=self.coordinates.to_string('decimal')
 
@@ -1995,8 +2007,12 @@ class TCC(wx.Frame):
         #self.protocol.sendCommand(command)
         self.command_queue.put(command)
         self.target_coords['Name']=name  #Store name of target for pointing routine
-        self.target_coords['RA']=input_ra #Store target RA for pointing routine
-        self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+        if self.telescope_status.get('precession')==True:
+            self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
+            self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
+        else:
+            self.target_coords['RA']= input_ra #Store target RA for pointing routine
+            self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,(True,self.decimalcoords,))
         return
@@ -2011,18 +2027,18 @@ class TCC(wx.Frame):
         """
         #d=self.protocol.sendCommand("velmeasure")
     	#d.addCallback(self.velmeasure)
-    	time.sleep(0.5)
+    	time.sleep(1.0)
     	while self.telescope_status.get('slewing')==True:
             #d=self.protocol.sendCommand("velmeasure")
             if secondary_slew:
                 self.command_queue.put("velmeasureSS")
                 print "Beginning First Slew"
                 #d.addCallback(self.velmeasureSS)
-                time.sleep(0.5)
+                time.sleep(0.511)
             else:
                 self.command_queue.put("velmeasure")
                 #d.addCallback(self.velmeasure)
-                time.sleep(0.5)
+                time.sleep(0.511)
         if secondary_slew:
             print "Completed First Slew"
             self.LST=str(self.control.currentLSTPos.GetLabel())
@@ -2037,7 +2053,7 @@ class TCC(wx.Frame):
                 #d=self.protocol.sendCommand("velmeasure")
                 self.command_queue.put("velmeasure")
                 #d.addCallback(self.velmeasure)
-                time.sleep(0.5)
+                time.sleep(0.511)
             #self.protocol.sendCommand("stop")
             print "Completed Secondary Slew"
         return
@@ -2273,7 +2289,7 @@ class TCC(wx.Frame):
         self.log("Current target is '"+name+"'")
 
         #Load Finder Chart
-        thread.start_new_thread(self.LoadFinder,(input_ra,input_dec,input_epoch,))
+        #thread.start_new_thread(self.LoadFinder,(input_ra,input_dec,input_epoch,))
         return
 
     # ----------------------------------------------------------------------------------
@@ -2407,6 +2423,7 @@ class TCC(wx.Frame):
         if self.telescope_status.get('precession')==True:
             self.coordprecess(self.coordinates,epoch_now,epoch)
 
+        #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
         self.obstarget=FixedTarget(name=t_name,coord=self.coordinates)
         #airmass= self.MRO.altaz(Time.now(),self.obstarget).secz
 
@@ -2558,7 +2575,7 @@ class TCC(wx.Frame):
             Args:
                 event: handler to allow function to be tethered to a wx widget.
             Returns:
-                Export Window.
+                Plot Finder Chart
         """
 
         sel_item=self.target.targetList.GetFocusedItem()
@@ -2567,11 +2584,15 @@ class TCC(wx.Frame):
         input_epoch=self.target.targetList.GetItem(sel_item,col=3).GetText()
 
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
+        print self.plot_open
+        if self.plot_open == True:
+            plt.close()
+            self.plot_open =False
 
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
         plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
+        self.plot_open = True
         plt.show()
-        return
 
     # ----------------------------------------------------------------------------------
     def ExportOpen(self,event):
@@ -2658,11 +2679,17 @@ class TCC(wx.Frame):
         self.plot_times = self.Obstime + np.linspace(0, 8, 8)*u.hour
         self.target_style={'color':'Black'}
         self.initial_style={'color':'r'}
+        print self.plot_open
+        if self.plot_open == True:
+            plt.close()
+            self.plot_open = False
 
         plot_sky(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
         plt.legend(shadow=True, loc=2)
         plot_sky(self.targetobject, self.MRO, self.Obstime,style_kwargs=self.initial_style)
+        self.plot_open = True
         plt.show()
+
 
     # ----------------------------------------------------------------------------------
     def airmass_plot(self,event):
@@ -2696,11 +2723,18 @@ class TCC(wx.Frame):
         self.Obstime=Time.now()
         self.plot_times = self.Obstime + np.linspace(0, 10, 24)*u.hour
         self.target_style={'color':'Black'}
+        print self.plot_open
+        if self.plot_open == True:
+            plt.close()
+            self.plot_open =False
         self.airmass=plot_airmass(self.targetobject, self.MRO, self.plot_times,style_kwargs=self.target_style)
+
         plt.axhline(y=2,linestyle='--',color='orange')
         plt.axhline(y=2.5,linestyle='--',color='r')
         plt.legend(shadow=True, loc=1)
+        self.plot_open = True
         plt.show()
+
 
     # ----------------------------------------------------------------------------------
     def setTelescopeZenith(self, event):
@@ -2770,7 +2804,7 @@ class TCC(wx.Frame):
             except AttributeError:
                 print "Not Connected to Telescope"
         return
-
+    # ----------------------------------------------------------------------------------
     def parkscope(self,event):
         if self.telescope_status.get('slewing')==False:
             try:
@@ -2778,7 +2812,7 @@ class TCC(wx.Frame):
                 self.command_queue.put("park")
             except AttributeError:
                 print "Not Connected to Telescope"
-
+    # ----------------------------------------------------------------------------------
     def coverpos(self,event):
         if self.telescope_status.get('slewing')==False:
             try:
@@ -2801,16 +2835,16 @@ class TCC(wx.Frame):
                 None
         """
         self.targetRA=str(self.target_coords.get('RA'))
-        self.targetRA_h, self.targetRA=self.targetRA.split('h')
-        self.targetRA_m, self.targetRA=self.targetRA.split('m')
-        self.targetRA_s = self.targetRA[:-1]
-        self.targetRA=float(self.targetRA_h)+float(self.targetRA_m)/60.+float(self.targetRA_s)/3600.
-        self.targetRA=self.targetRA*15.0 #Degrees
+        #self.targetRA_h, self.targetRA=self.targetRA.split('h')
+        #self.targetRA_m, self.targetRA=self.targetRA.split('m')
+        #self.targetRA_s = self.targetRA[:-1]
+        #self.targetRA=float(self.targetRA_h)+float(self.targetRA_m)/60.+float(self.targetRA_s)/3600.
+        #self.targetRA=self.targetRA*15.0 #Degrees
         self.targetDEC=str(self.target_coords.get('DEC'))
-    	self.targetDEC_d, self.targetDEC=self.targetDEC.split('d')
-        self.targetDEC_m, self.targetDEC=self.targetDEC.split('m')
-        self.targetDEC_s = self.targetDEC[:-1]
-    	self.targetDEC=float(self.targetDEC_d)+float(self.targetDEC_m)/60.+float(self.targetDEC_s)/3600.
+    	#self.targetDEC_d, self.targetDEC=self.targetDEC.split('d')
+        #self.targetDEC_m, self.targetDEC=self.targetDEC.split('m')
+        #self.targetDEC_s = self.targetDEC[:-1]
+    	#self.targetDEC=float(self.targetDEC_d)+float(self.targetDEC_m)/60.+float(self.targetDEC_s)/3600.
     	self.LST=str(self.control.currentLSTPos.GetLabel())
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
@@ -2846,6 +2880,7 @@ class TCC(wx.Frame):
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
             self.dict['RAtrackingRate'] = RArate
+            self.command_queue.put("RATR "+str(RArate))
             self.log("Right Ascension Tracking Rate set to " + RArate)
         else:
             dlg = wx.MessageDialog(self,
@@ -3030,23 +3065,32 @@ class TCC(wx.Frame):
             None
         """
         while True:
+            #print self.command_queue.qsize()
+            #print self.command_queue.empty()
             if not self.command_queue.empty():
                 command = self.command_queue.get()
+                print "Queue Size: ",self.command_queue.qsize()
+                #print command
+
                 if command == "velmeasureSS":
-                    d = self.protocol.sendCommand("velmeasure")
+                    d = self.protocol.sendCommand("velmeasure ")
                     d.addCallback(self.velmeasureSS)
-                    return
+                    self.command_queue.task_done()
                 elif command == "velmeasure":
-                    d = self.protocol.sendCommand("velmeasure")
+                    d = self.protocol.sendCommand("velmeasure ")
                     d.addCallback(self.velmeasure)
-                    return
+                    self.command_queue.task_done()
                 elif command == "shutdown":
-                    d= self.protocol.sendCommand("shutdown")
+                    d= self.protocol.sendCommand("shutdown ")
                     d.addCallback(self.quit)
-                    return
+                    self.command_queue.task_done()
+                elif command == "checkhandPaddle":
+                    self.protocol.sendCommand("paddle ")
+                    self.command_queue.task_done()
                 else:
-                    self.protocol.sendCommand(command)
-                    return
+                    self.protocol.sendCommand(command+" ")
+                    self.command_queue.task_done()
+            time.sleep(0.00137)
     # ----------------------------------------------------------------------------------
     def logstatus(self):
         """

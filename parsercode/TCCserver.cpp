@@ -29,7 +29,7 @@ bct30 pmc;
 double pastRApos=0.0;
 double pastDECpos=0.0;
 
-double RaRate=0.0;
+double RaRate=15.04108;
 double DecRate=0.0;
 
 double SIDEREAL_CNT_PER_SEC = 15.04108/0.05;
@@ -92,6 +92,7 @@ const char *parser(std::string input) {
 	std::string delimiter = " ";
 	size_t n = std::count(s.begin(), s.end(), ' ')+1;
 	std::string tokens[n];
+	//std::cout << tokens[0] << std::endl;
 	int begin=0;
 	for(int i = 0;i < n; i++)
 	{
@@ -187,6 +188,7 @@ const char *parser(std::string input) {
 		const char *offset;
 		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
+		double LST = ::atof(tokens[3].c_str());
 		//double RATR= ::atof(tokens[4].c_str());
 		//pmc.stopSlew();
 		if(tokens[1]=="N")
@@ -201,16 +203,46 @@ const char *parser(std::string input) {
 		}
 		if(tokens[1]=="E")
 		{
-			pmc.Jog(RaAxis,inc);
+			double ira_deg;	// initial values
+			double RAtarget_hrs;
+			double RAmove_2_deg;
+			double currentRA_hrs;
+			pmc.getPosition(RaAxis, &ira_deg); //Degrees off zenith
+			currentRA_hrs = LST-(ira_deg/15.0);
+			RAtarget_hrs = currentRA_hrs + (inc/3600.0/15.0);
+			RAmove_2_deg = (RAtarget_hrs-LST)*15.0;
+			//pmc.Jog(RaAxis,-inc);
+			std::cout << ira_deg << std::endl;
+			std::cout << inc << std::endl;
+			std::cout << RAmove_2_deg << std::endl;
+			std::cout << RAtarget_hrs << std::endl;
+			std::cout << LST << std::endl;
+			//double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
+			//std::cout << offset_pos << std::endl;
+			pmc.moveTo(RaAxis, &RAmove_2_deg);
 			offset = "offset E";
+			//pmc.Jog(RaAxis,inc);
+			//offset = "offset E";
 		}
 		if(tokens[1]=="W")
 		{
+			double ira_deg;	// initial values
+			double RAtarget_hrs;
+			double RAmove_2_deg;
+			double currentRA_hrs;
+			pmc.getPosition(RaAxis, &ira_deg); //Degrees off zenith
+			currentRA_hrs = LST-(ira_deg/15.0);
+			RAtarget_hrs = currentRA_hrs - (inc/3600.0/15.0);
+			RAmove_2_deg = (RAtarget_hrs-LST)*15.0;
 			//pmc.Jog(RaAxis,-inc);
-			double ira_deg, idec_deg;	// initial values
-			pmc.getPosition(RaAxis, &ira_deg);
-			double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
-			pmc.MoveAbsolute(RaAxis, offset_pos);
+			std::cout << ira_deg << std::endl;
+			std::cout << inc << std::endl;
+			std::cout << RAmove_2_deg << std::endl;
+			std::cout << RAtarget_hrs << std::endl;
+			std::cout << LST << std::endl;
+			//double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
+			//std::cout << offset_pos << std::endl;
+			pmc.moveTo(RaAxis, &RAmove_2_deg);
 			offset = "offset W";
 		}
 		//if(tokens[3]=="True")
@@ -219,9 +251,10 @@ const char *parser(std::string input) {
 		//}
 		return inc, offset;
 	}
-	if(tokens[0] == "checkhandPaddle")
+	if(tokens[0] == "paddle")
 	{
-
+		//std::cout << "In Paddle" << std::endl;
+		const char *paddle;
 		if(pmc.checkHandPaddle() == 1) {
 
 			if(tracking == true) {
@@ -231,22 +264,51 @@ const char *parser(std::string input) {
 			else {
 				resumetracking = false;
 			}
-
+			paddle = "Paddle Pressed";
+			return paddle;
 		}
 		if( pmc.checkHandPaddle() == 0 && resumetracking == true) {
-			 const char *paddle;
+			 //const char *paddle;
        // make sure scope has slowed first
+			 /*
 			 double RAvel, DECvel;
        pmc.getVelocity(RaAxis, &RAvel);
        pmc.getVelocity(RaAxis, &DECvel);
        if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)&& (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
        {
- 	 	 		pmc.track(RaAxis, RaRate); // if issues persist
- 	 			resumetracking = false; // since we just resumed
+			 	resumetracking = false; // since we just resumed
+ 	 	 	 	pmc.track(RaAxis, RaRate); // if issues persist
+			 	paddle = "Paddle Done; Telescope Still Moving";
+	 		 	return paddle;
+ 	 		 //resumetracking = false; // since we just resumed
 			 }
-			 paddle = "Checked Hand Paddle";
-			 return paddle;
+			 */
+			double curRApos, curDECpos; // axis velocity
+
+	 		pmc.getPosition(RaAxis, &curRApos); //ra in degrees
+	 		pmc.getPosition(DecAxis, &curDECpos); //dec in degrees
+	 		std::cout << curRApos << ' ' << curDECpos << std::endl;
+	 		if(fabs(curRApos-pastRApos) < 0.0001 && fabs(curDECpos-pastDECpos) < 0.0001)
+	 		{
+				resumetracking = false; // since we just resumed
+ 	 	 	 	pmc.track(RaAxis, RaRate); // if issues persist
+			 	paddle = "Paddle Done; Tracking Resumed";
+	 		 	return paddle;
+	 		}
+	 		else
+	 		{
+	 			pastDECpos = curDECpos;
+	 			pastRApos = curRApos;
+				paddle = "Paddle Done; Telescope Still Moving";
+			return paddle;
+	 		}
+			/*
+			 paddle = "Paddle Done; Telescope Still Moving";
+	 		 return paddle;
+			*/
 		}
+		paddle = "Checked Hand Paddle";
+		return paddle;
 	}
 	if(tokens[0] == "stop")
 	{
@@ -292,7 +354,8 @@ const char *parser(std::string input) {
 			const char *out= "Tracking Disabled";
       		return out;
 		}
-		const char *out= "Invalid Command";
+		std::cout << "Invalid Command: " << tokens << std::endl;
+		const char *out= "Invalid Command:";
       	return out;
 	}
 	if(tokens[0] == "halt")
@@ -302,9 +365,10 @@ const char *parser(std::string input) {
 		pmc.estop(DecAxis);
 		return out;
 	}
-	if(tokens[0] == "trackingstatus")
+	if(tokens[0] == "RATR")
 	{
-		std::cout << "tracking status\n";
+		RaRate = ::atof(tokens[1].c_str());
+		//std::cout << "RA tracking Rate Changed to " << tokens[1] << std::endl;
 		return 0;
 	}
 	if(tokens[0] == "coverpos")
@@ -349,6 +413,7 @@ const char *parser(std::string input) {
     const char *out= "Pointing set";
     return out;
 	}
+	std::cout << tokens[0] <<std::endl;
 	return "Invalid Command";
 }
 
@@ -437,7 +502,14 @@ void Listener(void) {
 	std::string input = (std::string) incoming_data_buffer;
 	const char* results = parser((std::string) incoming_data_buffer);
 	std::cout << results << std::endl;
-	send(new_fd, results, strlen(results), 0);
+	if(results != "Checked Hand Paddle") {
+		if(results != "File Written") {
+			if(results != "velmeasure 0") {
+				send(new_fd, results, strlen(results), 0);
+			}
+		}
+	}
+
 
   }
   // clean up
