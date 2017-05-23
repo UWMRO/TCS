@@ -24,7 +24,7 @@ from matplotlib.backends.backend_wxagg import \
 from astroplan import Observer, FixedTarget
 from astroplan.plots import plot_sky,plot_airmass
 import astropy.units as u
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, FK5
 from Finder_picker import plot_finder_image
 from twisted.internet import wxreactor
 wxreactor.install()
@@ -1067,7 +1067,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = True #Dev variable for ease of development offsite
+        self.at_MRO = False #Dev variable for ease of development offsite
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
@@ -1864,10 +1864,12 @@ class TCC(wx.Frame):
 
         ra_in=coords.ra.deg
         dec_in=coords.dec.deg
-        ep_in=float(epoch[1:])
+        #ep_in=float(epoch[1:])
+        ep_in=epoch
         ep_now_in=float(epoch_now)
         print ra_in, dec_in, ep_in, ep_now_in
 
+        """   #By Calculation
         T=(ep_now_in - ep_in)/100.0
         M=1.2812323*T+0.0003879*(T**2)+0.0000101*(T**3)
         N=0.5567530*T-0.0001185*(T**2)-0.0000116*(T**3)
@@ -1876,12 +1878,21 @@ class TCC(wx.Frame):
         d_ra= M + N*np.sin(ra_in* np.pi / 180.)*np.tan(dec_in* np.pi / 180.)
         d_dec=N*np.cos(ra_in* np.pi / 180.)
         #print d_ra, d_dec
+        """
 
-        self.ra_out=ra_in+d_ra 
-        self.dec_out=dec_in+d_dec
+        #By Astropy -- assumes input coords are J2000 currently
+        coord_frame = SkyCoord(ra=ra_in*u.degree,dec=dec_in*u.degree,frame = 'icrs',equinox=str(ep_in))
+        coord_fk5 = coord_frame.transform_to("fk5")
+        precessed_coords = coord_fk5.transform_to(FK5(equinox='J'+str(ep_now_in)))
+
+        self.ra_out=precessed_coords.ra.degree
+        self.dec_out=precessed_coords.dec.degree
+
+        #self.ra_out=ra_in+d_ra
+        #self.dec_out=dec_in+d_dec
         print self.ra_out,self.dec_out
-        self.log(self.ra_out)
-        self.log(self.dec_out)
+        self.log('Precessed RA: '+str(self.ra_out))
+        self.log('Precessed DEC: '+str(self.dec_out))
         self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
         return self.coordinates, self.ra_out, self.dec_out
 
@@ -1905,7 +1916,7 @@ class TCC(wx.Frame):
         input_epoch=self.control.targetEpochText.GetValue()
         current_epoch=self.control.currentEpochPos.GetLabel()
 
-
+        self.input_frame = SkyCoord(input_ra,input_dec,frame='icrs')
 
         if self.telescope_status.get('slewing')==False:
 
@@ -1945,8 +1956,8 @@ class TCC(wx.Frame):
                         self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
                         self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
                     else:
-                        self.target_coords['RA']= input_ra #Store target RA for pointing routine
-                        self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+                        self.target_coords['RA']= self.input_frame.ra.degree #Store target RA for pointing routine
+                        self.target_coords['DEC']=self.input_frame.dec.degree #Store target DEC for pointing routine
                     self.telescope_status['slewing'] = not self.telescope_status.get('slewing')
                     thread.start_new_thread( self.velwatch,(True, self.decimalcoords,) )
                     return
@@ -1989,6 +2000,8 @@ class TCC(wx.Frame):
         input_epoch=self.control.targetEpochText.GetValue()
         current_epoch=self.control.currentEpochPos.GetLabel()
 
+        self.input_frame = SkyCoord(input_ra,input_dec,frame='icrs')
+
         self.MRO_loc=EarthLocation(lat=46.9528*u.deg, lon=-120.7278*u.deg, height=1198*u.m)
         self.inputcoordSorter(input_ra,input_dec,input_epoch)
         self.obstarget=FixedTarget(name=name,coord=self.coordinates)
@@ -2011,8 +2024,8 @@ class TCC(wx.Frame):
             self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
             self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
         else:
-            self.target_coords['RA']= input_ra #Store target RA for pointing routine
-            self.target_coords['DEC']=input_dec #Store target DEC for pointing routine
+            self.target_coords['RA']= self.input_frame.ra.degree #Store target RA for pointing routine
+            self.target_coords['DEC']=self.input_frame.dec.degree #Store target DEC for pointing routine
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,(True,self.decimalcoords,))
         return
@@ -2263,6 +2276,7 @@ class TCC(wx.Frame):
         """
         Take a selected item from the list and set it as the current target.
         Load it into the control tab and load it's coordinates into the guider control tab for finder charts
+        This is slow, getFocusedItem might be lagging
 
             Args:
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Select as Current
@@ -2290,7 +2304,7 @@ class TCC(wx.Frame):
 
         #Load Finder Chart
         #thread.start_new_thread(self.LoadFinder,(input_ra,input_dec,input_epoch,))
-        return
+        #return
 
     # ----------------------------------------------------------------------------------
     def LoadFinder(self, input_ra,input_dec,input_epoch):
@@ -2590,10 +2604,17 @@ class TCC(wx.Frame):
             self.plot_open =False
 
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
-        plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
+        #plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
+        #self.plot_open = True
+        #plt.show()
+        thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
+        #plt.show()
+    # ----------------------------------------------------------------------------------
+    def GenerateFinder(self,target):
+        wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin*2,reticle=True, log=False,)
         self.plot_open = True
-        plt.show()
-
+        wx.CallAfter(plt.show,)
+        return
     # ----------------------------------------------------------------------------------
     def ExportOpen(self,event):
         """
@@ -3070,26 +3091,28 @@ class TCC(wx.Frame):
             if not self.command_queue.empty():
                 command = self.command_queue.get()
                 print "Queue Size: ",self.command_queue.qsize()
-                #print command
+                if self.command_queue.qsize() >= 10:
+                    print "WARNING: Backlog of commands present. Consider Restarting Application."
+                if self.telescope_status.get("connectState") == True:
 
-                if command == "velmeasureSS":
-                    d = self.protocol.sendCommand("velmeasure ")
-                    d.addCallback(self.velmeasureSS)
-                    self.command_queue.task_done()
-                elif command == "velmeasure":
-                    d = self.protocol.sendCommand("velmeasure ")
-                    d.addCallback(self.velmeasure)
-                    self.command_queue.task_done()
-                elif command == "shutdown":
-                    d= self.protocol.sendCommand("shutdown ")
-                    d.addCallback(self.quit)
-                    self.command_queue.task_done()
-                elif command == "checkhandPaddle":
-                    self.protocol.sendCommand("paddle ")
-                    self.command_queue.task_done()
-                else:
-                    self.protocol.sendCommand(command+" ")
-                    self.command_queue.task_done()
+                    if command == "velmeasureSS":
+                        d = self.protocol.sendCommand("velmeasure ")
+                        d.addCallback(self.velmeasureSS)
+                        self.command_queue.task_done()
+                    elif command == "velmeasure":
+                        d = self.protocol.sendCommand("velmeasure ")
+                        d.addCallback(self.velmeasure)
+                        self.command_queue.task_done()
+                    elif command == "shutdown":
+                        d= self.protocol.sendCommand("shutdown ")
+                        d.addCallback(self.quit)
+                        self.command_queue.task_done()
+                    elif command == "checkhandPaddle":
+                        self.protocol.sendCommand("paddle ")
+                        self.command_queue.task_done()
+                    else:
+                        self.protocol.sendCommand(command+" ")
+                        self.command_queue.task_done()
             time.sleep(0.00137)
     # ----------------------------------------------------------------------------------
     def logstatus(self):
