@@ -270,25 +270,12 @@ const char *parser(std::string input) {
 		if( pmc.checkHandPaddle() == 0 && resumetracking == true) {
 			 //const char *paddle;
        // make sure scope has slowed first
-			 /*
-			 double RAvel, DECvel;
-       pmc.getVelocity(RaAxis, &RAvel);
-       pmc.getVelocity(RaAxis, &DECvel);
-       if( (fabs(RAvel) <= SIDEREAL_CNT_PER_SEC)&& (fabs(DECvel) <= SIDEREAL_CNT_PER_SEC) )
-       {
-			 	resumetracking = false; // since we just resumed
- 	 	 	 	pmc.track(RaAxis, RaRate); // if issues persist
-			 	paddle = "Paddle Done; Telescope Still Moving";
-	 		 	return paddle;
- 	 		 //resumetracking = false; // since we just resumed
-			 }
-			 */
 			double curRApos, curDECpos; // axis velocity
 
 	 		pmc.getPosition(RaAxis, &curRApos); //ra in degrees
 	 		pmc.getPosition(DecAxis, &curDECpos); //dec in degrees
 	 		std::cout << curRApos << ' ' << curDECpos << std::endl;
-	 		if(fabs(curRApos-pastRApos) < 0.0001 && fabs(curDECpos-pastDECpos) < 0.0001)
+	 		if(fabs(curRApos-pastRApos) <= SIDEREAL_CNT_PER_SEC  && fabs(curDECpos-pastDECpos) <= SIDEREAL_CNT_PER_SEC)
 	 		{
 				resumetracking = false; // since we just resumed
  	 	 	 	pmc.track(RaAxis, RaRate); // if issues persist
@@ -299,7 +286,7 @@ const char *parser(std::string input) {
 	 		{
 	 			pastDECpos = curDECpos;
 	 			pastRApos = curRApos;
-				paddle = "Paddle Done; Telescope Still Moving";
+				paddle = "Telescope Still Moving; If this loops tap E or W on the Paddle"; //Issue here with N-S jog
 			return paddle;
 	 		}
 			/*
