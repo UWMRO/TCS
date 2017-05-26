@@ -1435,7 +1435,7 @@ class TCC(wx.Frame):
                 delta_arcs =(float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
         	#self.protocol.sendCommand("offset N "+str(delta_arcs))
-            self.command_queue.put("offset N "+str(delta_arcs))
+            self.command_queue.put("offset N "+str(delta_arcs)+" "+str(self.mrolat.value))
             self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
@@ -1463,7 +1463,7 @@ class TCC(wx.Frame):
             delta_arcs = (float(self.control.jogIncrement.GetValue()) * u.degree).to(u.arcsec).value
 
         #self.protocol.sendCommand("offset N "+str(delta_arcs))
-        self.command_queue.put("offset N "+str(delta_arcs))
+        self.command_queue.put("offset N "+str(delta_arcs)+" "+str(self.mrolat.value))
         self.log('N' + ' ' + str(delta_arcs) + ' arcseconds')
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
@@ -1628,7 +1628,7 @@ class TCC(wx.Frame):
 
             self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
             #self.protocol.sendCommand("offset S "+str(delta_arcs))
-            self.command_queue.put("offset S "+str(delta_arcs))
+            self.command_queue.put("offset S "+str(delta_arcs)+" "+str(self.mrolat.value))
             self.telescope_status['slewing'] = True
             thread.start_new_thread(self.velwatch,())
             return
@@ -1655,7 +1655,7 @@ class TCC(wx.Frame):
 
         self.log('S' + ' ' + str(delta_arcs) + ' arcseconds')
         #self.protocol.sendCommand("offset S "+str(delta_arcs))
-        self.command_queue.put("offset S "+str(delta_arcs))
+        self.command_queue.put("offset S "+str(delta_arcs)+" "+str(self.mrolat.value))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,())
         return
