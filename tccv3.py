@@ -3114,7 +3114,7 @@ class TCC(wx.Frame):
                     else:
                         self.protocol.sendCommand(command+" ")
                         self.command_queue.task_done()
-            time.sleep(0.00137)
+            time.sleep(0.0137)
     # ----------------------------------------------------------------------------------
     def logstatus(self):
         """
