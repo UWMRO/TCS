@@ -3090,7 +3090,8 @@ class TCC(wx.Frame):
             #print self.command_queue.empty()
             if not self.command_queue.empty():
                 command = self.command_queue.get()
-                print "Queue Size: ",self.command_queue.qsize()
+                #print "Queue Size: ",self.command_queue.qsize()
+                print command
                 if self.command_queue.qsize() >= 10:
                     print "WARNING: Backlog of commands present. Consider Restarting Application."
                 if self.telescope_status.get("connectState") == True:
