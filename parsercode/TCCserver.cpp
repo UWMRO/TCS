@@ -87,6 +87,7 @@ void paddletimer()
 const char *parser(std::string input) {
 
 	std::string s = input;
+	std::cout << s << std::endl;
 	double RArate,Decrate;
 
 	std::string delimiter = " ";
