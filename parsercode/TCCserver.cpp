@@ -215,7 +215,7 @@ const char *parser(std::string input) {
 			std::cout << LAT << std::endl;
 			//double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
 			//std::cout << offset_pos << std::endl;
-			pmc.moveTo(DECAxis, &DECtarget);
+			pmc.moveTo(DecAxis, &DECtarget);
 			offset = "offset S";
 			//pmc.Jog(DecAxis,-inc);
 			//offset = "offset S";
