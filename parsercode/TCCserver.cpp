@@ -188,7 +188,7 @@ const char *parser(std::string input) {
 		const char *offset;
 		std::cout << "offset " << tokens[1] << " "<< tokens[2] << std::endl;
 		double inc = ::atof(tokens[2].c_str());
-		double LST = ::atof(tokens[3].c_str());
+		//double LST = ::atof(tokens[3].c_str());
 		//double RATR= ::atof(tokens[4].c_str());
 		//pmc.stopSlew();
 		if(tokens[1]=="N")
@@ -198,8 +198,27 @@ const char *parser(std::string input) {
 		}
 		if(tokens[1]=="S")
 		{
-			pmc.Jog(DecAxis,-inc);
+			double idec_deg;	// initial values
+			//double RAtarget_hrs;
+			double currentDEC;
+			double DECtarget;
+			double LAT = ::atof(tokens[3].c_str());
+			pmc.getPosition(DecAxis, &idec_deg); //Degrees off zenith
+			currentDEC = LAT-(idec_deg/15.0);
+			DECtarget = currentDEC + (inc/3600.0);
+			//RAmove_2_deg = (RAtarget_hrs-LST)*15.0;
+			//pmc.Jog(RaAxis,-inc);
+			std::cout << idec_deg << std::endl;
+			std::cout << inc << std::endl;
+			std::cout << currentDEC << std::endl;
+			std::cout << DECtarget << std::endl;
+			std::cout << LAT << std::endl;
+			//double offset_pos = ((ira_deg-(inc/3600.0))*18000.0);
+			//std::cout << offset_pos << std::endl;
+			pmc.moveTo(DECAxis, &DECtarget);
 			offset = "offset S";
+			//pmc.Jog(DecAxis,-inc);
+			//offset = "offset S";
 		}
 		if(tokens[1]=="E")
 		{
@@ -207,6 +226,7 @@ const char *parser(std::string input) {
 			double RAtarget_hrs;
 			double RAmove_2_deg;
 			double currentRA_hrs;
+			double LST = ::atof(tokens[3].c_str());
 			pmc.getPosition(RaAxis, &ira_deg); //Degrees off zenith
 			currentRA_hrs = LST-(ira_deg/15.0);
 			RAtarget_hrs = currentRA_hrs + (inc/3600.0/15.0);
@@ -230,6 +250,7 @@ const char *parser(std::string input) {
 			double RAtarget_hrs;
 			double RAmove_2_deg;
 			double currentRA_hrs;
+			double LST = ::atof(tokens[3].c_str());
 			pmc.getPosition(RaAxis, &ira_deg); //Degrees off zenith
 			currentRA_hrs = LST-(ira_deg/15.0);
 			RAtarget_hrs = currentRA_hrs - (inc/3600.0/15.0);
