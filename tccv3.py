@@ -32,6 +32,7 @@ from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
 import Queue
+from multiprocessing import Process
 
 global pipe
 pipe=None
@@ -2607,7 +2608,10 @@ class TCC(wx.Frame):
         #plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
         #self.plot_open = True
         #plt.show()
-        thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
+        #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
+        p = Process(target=self.GenerateFinder,args=(self.targetobject,))
+        p.start()
+        #p.join()
         #plt.show()
     # ----------------------------------------------------------------------------------
     def GenerateFinder(self,target):
