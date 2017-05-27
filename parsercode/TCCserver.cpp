@@ -528,8 +528,8 @@ void Listener(void) {
 
 	std::string input = (std::string) incoming_data_buffer;
 	std::vector <std::string> commands = separator(input);
-	std::cout << commands.size() <<std::endl;
-	for(int i=0; i <commands.size(); i++) {
+	std::cout << commands.size()-1 <<std::endl;
+	for(int i=0; i <commands.size()-1; i++) {
 		std::cout << commands[i] << std::endl;
 		const char* results = parser(commands[i]);
 		std::cout << results << std::endl;
