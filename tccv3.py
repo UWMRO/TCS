@@ -3107,22 +3107,22 @@ class TCC(wx.Frame):
                 if self.telescope_status.get("connectState") == True:
 
                     if command == "velmeasureSS":
-                        d = self.protocol.sendCommand("velmeasure ")
+                        d = self.protocol.sendCommand("velmeasure;")
                         d.addCallback(self.velmeasureSS)
                         self.command_queue.task_done()
                     elif command == "velmeasure":
-                        d = self.protocol.sendCommand("velmeasure ")
+                        d = self.protocol.sendCommand("velmeasure;")
                         d.addCallback(self.velmeasure)
                         self.command_queue.task_done()
                     elif command == "shutdown":
-                        d= self.protocol.sendCommand("shutdown ")
+                        d= self.protocol.sendCommand("shutdown;")
                         d.addCallback(self.quit)
                         self.command_queue.task_done()
                     elif command == "checkhandPaddle":
-                        #self.protocol.sendCommand("paddle ")
+                        self.protocol.sendCommand("paddle;")
                         self.command_queue.task_done()
                     else:
-                        self.protocol.sendCommand(command+" ")
+                        self.protocol.sendCommand(command+";")
                         self.command_queue.task_done()
             time.sleep(0.0137)
     # ----------------------------------------------------------------------------------
