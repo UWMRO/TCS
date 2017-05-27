@@ -84,7 +84,7 @@ void paddletimer()
 	}
 }
 */
-const char *separator(std::string raw_input) {
+std::vector <std::string> separator(std::string raw_input) {
 	std::string raw = raw_input;
 	std::string delimiter = ";";
 	std::vector <std::string> commands;
