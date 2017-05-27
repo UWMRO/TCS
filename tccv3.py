@@ -32,7 +32,7 @@ from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
 import Queue
-from multiprocessing import Process
+from multiprocessing as mp
 
 global pipe
 pipe=None
@@ -1069,6 +1069,7 @@ class TCC(wx.Frame):
                 name = "Manastash Ridge Observatory"
                 )
         self.at_MRO = False #Dev variable for ease of development offsite
+        self.process_list=[]
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
@@ -2609,9 +2610,10 @@ class TCC(wx.Frame):
         #self.plot_open = True
         #plt.show()
         #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
-        p = Process(target=self.GenerateFinder,args=(self.targetobject,))
+        mp.freeze_support()
+        p = mp.Process(target=self.GenerateFinder,args=(self.targetobject,))
         p.start()
-        #p.join()
+        self.process_list.append(p)
         #plt.show()
     # ----------------------------------------------------------------------------------
     def GenerateFinder(self,target):
