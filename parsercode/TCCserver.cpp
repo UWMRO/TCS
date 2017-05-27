@@ -317,7 +317,7 @@ const char *parser(std::string input) {
 	 		pmc.getPosition(RaAxis, &curRApos); //ra in degrees
 	 		pmc.getPosition(DecAxis, &curDECpos); //dec in degrees
 	 		std::cout << curRApos << ' ' << curDECpos << std::endl;
-	 		if(fabs(curRApos-pastRApos) <= SIDEREAL_CNT_PER_SEC  && fabs(curDECpos-pastDECpos) <= SIDEREAL_CNT_PER_SEC)
+	 		if(fabs(curRApos-pastRApos) <= 0.001  && fabs(curDECpos-pastDECpos) <= 0.001)
 	 		{
 				resumetracking = false; // since we just resumed
  	 	 	 	pmc.track(RaAxis, RaRate); // if issues persist
