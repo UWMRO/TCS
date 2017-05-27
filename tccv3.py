@@ -32,7 +32,7 @@ from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
 import Queue
-from multiprocessing as mp
+import multiprocessing as mp
 
 global pipe
 pipe=None
