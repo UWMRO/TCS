@@ -1068,7 +1068,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = False #Dev variable for ease of development offsite
+        self.at_MRO = True #Dev variable for ease of development offsite
         self.process_list=[]
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
