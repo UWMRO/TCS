@@ -217,6 +217,7 @@ const char *parser(std::string input) {
 		}
 		if(tokens[1]=="S")
 		{
+			/*
 			double idec_deg;	// initial values
 			//double RAtarget_hrs;
 			double currentDEC;
@@ -236,8 +237,9 @@ const char *parser(std::string input) {
 			//std::cout << offset_pos << std::endl;
 			pmc.moveTo(DecAxis, &DECtarget);
 			offset = "offset S";
-			//pmc.Jog(DecAxis,-inc);
-			//offset = "offset S";
+			*/
+			pmc.Jog(DecAxis,-inc);
+			offset = "offset S";
 		}
 		if(tokens[1]=="E")
 		{
@@ -535,7 +537,7 @@ void Listener(void) {
 		std::cout << results << std::endl;
 		if(results != "Checked Hand Paddle") {
 			if(results != "File Written") {
-				if(results != "velmeasure 0") {
+				if(results != "velmeasure; 0") {
 					send(new_fd, results, strlen(results), 0);
 				}
 			}
