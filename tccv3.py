@@ -2507,7 +2507,7 @@ class TCC(wx.Frame):
 
         """
         try:
-            f_in=open('targetlists/'+self.target.fileText.GetValue())
+            f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
         except IOError:
             dlg = wx.MessageDialog(self,
                            "Path Error: File not Found.",
@@ -3230,7 +3230,7 @@ class TargetExportWindow(wx.Frame):
         wx.Frame.__init__(self, parent, -1, "Export to Target List File", size=(300,200))
 
         self.parent=parent
-        self.defaultdirectory='targetlists'
+        self.defaultdirectory='/home/mro/Desktop/targetlists'
 
         self.panel=Export(self)
 
