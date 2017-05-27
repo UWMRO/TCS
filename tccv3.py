@@ -2258,7 +2258,7 @@ class TCC(wx.Frame):
             self.UTC=self.UTC.split(" ")
             self.UTCdate=self.UTC[0].split("/")
             self.UTCdate=self.UTCdate[0]+self.UTCdate[1]+self.UTCdate[2]
-  			status_file = open(self.stordir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
+            status_file = open(self.stordir+"/positionlogs/"+str(self.UTCdate)+".txt","r")
 
             current_pos = status_file.readlines()[-1].split()
             status_file.close()
