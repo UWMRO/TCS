@@ -159,14 +159,14 @@ const char *parser(std::string input) {
 		std::cout << curRApos << ' ' << curDECpos << std::endl;
 		if(fabs(curRApos-pastRApos) < 0.0001 && fabs(curDECpos-pastDECpos) < 0.0001)
 		{
-			const char *out="velmeasure 1";
+			const char *out="velmeasure; 1";
 			return out;
 		}
 		else
 		{
 			pastDECpos = curDECpos;
 			pastRApos = curRApos;
-			const char *out="velmeasure 0";
+			const char *out="velmeasure; 0";
 			return out;
 		}
 
