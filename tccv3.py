@@ -1086,7 +1086,7 @@ class TCC(wx.Frame):
         self.code_timer_S = wx.Timer(self)
         self.code_timer_Slew = wx.Timer(self)
 
-        self.stop_time = 1000 #Waiting time for tracking to finish
+        self.stop_time = 500 #Waiting time for tracking to finish 1000 works
 
         #############################################################
 
