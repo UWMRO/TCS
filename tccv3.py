@@ -2611,7 +2611,7 @@ class TCC(wx.Frame):
         #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
         p = Process(target=self.GenerateFinder,args=(self.targetobject,))
         p.start()
-        #p.join()
+        p.join()
         #plt.show()
     # ----------------------------------------------------------------------------------
     def GenerateFinder(self,target):
