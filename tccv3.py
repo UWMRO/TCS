@@ -155,11 +155,11 @@ class Control(wx.Panel):
         self.currentRATRPos.SetForegroundColour((255,0,0))
 
         #Current DEC Tracking Rate
-        self.currentDECTRLabel = wx.StaticText(self, size=(75,-1))
-        self.currentDECTRLabel.SetLabel('DEC TR: ')
-        self.currentDECTRPos = wx.StaticText(self,size=(75,-1))
-        self.currentDECTRPos.SetLabel('Unknown')
-        self.currentDECTRPos.SetForegroundColour((255,0,0))
+        #self.currentDECTRLabel = wx.StaticText(self, size=(75,-1))
+        #self.currentDECTRLabel.SetLabel('DEC TR: ')
+        #self.currentDECTRPos = wx.StaticText(self,size=(75,-1))
+        #self.currentDECTRPos.SetLabel('Unknown')
+        #self.currentDECTRPos.SetForegroundColour((255,0,0))
 
         #############################################################
 
@@ -169,6 +169,8 @@ class Control(wx.Panel):
         self.focusAbsText = wx.TextCtrl(self,size=(75,-1))
         self.focusAbsText.SetValue('1500')
         self.focusAbsMove = wx.Button(self,-1,'Move Relative')
+        self.focusAbsMove.SetBackgroundColour('Light Slate Blue')
+        self.focusAbsMove.SetForegroundColour('White')
 
         #############################################################
 
@@ -181,7 +183,9 @@ class Control(wx.Panel):
         self.trackButton.SetBackgroundColour('Light Slate Blue')
         self.trackButton.SetForegroundColour('White')
         self.trackButton.Disable()
-        self.stopButton = wx.Button(self, -1, "HALT MOTION")
+        self.pointButton = wx.Button(self, -1, "Update Pointing to Target")
+        self.pointButton.Disable()
+        self.stopButton = wx.Button(self, -1, "  EMERGENCY STOP  ")
         self.stopButton.SetBackgroundColour('Red')
         self.stopButton.SetForegroundColour('White')
 
@@ -200,9 +204,9 @@ class Control(wx.Panel):
         self.jogEButton = wx.Button(self, -1, 'E')
         self.jogEButton.SetBackgroundColour('Light Slate Blue')
         self.jogEButton.SetForegroundColour('White')
-        self.jogIncrement = wx.TextCtrl(self,size=(75,-1))
+        self.jogIncrement = wx.TextCtrl(self,size=(50,-1))
         self.jogIncrement.SetValue('1.0')
-        self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(75,-1), style = wx.CB_DROPDOWN,
+        self.jogUnits = wx.ComboBox(self, -1, "arcsec", size =(100,-1), style = wx.CB_DROPDOWN,
                                     choices=["arcsec", "arcmin", "deg"])
 
         #############################################################
@@ -217,7 +221,7 @@ class Control(wx.Panel):
         self.hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         self.gbox=wx.GridSizer(rows=6, cols=2, hgap=5, vgap=5)
-        self.gbox2=wx.GridSizer(rows=11, cols=2, hgap=0, vgap=5)
+        self.gbox2=wx.GridSizer(rows=10, cols=2, hgap=0, vgap=5)
         self.gbox3=wx.GridSizer(rows=2, cols=2, hgap=5, vgap=5)
 
         #Current Target Sizer
@@ -253,6 +257,8 @@ class Control(wx.Panel):
         self.gbox.Add(self.trackButton,0, wx.ALIGN_CENTER)
 
         self.vbox3.Add(self.gbox,0,wx.ALIGN_CENTER)
+        self.vbox3.AddSpacer(10)
+        self.vbox3.Add(self.pointButton,0,wx.ALIGN_CENTER)
         self.vbox1.Add(self.vbox3,0,wx.ALIGN_CENTER)
 
         #Populate TCC Status Box
@@ -276,8 +282,8 @@ class Control(wx.Panel):
         self.gbox2.Add(self.currentFocusPos, 0, wx.ALIGN_LEFT)
         self.gbox2.Add(self.currentRATRLabel, 0, wx.ALIGN_RIGHT)
         self.gbox2.Add(self.currentRATRPos, 0, wx.ALIGN_LEFT)
-        self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
-        self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
+        #self.gbox2.Add(self.currentDECTRLabel, 0, wx.ALIGN_RIGHT)
+        #self.gbox2.Add(self.currentDECTRPos, 0, wx.ALIGN_LEFT)
 
         self.vbox4.Add(self.gbox2,0,wx.ALIGN_CENTER)
 
@@ -292,9 +298,9 @@ class Control(wx.Panel):
 
         self.vbox5.Add(self.gbox3,0,wx.ALIGN_CENTER)
 
-        self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
-        self.hbox3.AddSpacer(5)
         self.hbox3.Add(self.jogEButton,0,wx.ALIGN_LEFT)
+        self.hbox3.AddSpacer(5)
+        self.hbox3.Add(self.jogWButton,0,wx.ALIGN_LEFT)
 
         self.hbox4.Add(self.jogIncrement,0,wx.ALIGN_LEFT)
         self.hbox4.AddSpacer(5)
@@ -341,8 +347,8 @@ class Target(wx.Panel):
         #############################################################
 
         #Target List Retrieval
-        self.fileLabel=wx.StaticText(self, size=(125,-1))
-        self.fileLabel.SetLabel('Target List Path: ')
+        self.fileLabel=wx.StaticText(self, size=(-1,-1))
+        self.fileLabel.SetLabel('Object List File Name:   ')
         self.fileText=wx.TextCtrl(self,size=(400,-1))
 
         #############################################################
@@ -354,7 +360,7 @@ class Target(wx.Panel):
 
         #Initialize Target List Table
         self.targetList=wx.ListCtrl(self,size=(525,200), style=wx.LC_REPORT | wx.VSCROLL)
-        self.targetList.InsertColumn(0,'Target Name',width=125)
+        self.targetList.InsertColumn(0,'Object Name',width=125)
         self.targetList.InsertColumn(1,'RA',width=100)
         self.targetList.InsertColumn(2,'DEC',width=100)
         self.targetList.InsertColumn(3,'EPOCH',width=62.5)
@@ -399,8 +405,14 @@ class Target(wx.Panel):
         self.removeButton=wx.Button(self,-1,"Remove Selected from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
+        self.plot_button.SetBackgroundColour("Lime Green")
+        self.plot_button.SetForegroundColour("White")
         self.airmass_button=wx.Button(self,-1,"Airmass Curve")
+        self.airmass_button.SetBackgroundColour("Lime Green")
+        self.airmass_button.SetForegroundColour("White")
         self.finder_button=wx.Button(self,-1,"Load Finder Chart")
+        self.finder_button.SetBackgroundColour("Lime Green")
+        self.finder_button.SetForegroundColour("White")
 
         #Turn Buttons off initially, enable on initialization
         self.listButton.Disable()
@@ -711,8 +723,8 @@ class Initialization(wx.Panel):
         self.targetEpochText.SetLabel('2000')
         #Buttons; At Zenith & Set Telescope Position
         self.atZenithButton = wx.Button(self, -1, "Load Zenith Coordinates") #Not a slew to Zenith
-        self.syncButton = wx.Button(self, -1, "Set Telescope Position") #Tell the telescope it is at a certain location
-        self.onTargetButton = wx.Button(self, -1, "On Target")
+        self.syncButton = wx.Button(self, -1, "Update Telescope Coordinates") #Tell the telescope it is at a certain location
+        #self.onTargetButton = wx.Button(self, -1, "On Target")
 
         #############################################################
 
@@ -723,16 +735,17 @@ class Initialization(wx.Panel):
 
         # this should autofill from tcc.conf
 
-        #Right Ascension Tracking Rate; Suggested value of 15.0418
+        #Right Ascension Tracking Rate; Suggested value of 15.04108 deg/hr
         self.trackingRateRALabel=wx.StaticText(self)
         self.trackingRateRALabel.SetLabel('RA Tracking Rate: ')
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
         self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
+        self.resetTRButton = wx.Button(self,-1,"  Reset Right Ascension Tracking Rate  ")
         #Declination Tracking Rate
-        self.trackingRateDECLabel=wx.StaticText(self)
-        self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
-        self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
-        self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
+        #self.trackingRateDECLabel=wx.StaticText(self)
+        #self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
+        #self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
+        #self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
 
         #############################################################
 
@@ -772,7 +785,7 @@ class Initialization(wx.Panel):
         self.syncButton.Disable()
         self.parkButton.Disable()
         self.coverposButton.Disable()
-        self.onTargetButton.Disable()
+        #self.onTargetButton.Disable()
 
         #############################################################
 
@@ -793,7 +806,7 @@ class Initialization(wx.Panel):
         self.glabel = wx.StaticBox(self, label="Guiding")
         self.gbox_v = wx.StaticBoxSizer(self.glabel, wx.VERTICAL)
 
-        self.coordbox_g = wx.GridSizer(rows=5, cols=2, hgap=5, vgap=5)
+        self.coordbox_g = wx.GridSizer(rows=4, cols=2, hgap=5, vgap=5)
         self.slewbox_h = wx.BoxSizer(wx.HORIZONTAL)
         self.trackbox1_h = wx.BoxSizer(wx.HORIZONTAL)
         self.trackbox2_h = wx.BoxSizer(wx.HORIZONTAL)
@@ -802,8 +815,8 @@ class Initialization(wx.Panel):
         self.logbox_h = wx.BoxSizer(wx.HORIZONTAL)
 
         #Sizers: Populate Box Sizers
-        self.coordbox_g.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
-        self.coordbox_g.Add(self.syncButton,0, wx.ALIGN_CENTER)
+        #self.coordbox_g.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
+        #self.coordbox_g.Add(self.syncButton,0, wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.targetNameLabel, 0, wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.targetNameText, 0, wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.targetRaLabel, 0, wx.ALIGN_CENTER)
@@ -813,8 +826,11 @@ class Initialization(wx.Panel):
         self.coordbox_g.Add(self.targetEpochLabel, 0, wx.ALIGN_CENTER)
         self.coordbox_g.Add(self.targetEpochText, 0, wx.ALIGN_CENTER)
 
+        self.tcbox_v.Add(self.atZenithButton,0,wx.ALIGN_CENTER)
+        self.tcbox_v.AddSpacer(5)
         self.tcbox_v.Add(self.coordbox_g, 0 ,wx.ALIGN_CENTER)
-        self.tcbox_v.Add(self.onTargetButton,0,wx.ALIGN_CENTER)
+        self.tcbox_v.AddSpacer(5)
+        self.tcbox_v.Add(self.syncButton,0,wx.ALIGN_CENTER)
 
         self.slewbox_h.Add(self.initButton,0,wx.ALIGN_LEFT)
         self.slewbox_h.AddSpacer(10)
@@ -831,15 +847,15 @@ class Initialization(wx.Panel):
         self.trackbox1_h.AddSpacer(5)
         self.trackbox1_h.Add(self.rateRAButton,0,wx.ALIGN_RIGHT)
 
-        self.trackbox2_h.Add(self.trackingRateDECLabel,0,wx.ALIGN_RIGHT)
-        self.trackbox2_h.AddSpacer(5)
-        self.trackbox2_h.Add(self.trackingRateDECText,0,wx.ALIGN_RIGHT)
-        self.trackbox2_h.AddSpacer(5)
-        self.trackbox2_h.Add(self.rateDECButton,0,wx.ALIGN_RIGHT)
+        #self.trackbox2_h.Add(self.trackingRateDECLabel,0,wx.ALIGN_RIGHT)
+        #self.trackbox2_h.AddSpacer(5)
+        #self.trackbox2_h.Add(self.trackingRateDECText,0,wx.ALIGN_RIGHT)
+        #self.trackbox2_h.AddSpacer(5)
+        #self.trackbox2_h.Add(self.rateDECButton,0,wx.ALIGN_RIGHT)
 
         self.tbox_v.Add(self.trackbox1_h,0,wx.ALIGN_CENTER)
         self.tbox_v.AddSpacer(5)
-        self.tbox_v.Add(self.trackbox2_h,0,wx.ALIGN_CENTER)
+        self.tbox_v.Add(self.resetTRButton,0,wx.ALIGN_CENTER)
 
         self.guidebox1_h.Add(self.maxdRALabel, 0, wx.ALIGN_RIGHT)
         self.guidebox1_h.AddSpacer(5)
@@ -867,7 +883,7 @@ class Initialization(wx.Panel):
 
         self.main_h.AddSpacer(10)
         self.main_h.Add(self.leftbox_v, wx.ALIGN_LEFT)
-        self.main_h.AddSpacer(10)
+        self.main_h.AddSpacer(100)
         self.main_h.Add(self.tcbox_v, wx.ALIGN_LEFT)
 
         self.logbox_h.AddSpacer(30)
@@ -1068,7 +1084,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = True #Dev variable for ease of development offsite
+        self.at_MRO = False #Dev variable for ease of development offsite
         self.process_list=[]
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
@@ -1118,6 +1134,7 @@ class TCC(wx.Frame):
         #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
         self.Bind(wx.EVT_BUTTON,self.toggletracksend,self.control.trackButton)
+        self.Bind(wx.EVT_BUTTON, self.pointing, self.control.pointButton)
         self.Bind(wx.EVT_BUTTON,self.haltmotion,self.control.stopButton)
         self.Bind(wx.EVT_BUTTON,self.Noffset,self.control.jogNButton)
         self.Bind(wx.EVT_BUTTON,self.Soffset,self.control.jogSButton)
@@ -1145,12 +1162,12 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.setTelescopePosition, self.init.syncButton)
         self.Bind(wx.EVT_BUTTON, self.onInit, self.init.initButton)
         self.Bind(wx.EVT_BUTTON, self.setRATrackingRate,self.init.rateRAButton)
-        self.Bind(wx.EVT_BUTTON, self.setDECTrackingRate,self.init.rateDECButton)
+        self.Bind(wx.EVT_BUTTON, self.resetRATrackingRate,self.init.resetTRButton)
         self.Bind(wx.EVT_BUTTON, self.setmaxdRA, self.init.dRAButton)
         self.Bind(wx.EVT_BUTTON, self.setmaxdDEC, self.init.dDECButton)
         self.Bind(wx.EVT_BUTTON, self.coverpos, self.init.coverposButton)
         self.Bind(wx.EVT_BUTTON, self.parkscope, self.init.parkButton)
-        self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
+        #self.Bind(wx.EVT_BUTTON, self.pointing, self.init.onTargetButton)
 
         self.Bind(wx.EVT_TIMER,self.timeW,self.code_timer_W)
         self.Bind(wx.EVT_TIMER,self.timeE,self.code_timer_E)
@@ -1420,6 +1437,10 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
+        self.control.jogWButton.Disable()
+        self.control.jogEButton.Disable()
+        self.control.jogNButton.Disable()
+        self.control.jogSButton.Disable()
         if self.telescope_status.get("tracking") == True:
         	#self.protocol.sendCommand("track off")
             self.command_queue.put("track off")
@@ -1482,7 +1503,10 @@ class TCC(wx.Frame):
             Returns:
                 None
         """
-
+        self.control.jogWButton.Disable()
+        self.control.jogEButton.Disable()
+        self.control.jogNButton.Disable()
+        self.control.jogSButton.Disable()
         if self.telescope_status.get("tracking") == True:
         	#self.protocol.sendCommand("track off")
             self.command_queue.put("track off")
@@ -1552,7 +1576,10 @@ class TCC(wx.Frame):
         """
 
 
-
+        self.control.jogWButton.Disable()
+        self.control.jogEButton.Disable()
+        self.control.jogNButton.Disable()
+        self.control.jogSButton.Disable()
         if self.telescope_status.get("tracking") == True:
         	#self.protocol.sendCommand("track off")
             self.command_queue.put("track off")
@@ -1612,7 +1639,10 @@ class TCC(wx.Frame):
                 None
         """
 
-
+        self.control.jogWButton.Disable()
+        self.control.jogEButton.Disable()
+        self.control.jogNButton.Disable()
+        self.control.jogSButton.Disable()
         if self.telescope_status.get("tracking") == True:
         	#self.protocol.sendCommand("track off")
             self.command_queue.put("track off")
@@ -1767,10 +1797,10 @@ class TCC(wx.Frame):
                 None
         '''
         RATR=self.control.currentRATRPos.GetLabel()
-        DECTR=self.control.currentDECTRPos.GetLabel()
-        print RATR, DECTR
+        #DECTR=self.control.currentDECTRPos.GetLabel()
+        print RATR
         if str(RATR)=='Unknown':
-        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 15.0418 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
+        	dlg = wx.MessageDialog(self,"Please input a valid RA tracking rate. Range is between -10.0 and 25.0. Use 15.04108 if unsure.", "Error", wx.OK|wx.ICON_ERROR)
         	dlg.ShowModal()
         	dlg.Destroy()
         	return
@@ -2300,7 +2330,8 @@ class TCC(wx.Frame):
         self.control.targetDecText.SetValue(input_dec)
         self.control.targetEpochText.SetValue(input_epoch)
         self.control.targetMagText.SetValue(mag)
-        self.init.onTargetButton.Enable()
+        #self.init.onTargetButton.Enable()
+        self.control.pointButton.Enable()
 
         self.log("Current target is '"+name+"'")
 
@@ -2782,7 +2813,8 @@ class TCC(wx.Frame):
                 None
         """
         name='Zenith'
-        ra=self.control.currentLSTPos.GetLabel() #set to current LST
+        #ra=self.control.currentLSTPos.GetLabel() #set to current LST
+        ra = "LST"
         dec='+46:57:10.08' #set to LAT
         epoch=self.control.currentEpochPos.GetLabel()#define as current epoch
 
@@ -2810,6 +2842,8 @@ class TCC(wx.Frame):
         target_ra=self.init.targetRaText.GetValue()
         target_dec=self.init.targetDecText.GetValue()
         target_epoch=self.init.targetEpochText.GetValue()
+        if target_ra == "LST":
+            target_ra = self.control.currentLSTPos.GetLabel()
 
         self.log('Syncing TCC position to'+' '+str(target_ra)+' '+str(target_dec))
         if target_name=="Zenith":
@@ -2911,8 +2945,9 @@ class TCC(wx.Frame):
             self.control.currentRATRPos.SetLabel(RArate)
             self.control.currentRATRPos.SetForegroundColour('black')
             self.dict['RAtrackingRate'] = RArate
-            self.command_queue.put("RATR "+str(RArate))
+            #self.command_queue.put("RATR "+str(RArate))
             self.log("Right Ascension Tracking Rate set to " + RArate)
+            self.log("If currently tracking, please turn tracking off and on to track at new rate.")
         else:
             dlg = wx.MessageDialog(self,
                                "Please input an integer or float number.",
@@ -2920,37 +2955,24 @@ class TCC(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy()
         return
-
     # ----------------------------------------------------------------------------------
-    def setDECTrackingRate(self,event):
+    def resetRATrackingRate(self,event):
         """
-        Sets telescope DEC tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
-        Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget. Tethered to the "Set DEC Tracking Rate" button in the initialization tab.
-        Returns:
+        Sets telescope RA tracking rate to the recommended sidereal value of 15.04108
+            Args:
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Set RA Tracking Rate" button in the initialization tab.
+
+            Returns:
                 None
         """
-        DECrate=self.init.trackingRateDECText.GetValue()
+        rate=15.04108
+        self.control.currentRATRPos.SetLabel(str(rate))
+        self.control.currentRATRPos.SetForegroundColour('black')
+        self.dict['RAtrackingRate'] = rate
+        #self.command_queue.put("RATR "+str(rate))
+        self.log("Right Ascension Tracking Rate set to " + str(rate))
+        self.log("If currently tracking, please turn tracking off and on to track at new rate.")
 
-        valid_input=True
-
-        try:
-            val=float(DECrate)
-        except ValueError:
-            valid_input=False
-
-        if valid_input==True:
-            self.control.currentDECTRPos.SetLabel(DECrate)
-            self.control.currentDECTRPos.SetForegroundColour('black')
-            self.dict['DECtrackingRate'] = DECrate
-            self.log("Declination Tracking Rate set to " + DECrate)
-        else:
-            dlg = wx.MessageDialog(self,
-                               "Please input an integer or float number.",
-                               "Error", wx.OK|wx.ICON_ERROR)
-            dlg.ShowModal()
-            dlg.Destroy()
         return
 
     # ----------------------------------------------------------------------------------
@@ -3068,6 +3090,8 @@ class TCC(wx.Frame):
             self.control.currentLocalPos.SetForegroundColour('black')
             self.control.currentEpochPos.SetForegroundColour('black')
             self.control.currentRATRPos.SetForegroundColour('black')
+            self.control.currentFocusPos.SetLabel('0.0')
+            self.control.currentFocusPos.SetForegroundColour('black')
             thread.start_new_thread(self.logstatus,())
             if self.protocol != None:
                 self.telescope_status['connectState'] = True
