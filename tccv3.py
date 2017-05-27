@@ -3296,6 +3296,7 @@ class DataForwardingProtocol(basic.LineReceiver):
         gui.protocol = self
         gui.control.protocol= self
         print "data received from server:" ,data
+        print repr(data)
 
         if gui:
             val = gui.control.logBox.GetValue()
