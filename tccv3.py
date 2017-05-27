@@ -2085,8 +2085,8 @@ class TCC(wx.Frame):
                 None
         """
     	print repr(msg)
-    	msg=int(msg)
-    	if msg==1:
+    	#msg=int(msg)
+    	if msg=="velmeasure 1":
             self.telescope_status['slewing']=False
             print "Slewing == False"
             wx.CallAfter(self.slewbutton_toggle)
