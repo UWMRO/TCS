@@ -3119,7 +3119,7 @@ class TCC(wx.Frame):
                         d.addCallback(self.quit)
                         self.command_queue.task_done()
                     elif command == "checkhandPaddle":
-                        self.protocol.sendCommand("paddle ")
+                        #self.protocol.sendCommand("paddle ")
                         self.command_queue.task_done()
                     else:
                         self.protocol.sendCommand(command+" ")
