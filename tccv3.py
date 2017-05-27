@@ -58,27 +58,27 @@ class Control(wx.Panel):
         #Target Name
         self.targetNameLabel = wx.StaticText(self, size=(75,-1))
         self.targetNameLabel.SetLabel('Name: ')
-        self.targetNameText = wx.TextCtrl(self,size=(110,-1))
+        self.targetNameText = wx.TextCtrl(self,size=(125,-1))
 
         #Target Right Ascension
         self.targetRaLabel = wx.StaticText(self, size=(75,-1))
         self.targetRaLabel.SetLabel('RA: ')
-        self.targetRaText = wx.TextCtrl(self,size=(110,-1))
+        self.targetRaText = wx.TextCtrl(self,size=(125,-1))
 
         #Target Declination
         self.targetDecLabel = wx.StaticText(self, size=(75,-1))
         self.targetDecLabel.SetLabel('DEC: ')
-        self.targetDecText = wx.TextCtrl(self,size=(110,-1))
+        self.targetDecText = wx.TextCtrl(self,size=(125,-1))
 
         #Target Epoch
         self.targetEpochLabel = wx.StaticText(self, size=(75,-1))
         self.targetEpochLabel.SetLabel('EPOCH: ')
-        self.targetEpochText = wx.TextCtrl(self,size=(110,-1))
+        self.targetEpochText = wx.TextCtrl(self,size=(125,-1))
 
         #Target V Magnitude
         self.targetMagLabel = wx.StaticText(self, size=(75,-1))
         self.targetMagLabel.SetLabel('V Mag: ')
-        self.targetMagText = wx.TextCtrl(self,size=(110,-1))
+        self.targetMagText = wx.TextCtrl(self,size=(125,-1))
 
         #############################################################
 
