@@ -3391,7 +3391,7 @@ if __name__=="__main__":
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		pipe= subprocess.Popen("./parsercode/TCC_server",shell=True, preexec_fn=os.setsid)
+  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
   		time.sleep(2.0)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
