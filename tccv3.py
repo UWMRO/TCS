@@ -2088,12 +2088,12 @@ class TCC(wx.Frame):
                 #d.addCallback(self.velmeasure)
                 time.sleep(0.511)
         if secondary_slew:
-            self.log("Completed First Slew")
+            wx.CallAfter(self.log,("Completed First Slew"))
             self.LST=str(self.control.currentLSTPos.GetLabel())
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
             command="slew"+' '+str(data)+' '+str(self.LST)
-            self.log("Beginning Secondary Slew")
+            wx.CallAfter(self.log,("Beginning Secondary Slew"))
             #self.protocol.sendCommand(command)
             self.command_queue.put(command)
             self.telescope_status["slewing"]=True
@@ -2103,7 +2103,7 @@ class TCC(wx.Frame):
                 #d.addCallback(self.velmeasure)
                 time.sleep(0.511)
             #self.protocol.sendCommand("stop")
-            self.log("Completed Secondary Slew")
+            wx.CallAfter(self.log,("Completed Secondary Slew"))
         return
 
     # ----------------------------------------------------------------------------------
