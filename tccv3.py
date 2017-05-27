@@ -2103,9 +2103,10 @@ class TCC(wx.Frame):
             self.telescope_status["slewing"]=True
             while self.telescope_status.get('slewing')==True:
                 #d=self.protocol.sendCommand("velmeasure")
+                time.sleep(0.511)
                 self.command_queue.put("velmeasure")
                 #d.addCallback(self.velmeasure)
-                time.sleep(0.511)
+                #time.sleep(0.511)
             #self.protocol.sendCommand("stop")
             wx.CallAfter(self.log,("Completed Secondary Slew"))
         return
