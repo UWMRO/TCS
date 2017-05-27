@@ -2618,12 +2618,12 @@ class TCC(wx.Frame):
     # ----------------------------------------------------------------------------------
     def GenerateFinder(self,target):
         print "Multiprocess"
-        #wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False,)
-        plot_finder_image(target,fov_radius=18*u.arcmin,reticle=True, log=False)
+        wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False,)
+        #plot_finder_image(target,fov_radius=18*u.arcmin,reticle=True, log=False)
         print "Made it"
         self.plot_open = True
         wx.CallAfter(plt.show,)
-        plt.show()
+        #plt.show()
         return
     # ----------------------------------------------------------------------------------
     def ExportOpen(self,event):
