@@ -1122,14 +1122,14 @@ class TCC(wx.Frame):
         nb.AddPage(targetPage,"Target List")
         self.target=nb.GetPage(1)
 
-        nb.AddPage(guiderControlPage,"Guider Control")
-        self.guiderControl=nb.GetPage(2)
+        #nb.AddPage(guiderControlPage,"Guider Control")
+        #self.guiderControl=nb.GetPage(2)
 
         nb.AddPage(initPage,"Initialization")
-        self.init=nb.GetPage(3)
+        self.init=nb.GetPage(2)
 
-        nb.AddPage(logPage,"Night Log")
-        self.nl=nb.GetPage(4)
+        #nb.AddPage(logPage,"Night Log")
+        #self.nl=nb.GetPage(3)
 
         #Control Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.startSlew, self.control.slewButton)
@@ -1155,7 +1155,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.FinderOpen,self.target.finder_button)
 
         #Guider Control Tab Bindings
-        self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
+        #self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
 
         # Init Tab Bindings
         self.Bind(wx.EVT_BUTTON,self.setTelescopeZenith ,self.init.atZenithButton)
@@ -1199,8 +1199,8 @@ class TCC(wx.Frame):
 
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         img=mpimg.imread(img_default)
-        self.guiderControl.ax_r.imshow(img, picker=False)
-        self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
+        #self.guiderControl.ax_r.imshow(img, picker=False)
+        #self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
 
     # ----------------------------------------------------------------------------------
     def createMenu(self):
@@ -1385,7 +1385,10 @@ class TCC(wx.Frame):
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
-        f_out=open(self.stordir+'/logs/'+today,'a')
+        if self.at_MRO ==True:
+            f_out=open(self.stordir+'/logs/'+today,'a')
+        else:
+            f_out=open(self.dir+'/logs/'+today,'a')
         f_out.write(current_time_log+','+str(input)+'\n')
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
@@ -2356,7 +2359,7 @@ class TCC(wx.Frame):
 
         self.coordinates = self.inputcoordSorter(input_ra,input_dec,input_epoch)
         self.finder_object=FixedTarget(name=None,coord=self.coordinates)
-        wx.CallAfter(plot_finder_image,self.finder_object,fov_radius=18*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False,)
+        #wx.CallAfter(plot_finder_image,self.finder_object,fov_radius=18*u.arcmin,ax=self.guiderControl.ax_l,reticle=False, log=False,)
         return
 
     # ----------------------------------------------------------------------------------
@@ -2388,6 +2391,7 @@ class TCC(wx.Frame):
                 thread.start_new_thread(self.Rotate,(phi_or,))
 
     # ----------------------------------------------------------------------------------
+    '''
     def on_Rot(self,event):
         """
         Initialize rotation of periscope to angle specified by rotation angle field.
@@ -2439,7 +2443,7 @@ class TCC(wx.Frame):
             time.sleep(0.025)
         self.telescope_status['guider_rot']=False
         return
-
+    '''
     # ----------------------------------------------------------------------------------
     def addToList(self,event):
         """
@@ -3106,7 +3110,7 @@ class TCC(wx.Frame):
             if self.telescope_status.get('connectState'):
                 self.log("Successfully connected to the telescope.")
                 self.sb.SetStatusText('Connected to Telescope', 3)
-                self.at_MRO = True #Dev Variable
+                self.at_MRO = False #Dev Variable
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
