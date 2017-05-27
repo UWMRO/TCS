@@ -86,7 +86,7 @@ void paddletimer()
 */
 const char *separator(std::string raw_input) {
 	std::string raw = raw_input;
-	std::string delimiter = ";"
+	std::string delimiter = ";";
 	std::vector <std::string> commands;
 
 	size_t n = std::count(raw.begin(), raw.end(), ';')+1;
