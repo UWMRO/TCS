@@ -84,6 +84,24 @@ void paddletimer()
 	}
 }
 */
+const char *separator(std::string raw_input) {
+	std::string raw = raw_input;
+	std::string delimiter = ";"
+	std::vector <std::string> commands;
+
+	size_t n = std::count(raw.begin(), raw.end(), ';')+1;
+	//std::string commands[n];
+
+	int begin=0;
+	for(int i = 0;i < n; i++)
+	{
+		std::string command = raw.substr(0,raw.find(';'));
+		commands.push_back(command);
+		raw=raw.substr(raw.find(';')+1,raw.length());
+	}
+	return commands;
+}
+
 const char *parser(std::string input) {
 
 	std::string s = input;
@@ -509,15 +527,18 @@ void Listener(void) {
 	incoming_data_buffer[bytes_received] = '\0';
 
 	std::string input = (std::string) incoming_data_buffer;
-	const char* results = parser((std::string) incoming_data_buffer);
-	std::cout << results << std::endl;
-	if(results != "Checked Hand Paddle") {
-		if(results != "File Written") {
-			if(results != "velmeasure 0") {
-				send(new_fd, results, strlen(results), 0);
+	std::vector <string> commands = separator(input);
+	for(int i=0; i <commands.size(); i++)
+		std::cout << command[i] << std::endl;
+		const char* results = parser(command[i]);
+		std::cout << results << std::endl;
+		if(results != "Checked Hand Paddle") {
+			if(results != "File Written") {
+				if(results != "velmeasure 0") {
+					send(new_fd, results, strlen(results), 0);
+				}
 			}
 		}
-	}
 
 
   }
@@ -531,6 +552,7 @@ void Listener(void) {
 int main(int argc, char *argv[])
 {
 	pmc.init();
+	Separator();
 	//std::thread t1(paddletimer);
 	Listener();
 	//t1.join();
