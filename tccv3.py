@@ -3385,19 +3385,19 @@ class TCCClient(protocol.ClientFactory):
         reactor.stop()
 ###########################################################################################
 if __name__=="__main__":
-	#global pipe
+	global pipe
 	try:
   		app = wx.App(False)
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		#pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
-  		#time.sleep(3)
+  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		time.sleep(3)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
   		app.MainLoop()
-		#except KeyboardInterrupt:
-		#os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
-		#sys.exit(0)
+	except KeyboardInterrupt:
+		os.killpg(os.getpgid(pipe.pid),signal.SIGTERM)
+		sys.exit(0)
 	except ValueError:
 		pass
