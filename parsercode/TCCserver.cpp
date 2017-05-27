@@ -132,7 +132,7 @@ const char *parser(std::string input) {
 
 		RAmove_2_deg = (RAtarget_hrs - LST)*15.0;
    		DECmove_2_deg = DECtarget_degrees - 46.951166666667; //mrolat
-		const char *slew = "slew 1";
+		const char *slew = "Slew Request Received";
 		if(fabs(RAmove_2_deg) > (8.0*15.0)) //maxHourAngle
    		{
       		const char *out= "Target RA exceeds max Hour Angle";

@@ -1975,13 +1975,13 @@ class TCC(wx.Frame):
             	self.LST=str(self.control.currentLSTPos.GetLabel())
             	self.LST=self.LST.split(':')
             	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-                self.log(str(self.LST))
-                self.log([input_ra,input_dec,current_epoch])
+                self.log("First Slew LST: "+str(self.LST))
+                #self.log([input_ra,input_dec,current_epoch])
                 command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
                 if self.telescope_status.get("tracking") == True:
                     #self.protocol.sendCommand("track off")
                     self.command_queue.put("track off")
-                    print "Turning off Tracking"
+                    self.log("Turning tracking off for slew duration")
                     self.code_timer_Slew.Start(self.stop_time, oneShot = True)
                     return
                 elif self.telescope_status.get("tracking") == False:
@@ -2010,6 +2010,7 @@ class TCC(wx.Frame):
         elif self.telescope_status.get('slewing')==True:
             #self.protocol.sendCommand("stop")
             self.command_queue.put("stop")
+            self.log("Telescope Slew/Jog Command Stopped Early.")
 
             #self.control.slewButton.SetLabel('Start Slew')
             #self.control.slewButton.SetBackgroundColour("Light Slate Blue")
@@ -2050,8 +2051,8 @@ class TCC(wx.Frame):
         self.LST=str(self.control.currentLSTPos.GetLabel())
         self.LST=self.LST.split(':')
         self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-        self.log(str(self.LST))
-        self.log([input_ra,input_dec,current_epoch])
+        self.log("First Slew LST: "+str(self.LST))
+        #self.log([input_ra,input_dec,current_epoch])
         command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
 
         #self.protocol.sendCommand(command)
@@ -2094,7 +2095,7 @@ class TCC(wx.Frame):
             self.LST=str(self.control.currentLSTPos.GetLabel())
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
-            wx.CallAfter(self.log,(str(self.LST)))
+            wx.CallAfter(self.log,("Secondary Slew LST: "+str(self.LST)))
             command="slew"+' '+str(data)+' '+str(self.LST)
             wx.CallAfter(self.log,("Beginning Secondary Slew"))
             #self.protocol.sendCommand(command)
