@@ -529,8 +529,8 @@ void Listener(void) {
 	std::string input = (std::string) incoming_data_buffer;
 	std::vector <string> commands = separator(input);
 	for(int i=0; i <commands.size(); i++)
-		std::cout << command[i] << std::endl;
-		const char* results = parser(command[i]);
+		std::cout << commands[i] << std::endl;
+		const char* results = parser(commands[i]);
 		std::cout << results << std::endl;
 		if(results != "Checked Hand Paddle") {
 			if(results != "File Written") {
@@ -552,7 +552,6 @@ void Listener(void) {
 int main(int argc, char *argv[])
 {
 	pmc.init();
-	Separator();
 	//std::thread t1(paddletimer);
 	Listener();
 	//t1.join();
