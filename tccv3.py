@@ -1191,11 +1191,11 @@ class TCC(wx.Frame):
         self.readConfig()
 
         """Target testing parameters """
-        self.target.nameText.SetValue('M31')
-        self.target.raText.SetValue('00h42m44.330s')
-        self.target.decText.SetValue('+41d16m07.50s')
-        self.target.epochText.SetValue('J2000')
-        self.target.magText.SetValue('3.43')
+        #self.target.nameText.SetValue('M31')
+        #self.target.raText.SetValue('00h42m44.330s')
+        #self.target.decText.SetValue('+41d16m07.50s')
+        #self.target.epochText.SetValue('J2000')
+        #self.target.magText.SetValue('3.43')
 
         img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         img=mpimg.imread(img_default)
@@ -3385,7 +3385,7 @@ class TCCClient(protocol.ClientFactory):
         reactor.stop()
 ###########################################################################################
 if __name__=="__main__":
-	global pipe
+	#global pipe
 	try:
   		app = wx.App(False)
   		app.frame = TCC()
