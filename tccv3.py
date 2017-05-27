@@ -2049,6 +2049,7 @@ class TCC(wx.Frame):
         self.LST=str(self.control.currentLSTPos.GetLabel())
         self.LST=self.LST.split(':')
         self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+        self.log(str(self.LST))
         self.log([input_ra,input_dec,current_epoch])
         command="slew"+' '+str(self.decimalcoords)+' '+str(self.LST)
 
@@ -2092,6 +2093,7 @@ class TCC(wx.Frame):
             self.LST=str(self.control.currentLSTPos.GetLabel())
             self.LST=self.LST.split(':')
             self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
+            wx.CallAfter(self.log,(str(self.LST)))
             command="slew"+' '+str(data)+' '+str(self.LST)
             wx.CallAfter(self.log,("Beginning Secondary Slew"))
             #self.protocol.sendCommand(command)
