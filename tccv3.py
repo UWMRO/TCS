@@ -3110,7 +3110,7 @@ class TCC(wx.Frame):
             if self.telescope_status.get('connectState'):
                 self.log("Successfully connected to the telescope.")
                 self.sb.SetStatusText('Connected to Telescope', 3)
-                self.at_MRO = False #Dev Variable
+                self.at_MRO = True #Dev Variable
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
