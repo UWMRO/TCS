@@ -58,27 +58,27 @@ class Control(wx.Panel):
         #Target Name
         self.targetNameLabel = wx.StaticText(self, size=(75,-1))
         self.targetNameLabel.SetLabel('Name: ')
-        self.targetNameText = wx.TextCtrl(self,size=(100,-1))
+        self.targetNameText = wx.TextCtrl(self,size=(110,-1))
 
         #Target Right Ascension
         self.targetRaLabel = wx.StaticText(self, size=(75,-1))
         self.targetRaLabel.SetLabel('RA: ')
-        self.targetRaText = wx.TextCtrl(self,size=(100,-1))
+        self.targetRaText = wx.TextCtrl(self,size=(110,-1))
 
         #Target Declination
         self.targetDecLabel = wx.StaticText(self, size=(75,-1))
         self.targetDecLabel.SetLabel('DEC: ')
-        self.targetDecText = wx.TextCtrl(self,size=(100,-1))
+        self.targetDecText = wx.TextCtrl(self,size=(110,-1))
 
         #Target Epoch
         self.targetEpochLabel = wx.StaticText(self, size=(75,-1))
         self.targetEpochLabel.SetLabel('EPOCH: ')
-        self.targetEpochText = wx.TextCtrl(self,size=(100,-1))
+        self.targetEpochText = wx.TextCtrl(self,size=(110,-1))
 
         #Target V Magnitude
         self.targetMagLabel = wx.StaticText(self, size=(75,-1))
         self.targetMagLabel.SetLabel('V Mag: ')
-        self.targetMagText = wx.TextCtrl(self,size=(100,-1))
+        self.targetMagText = wx.TextCtrl(self,size=(110,-1))
 
         #############################################################
 
@@ -1084,7 +1084,7 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = False #Dev variable for ease of development offsite
+        self.at_MRO = True #Dev variable for ease of development offsite
         self.process_list=[]
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
@@ -1218,7 +1218,7 @@ class TCC(wx.Frame):
         m_exit = menu_file.Append(-1, "E&xit\tCtrl-X", "Exit")
 
         tool_file = wx.Menu()
-        m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
+        #m_night = tool_file.Append(-1, 'Night\tCtrl-N','Night Mode')
 
         tz_choice = wx.Menu()
         tz_choice.Append(1110, "Pacific", "Set Time Zone", kind=wx.ITEM_RADIO)
@@ -1234,7 +1234,7 @@ class TCC(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_exit, m_exit)
         self.Bind(wx.EVT_CLOSE, self.on_exit)
-        self.Bind(wx.EVT_MENU, self.on_night, m_night)
+        #self.Bind(wx.EVT_MENU, self.on_night, m_night)
         self.Bind(wx.EVT_MENU, self.on_Pacific, id=1110)
         self.Bind(wx.EVT_MENU, self.on_Mountain, id=1111)
         self.Bind(wx.EVT_MENU, self.pre_on, id=1120)
