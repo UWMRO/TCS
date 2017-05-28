@@ -2,6 +2,8 @@
 #Bifrost Telescope Control Computer Software
 #For use at Manastash Ridge Observatory in Ellensberg, WA
 
+#Version 1.0
+
 import time
 import wx
 import os
