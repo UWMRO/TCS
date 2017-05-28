@@ -33,6 +33,8 @@ from twisted.protocols import basic
 import subprocess
 import Queue
 import multiprocessing as mp
+from astroquery.skyview import SkyView
+from astropy.wcs import WCS
 
 global pipe
 pipe=None
@@ -1710,7 +1712,7 @@ class TCC(wx.Frame):
         time.sleep(2.0)
         while True:
             #self.protocol.sendCommand("paddle")
-            self.command_queue.put("checkhandPaddle")
+            #self.command_queue.put("checkhandPaddle")
             time.sleep(0.123)
 
     # ----------------------------------------------------------------------------------
@@ -2645,21 +2647,85 @@ class TCC(wx.Frame):
         #self.plot_open = True
         #plt.show()
         thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
+        #wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False, wx.CallAfter(plt.show,))
+        #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
         #mp.freeze_support()
         #p = mp.Process(target=self.GenerateFinder,args=(self.targetobject,))
         #p.start()
         #self.process_list.append(p)
         #plt.show()
     # ----------------------------------------------------------------------------------
-    def GenerateFinder(self,target):
-        print "Multiprocess"
-        wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False,)
-        #plot_finder_image(target,fov_radius=18*u.arcmin,reticle=True, log=False)
-        print "Made it"
+    def GenerateFinder(self, target, survey='DSS', fov_radius=18*u.arcmin,
+                          log=False, ax=None, grid=False, reticle=False,
+                          style_kwargs=None, reticle_style_kwargs=None):
+
+
+        #__all__ = ['plot_finder_image']
+        print "Hello?"
+        coord = target if not hasattr(target, 'coord') else target.coord
+        position = coord.icrs
+        coordinates = 'icrs'
+        target_name = None if isinstance(target, SkyCoord) else target.name
+
+        hdu = SkyView.get_images(position=position, coordinates=coordinates,
+                                     survey=survey, radius=fov_radius, grid=grid)[0][0]
+        print hdu
+        #wcs = WCS(hdu.header)
+        wx.CallAfter(self.plotFinder, ax, hdu, grid, log, fov_radius, reticle,
+        style_kwargs, reticle_style_kwargs, target_name)
+
+    # ----------------------------------------------------------------------------------
+
+    def plotFinder(self, ax, hdu, grid, log, fov_radius,reticle,
+    style_kwargs, reticle_style_kwargs, target_name):
+        wcs = WCS(hdu.header)
+        # Set up axes & plot styles if needed.
+        if ax is None:
+            ax = plt.gca(projection=wcs)
+        if style_kwargs is None:
+            style_kwargs = {}
+        style_kwargs = dict(style_kwargs)
+        style_kwargs.setdefault('cmap', 'Greys')
+        style_kwargs.setdefault('origin', 'lower')
+        print "Plotting"
+        if log:
+            image_data = np.log(hdu.data)
+        else:
+            image_data = hdu.data
+        ax.imshow(image_data, picker=True, **style_kwargs)
+
+        # Draw reticle
+        if reticle:
+            pixel_width = image_data.shape[0]
+            inner, outer = 0.03, 0.08
+
+            if reticle_style_kwargs is None:
+                reticle_style_kwargs = {}
+            reticle_style_kwargs.setdefault('linewidth', 2)
+            reticle_style_kwargs.setdefault('color', 'm')
+
+            ax.axvline(x=0.5*pixel_width, ymin=0.5+inner, ymax=0.5+outer,
+                   **reticle_style_kwargs)
+            ax.axvline(x=0.5*pixel_width, ymin=0.5-inner, ymax=0.5-outer,
+                   **reticle_style_kwargs)
+            ax.axhline(y=0.5*pixel_width, xmin=0.5+inner, xmax=0.5+outer,
+                   **reticle_style_kwargs)
+            ax.axhline(y=0.5*pixel_width, xmin=0.5-inner, xmax=0.5-outer,
+                   **reticle_style_kwargs)
+
+        # Labels, title, grid
+        ax.set(xlabel='RA', ylabel='DEC')
+        if target_name is not None:
+            ax.set_title(target_name)
+        ax.grid(grid)
+
+        # Redraw the figure for interactive sessions.
+        ax.figure.canvas.draw()
         self.plot_open = True
-        wx.CallAfter(plt.show,)
-        #plt.show()
-        return
+        print "plotted"
+        plt.show()
+        return ax, hdu
+
     # ----------------------------------------------------------------------------------
     def ExportOpen(self,event):
         """
