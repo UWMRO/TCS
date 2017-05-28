@@ -3010,7 +3010,7 @@ class TCC(wx.Frame):
             print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
         if self.telescope_status.get("tracking") == True:
-            self.command_queue.put('track on'+str(self.dict.get('RAtrackingRate'))
+            self.command_queue.put('track on'+str(self.dict.get('RAtrackingRate')))
 
     # ----------------------------------------------------------------------------------
     def setRATrackingRate(self,event):
