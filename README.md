@@ -10,10 +10,10 @@ use in Summer 2017.
 ## Feature Set
 - Telescope Control
   --
-  - Slewing (Ready for On-Sky Testing)
-  - Tracking (Ready for On-Sky Testing)
-  - Jogging (Ready for On-Sky Testing)
-  - Focusing (Ready for On-Sky Testing)
+  - Slewing (Complete)
+  - Tracking (Complete)
+  - Jogging (Complete)
+  - Focusing (Complete)
   - Hand Paddle Control (Complete)
   - Status Display (Complete)
   - Precession (Complete)
@@ -24,13 +24,14 @@ use in Summer 2017.
   - Target Alt-Az Plotting (Complete)
   - Target Airmass Plotting (Complete)
   - Target Assignment (Complete)
+  - Target Finder Chart (Complete)
   
-- Guider Control
+- Guider Control (Not Available in Current Release)
   -- 
   - Guider Exposure (In Development)
   - Guider Rotation (In Development)
   - Periscope Finder Chart (Complete)
-  - Auto Find Guide Stars (In Development
+  - Auto Find Guide Stars (In Development)
   - Guiding (In Development)
   - Jog Guide Field (In Development)
   - Focus Guider (In Development)
@@ -43,8 +44,8 @@ use in Summer 2017.
   - Guiding Parameters (In Development)
   - Set Telescope Position (Complete)
   - Load Zenith Coordinates (Complete)
-  - Pointing (Ready for On-Sky Testing)
-- Night Log
+  - Pointing (Complete)
+- Night Log (Not Available in Current Release)
   --
   - Log Fields (In Development)
   - Save and Send Logs (In Development)
