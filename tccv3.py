@@ -1712,7 +1712,7 @@ class TCC(wx.Frame):
         time.sleep(2.0)
         while True:
             #self.protocol.sendCommand("paddle")
-            #self.command_queue.put("checkhandPaddle")
+            self.command_queue.put("checkhandPaddle")
             time.sleep(0.123)
 
     # ----------------------------------------------------------------------------------
