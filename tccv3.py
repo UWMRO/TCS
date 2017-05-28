@@ -1084,16 +1084,16 @@ class TCC(wx.Frame):
                 elevation = 1198*u.m,
                 name = "Manastash Ridge Observatory"
                 )
-        self.at_MRO = True #Dev variable for ease of development offsite
+        #self.at_MRO = True #Dev variable for ease of development offsite
         self.process_list=[]
         debug=True #Debug mode, currently no functionality
         ico = wx.Icon("tcc_ico_1.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
         self.dir=os.getcwd() #Current path for file IO
-        if self.at_MRO == True:
-            self.stordir = "/home/mro/storage/tcc_data"
-        else:
-            self.stordir = self.dir
+        #if self.at_MRO == True:
+        self.stordir = "/home/mro/storage/tcc_data"
+        #else:
+        #self.stordir = self.dir
         self.plot_open = False
 
         self.code_timer_W = wx.Timer(self)
@@ -1385,10 +1385,10 @@ class TCC(wx.Frame):
         today=time.strftime('%Y%m%d.log')
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
-        if self.at_MRO ==True:
-            f_out=open(self.stordir+'/logs/'+today,'a')
-        else:
-            f_out=open(self.dir+'/logs/'+today,'a')
+        #if self.at_MRO ==True:
+        f_out=open(self.stordir+'/logs/'+today,'a')
+        #else:
+        #f_out=open(self.dir+'/logs/'+today,'a')
         f_out.write(current_time_log+','+str(input)+'\n')
         f_out.close()
         self.control.logBox.AppendText(str(current_time)+':  '+str(input)+'\n')
@@ -1785,7 +1785,7 @@ class TCC(wx.Frame):
         #self.protocol.sendCommand("halt")
         self.command_queue.put("halt")
 
-        self.log("WARNING: Halt Motion Button pressed. A full restart of the TCC is required.")
+        self.log("WARNING: Emergency Stop Button pressed. A full restart of the TCC is required.")
         return
 
     # ----------------------------------------------------------------------------------
@@ -1926,8 +1926,8 @@ class TCC(wx.Frame):
         #self.ra_out=ra_in+d_ra
         #self.dec_out=dec_in+d_dec
         print self.ra_out,self.dec_out
-        self.log('Precessed RA: '+str(self.ra_out))
-        self.log('Precessed DEC: '+str(self.dec_out))
+        #self.log('Precessed RA: '+str(self.ra_out))
+        #self.log('Precessed DEC: '+str(self.dec_out))
         self.coordinates=SkyCoord(ra=float(self.ra_out)*u.degree,dec=float(self.dec_out)*u.degree,frame='icrs',equinox=str(epoch_now))
         return self.coordinates, self.ra_out, self.dec_out
 
@@ -1991,6 +1991,8 @@ class TCC(wx.Frame):
                     if self.telescope_status.get('precession')==True:
                         self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
                         self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
+                        self.log('Precessed RA: '+str(self.ra_out))
+                        self.log('Precessed DEC: '+str(self.dec_out))
                     else:
                         self.target_coords['RA']= self.input_frame.ra.degree #Store target RA for pointing routine
                         self.target_coords['DEC']=self.input_frame.dec.degree #Store target DEC for pointing routine
@@ -2877,6 +2879,14 @@ class TCC(wx.Frame):
             try:
                 #self.protocol.sendCommand("park")
                 self.command_queue.put("park")
+                if self.telescope_status.get('pointState')==True:
+                    self.target_coords['Name'] = "Zenith"
+                if self.telescope_status.get('tracking')==True:
+                    self.telescope_status['tracking']=False
+                    self.control.trackButton.SetLabel('Start Tracking')
+                    self.control.trackButton.SetBackgroundColour('Light Slate Blue')
+                    self.log("Tracking was on, turned off to Park Telescope")
+
             except AttributeError:
                 print "Not Connected to Telescope"
     # ----------------------------------------------------------------------------------
@@ -2885,6 +2895,14 @@ class TCC(wx.Frame):
             try:
                 #self.protocol.sendCommand("coverpos")
                 self.command_queue.put("coverpos")
+                if self.telescope_status.get('pointState')==True:
+                    self.target_coords['Name'] = "Cover Position"
+                if self.telescope_status.get('tracking')==True:
+                    self.telescope_status['tracking']=False
+                    self.control.trackButton.SetLabel('Start Tracking')
+                    self.control.trackButton.SetBackgroundColour('Light Slate Blue')
+                    self.log("Tracking was on, turned off for slew to Cover Position")
+
             except AttributeError:
                 print "Not Connected to Telescope"
 
@@ -3108,7 +3126,7 @@ class TCC(wx.Frame):
             if self.telescope_status.get('connectState'):
                 self.log("Successfully connected to the telescope.")
                 self.sb.SetStatusText('Connected to Telescope', 3)
-                self.at_MRO = True #Dev Variable
+                #self.at_MRO = True #Dev Variable
             else:
                 self.sb.SetStatusText('ERROR: Telescope Not Responding',3)
                 self.log("Failed to connect to telescope. Restart the application.")
@@ -3155,6 +3173,8 @@ class TCC(wx.Frame):
     def logstatus(self):
         """
         Display parameters in telescope status dictionary to the user in each log box.
+        Not sure how useful this is, every 10 minutes offers a sanity check that may be
+        more useful to advanced users.
             Args:
                 None
             Returns:
@@ -3165,7 +3185,7 @@ class TCC(wx.Frame):
             for key in self.telescope_status:
                 message+=key+': '+str(self.telescope_status.get(key))+' | '
             wx.CallAfter(self.log, (message))
-            time.sleep(120)
+            time.sleep(600) #Once Every 10 Minutes
 
     # ----------------------------------------------------------------------------------
     def timer(self):
@@ -3329,6 +3349,10 @@ class DataForwardingProtocol(basic.LineReceiver):
             self.timestamp()
             gui.control.logBox.SetValue(val+stamp+data+'\n')
             gui.control.logBox.SetInsertionPointEnd()
+            gui.target.logBox.SetValue(val+stamp+data+'\n')
+            gui.target.logBox.SetInsertionPointEnd()
+            gui.init.logBox.SetValue(val+stamp+data+'\n')
+            gui.init.logBox.SetInsertionPointEnd()
             sep_data= data.split(" ")
             if sep_data[0] in self._deferreds:
                 self._deferreds.pop(sep_data[0]).callback(sep_data[1])
