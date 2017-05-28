@@ -44,7 +44,7 @@ use in Summer 2017.
   - Guiding Parameters (In Development)
   - Set Telescope Position (Complete)
   - Load Zenith Coordinates (Complete)
-  - Pointing (Ready for On-Sky Testing)
+  - Pointing (Complete)
 - Night Log (Not Available in Current Release)
   --
   - Log Fields (In Development)
