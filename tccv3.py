@@ -2647,7 +2647,7 @@ class TCC(wx.Frame):
         #self.plot_open = True
         #plt.show()
         thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
-        self.finder_button.Disable()
+        self.target.finder_button.Disable()
         #wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False, wx.CallAfter(plt.show,))
         #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
         #mp.freeze_support()
@@ -2724,7 +2724,7 @@ class TCC(wx.Frame):
         ax.figure.canvas.draw()
         self.plot_open = True
         print "plotted"
-        self.finder_button.Enable()
+        self.target.finder_button.Enable()
         plt.show()
         return ax, hdu
 
