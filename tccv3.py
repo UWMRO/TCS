@@ -320,9 +320,9 @@ class Control(wx.Panel):
 
 
         self.hbox1.Add(self.vbox7, 0, wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(25)
+        self.hbox1.AddSpacer(15)
         self.hbox1.Add(self.vbox1, 0, wx.ALIGN_CENTER)
-        self.hbox1.AddSpacer(25)
+        self.hbox1.AddSpacer(15)
         self.hbox1.Add(self.vbox2, 0, wx.ALIGN_CENTER)
 
         self.hbox5.AddSpacer(30)
