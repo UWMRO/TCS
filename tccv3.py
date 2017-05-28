@@ -1091,7 +1091,7 @@ class TCC(wx.Frame):
         #self.at_MRO = True #Dev variable for ease of development offsite
         self.process_list=[]
         debug=True #Debug mode, currently no functionality
-        ico = wx.Icon("bifrost.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
+        ico = wx.Icon("bifrost_small.ico", wx.BITMAP_TYPE_ICO) #GUI Icon
         self.SetIcon(ico)
         self.dir=os.getcwd() #Current path for file IO
         #if self.at_MRO == True:
