@@ -1,6 +1,6 @@
 #!/user/local/bin python
 #Bifrost Telescope Control Computer Software
-#For use at Manastash Ridge Observatory in Ellensberg, WA
+#For use at Manastash Ridge Observatory in Ellensburg, WA
 
 #Version 1.0
 
@@ -34,7 +34,6 @@ from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 import subprocess
 import Queue
-import multiprocessing as mp
 from astroquery.skyview import SkyView
 from astropy.wcs import WCS
 
@@ -493,7 +492,8 @@ class Target(wx.Panel):
 
 ###########################################################################################
 class GuiderPerformance(wx.Panel):
-    """Secondary tab for guider operation, view guider performance from this panel"""
+    """Secondary tab for guider operation, view guider performance from this panel.
+    Not currently enabled."""
     # ----------------------------------------------------------------------------------
     def __init__(self,parent, debug, night):
         """Create the Guider Performance panel"""
@@ -538,7 +538,8 @@ class GuiderPerformance(wx.Panel):
 
 ###########################################################################################
 class GuiderControl(wx.Panel):
-    """Primary tab for guider operation, utilize guider functions from this panel"""
+    """Primary tab for guider operation, utilize guider functions from this panel. Not
+    currently enabled."""
     # ----------------------------------------------------------------------------------
     def __init__(self,parent, debug, night):
         """Create Guider Control panel"""
@@ -745,11 +746,6 @@ class Initialization(wx.Panel):
         self.trackingRateRAText=wx.TextCtrl(self,size=(100,-1))
         self.rateRAButton = wx.Button(self, -1, "Set RA Tracking Rate")
         self.resetTRButton = wx.Button(self,-1,"  Reset Right Ascension Tracking Rate  ")
-        #Declination Tracking Rate
-        #self.trackingRateDECLabel=wx.StaticText(self)
-        #self.trackingRateDECLabel.SetLabel('DEC Tracking Rate: ')
-        #self.trackingRateDECText=wx.TextCtrl(self,size=(100,-1))
-        #self.rateDECButton = wx.Button(self, -1, "Set DEC Tracking Rate")
 
         #############################################################
 
@@ -851,12 +847,6 @@ class Initialization(wx.Panel):
         self.trackbox1_h.AddSpacer(5)
         self.trackbox1_h.Add(self.rateRAButton,0,wx.ALIGN_RIGHT)
 
-        #self.trackbox2_h.Add(self.trackingRateDECLabel,0,wx.ALIGN_RIGHT)
-        #self.trackbox2_h.AddSpacer(5)
-        #self.trackbox2_h.Add(self.trackingRateDECText,0,wx.ALIGN_RIGHT)
-        #self.trackbox2_h.AddSpacer(5)
-        #self.trackbox2_h.Add(self.rateDECButton,0,wx.ALIGN_RIGHT)
-
         self.tbox_v.Add(self.trackbox1_h,0,wx.ALIGN_CENTER)
         self.tbox_v.AddSpacer(5)
         self.tbox_v.Add(self.resetTRButton,0,wx.ALIGN_CENTER)
@@ -902,7 +892,8 @@ class Initialization(wx.Panel):
 
 ###########################################################################################
 class NightLog(wx.ScrolledWindow):
-    """Night Log panel, write and save user logs for an observing night"""
+    """Night Log panel, write and save user logs for an observing night. Not currently
+    displayed."""
     # ----------------------------------------------------------------------------------
     def __init__(self,parent, debug, night):
         """Create the Night Log panel"""
@@ -1320,7 +1311,6 @@ class TCC(wx.Frame):
         Event handle for the pacific time zone option. Changes time to the current pacific time representation.
 
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget.
 
             Returns:
@@ -1336,11 +1326,10 @@ class TCC(wx.Frame):
         Event handle for the Mountain time zone option. Changes time to the current Mountain time representation.
 
          Args:
-                self: points function towards WX application.
-                event: handler to allow function to be tethered to a wx widget.
+            event: handler to allow function to be tethered to a wx widget.
 
          Returns:
-                None
+            None
         """
         self.current_timezone="MST"
         self.sb.SetStatusText('Timezone: MST',4)
@@ -1364,7 +1353,6 @@ class TCC(wx.Frame):
         """
         Turns precession off for the entire GUI.
                 Args:
-                    self: points function towards WX application.
                     event: handler to allow function to be tethered to a wx widget.
                 Returns:
                     self.precession: Sets self.precession = True
@@ -1720,7 +1708,7 @@ class TCC(wx.Frame):
     # ----------------------------------------------------------------------------------
     def focusIncPlus(self,event):
         """
-        Focus Increment; apply a positive focus increment of 1500.
+        Focus Increment; apply a positive focus increment of 1500 to the move relative box.
 
             Args:
                 event: handler to allow function to be tethered to a wx widget.Tethered to the "Increment Positive" button in the telescope control tab.
@@ -1737,7 +1725,7 @@ class TCC(wx.Frame):
     # ----------------------------------------------------------------------------------
     def focusIncNeg(self,event):
         """
-        Focus Increment; apply a negative focus increment of 1500.
+        Focus Increment; apply a negative focus increment of 1500 to the move relative box.
 
             Args:
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Increment Negative" button in the telescope control tab.
@@ -2792,11 +2780,10 @@ class TCC(wx.Frame):
         overplotting has complications between radial and cartesian plots and will produce strange results. Exit the working plot before sending a new plot command.
 
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Plot Target" button in the target list tab.
 
             Returns:
-                Radial plot of target altitude and azimuth in new window or current plotting window (overplotting not advised).
+                Radial plot of target altitude and azimuth in new window.
 
         '''
         sel_item=self.target.targetList.GetFocusedItem()
@@ -2837,11 +2824,10 @@ class TCC(wx.Frame):
         before sending a new plot command.
 
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Airmass Curve" button in the target list tab.
 
             Returns:
-                Airmass curve of target in new window or current plotting window (overplotting not advised).
+                Airmass curve of target in new window.
 
         '''
         sel_item=self.target.targetList.GetFocusedItem()
@@ -2881,7 +2867,6 @@ class TCC(wx.Frame):
         initialization text boxes. Pushing these to the telescope is then accomplished by Set Telescope Position.
 
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Load Zenith Coordinates" button in the initialization tab.
 
             Returns:
@@ -2907,7 +2892,6 @@ class TCC(wx.Frame):
         Used to sync TCC values with physical position of telescope.
 
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Telescope Position" button in the initialization tab.
 
             Returns:
@@ -2946,6 +2930,15 @@ class TCC(wx.Frame):
         return
     # ----------------------------------------------------------------------------------
     def parkscope(self,event):
+        """
+        Send Command to the telescope to park (move to zenith).
+
+            Args:
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Park Telescope" button in the initialization tab.
+
+            Returns:
+                None
+        """
         if self.telescope_status.get('slewing')==False:
             try:
                 #self.protocol.sendCommand("park")
@@ -2962,6 +2955,15 @@ class TCC(wx.Frame):
                 print "Not Connected to Telescope"
     # ----------------------------------------------------------------------------------
     def coverpos(self,event):
+        """
+        Send Command to the telescope to Cover Position.
+
+            Args:
+                event: handler to allow function to be tethered to a wx widget. Tethered to the "Slew to Cover Position" button in the initialization tab.
+
+            Returns:
+                None
+        """
         if self.telescope_status.get('slewing')==False:
             try:
                 #self.protocol.sendCommand("coverpos")
@@ -2985,7 +2987,6 @@ class TCC(wx.Frame):
         future inaccuracies in slewing and should be executed as an initialization task.
 
             Args:
-                self: points function towards WX application
                 event: handler allows function to be tethered to a WX widget. Tethered to the On Target button
             Returns:
                 None
@@ -3000,7 +3001,8 @@ class TCC(wx.Frame):
     	#self.targetDEC_d, self.targetDEC=self.targetDEC.split('d')
         #self.targetDEC_m, self.targetDEC=self.targetDEC.split('m')
         #self.targetDEC_s = self.targetDEC[:-1]
-    	#self.targetDEC=float(self.targetDEC_d)+float(self.targetDEC_m)/60.+float(self.targetDEC_s)/3600.
+        #self.targetDEC=float(self.targetDEC_d)+float(self.targetDEC_m)/60.+float(self.targetDEC_s)/3600.
+
     	self.LST=str(self.control.currentLSTPos.GetLabel())
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
@@ -3020,9 +3022,7 @@ class TCC(wx.Frame):
         """
         Sets telescope RA tracking rate to the value specified in the RA tracking rate text box in the initialization tab.
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set RA Tracking Rate" button in the initialization tab.
-
             Returns:
                 None
         """
@@ -3055,7 +3055,6 @@ class TCC(wx.Frame):
         Sets telescope RA tracking rate to the recommended sidereal value of 15.04108
             Args:
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set RA Tracking Rate" button in the initialization tab.
-
             Returns:
                 None
         """
@@ -3074,9 +3073,7 @@ class TCC(wx.Frame):
         """
         Sets the maximum RA adjustment the guider is allowed to perform.
             Args:
-                self: points function towards WX application.
                 event: handler to allow function to be tethered to a wx widget. Tethered to the "Set Maximum dRA" button in the initialization tab.
-
             Returns:
                 None
                 """
@@ -3135,7 +3132,6 @@ class TCC(wx.Frame):
         Initialize telescope systems according to values set in the TCC config file. Enables buttons throughout the GUI that depend on initialized systems to function.
 
         Args:
-            self: points function towards WX application.
             event: handler to allow function to be tethered to a wx widget. Tethered to the "Initialize Telescope Systems" button in the initialization tab.
 
         Returns:
@@ -3266,7 +3262,7 @@ class TCC(wx.Frame):
         """
         Dynamically updates Julian Date, LST, UTC, Local Time and current Epoch in the telescope control tab.
             Args:
-                self: points function towards WX application.
+                None
             Returns:
                 None
         """
@@ -3284,7 +3280,7 @@ class TCC(wx.Frame):
         """
        Calculates current time values for Julian Date, Epoch, Local Time and LST.
             Args:
-                self: points function towards WX application.
+                None
             Returns:
                 None
         """
@@ -3307,6 +3303,13 @@ class TCC(wx.Frame):
 
     # ----------------------------------------------------------------------------------
     def getFocus(self,event):
+        """
+        In Development.
+            Args:
+                event: handler to allow function to be tethered to a wx widget.
+            Returns:
+                None
+        """
         num=self.focusNum.GetValue()
         files=os.popen('tail -%s /Users/%s/nfocus.txt' % (num, os.getenv('USER')), 'r')
         for l in files:
@@ -3353,6 +3356,7 @@ class TargetExportWindow(wx.Frame):
 
 ###########################################################################################
 class Export(wx.Panel):
+    """Window brought up to export current Target List"""
     # ----------------------------------------------------------------------------------
     def __init__(self,parent):
         wx.Panel.__init__(self,parent)
