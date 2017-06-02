@@ -36,6 +36,7 @@ import subprocess
 import Queue
 from astroquery.skyview import SkyView
 from astropy.wcs import WCS
+import multiprocessing as mp
 
 global pipe
 pipe=None
@@ -1378,7 +1379,10 @@ class TCC(wx.Frame):
         current_time_log=time.strftime('%Y%m%dT%H%M%S')
         current_time=time.strftime('%Y%m%d  %H:%M:%S')
         #if self.at_MRO ==True:
-        f_out=open(self.stordir+'/logs/'+today,'a')
+        try:
+            f_out=open(self.stordir+'/logs/'+today,'a')
+        except IOError:
+            f_out=open(self.dir+'/logs/'+today,'a')
         #else:
         #f_out=open(self.dir+'/logs/'+today,'a')
         f_out.write(current_time_log+','+str(input)+'\n')
@@ -1414,7 +1418,7 @@ class TCC(wx.Frame):
         self.sb.SetStatusText('Guiding: False',2)
         self.sb.SetStatusText('Init Telescope to Enable Slew / Track',3)
         self.sb.SetStatusText('Timezone: UTC',4)
-        self.init.targetDecText.SetValue(str(self.dict['lat']))
+        #self.init.targetDecText.SetValue(str(self.dict['lat']))
         self.init.targetEpochText.SetValue(str( '%.3f') % t['epoch'])
         self.init.trackingRateRAText.SetValue(str(self.dict['RAtrackingRate']))
         self.init.maxdRAText.SetValue(str(self.dict['maxdRA']))
@@ -2501,7 +2505,8 @@ class TCC(wx.Frame):
 
         """
         try:
-            f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
+            #f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
+            f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
         except IOError:
             dlg = wx.MessageDialog(self,
                            "Path Error: File not Found.",
@@ -2633,18 +2638,19 @@ class TCC(wx.Frame):
             self.plot_open =False
 
         self.targetobject=FixedTarget(name=self.target.targetList.GetItem(sel_item,0).GetText(),coord=self.coordinates)
-        #plot_finder_image(self.targetobject, fov_radius=18*u.arcmin*2,reticle=True, log=False)
-        #self.plot_open = True
-        #plt.show()
-        thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
-        self.target.finder_button.Disable()
-        #wx.CallAfter(plot_finder_image,target, fov_radius=18*u.arcmin,reticle=True, log=False, wx.CallAfter(plt.show,))
-        #thread.start_new_thread(self.GenerateFinder,(self.targetobject,))
+
+        self.finder_routine_complete = False
+        f_thread=threading.Thread(target=self.GenerateFinder,args=(self.targetobject,),name="Finder Chart")
+        f_thread.daemon = True
+        f_thread.start()
+        #f_thread.join(10)
+        thread.start_new_thread(self.timeout,(f_thread,20.0))
         #mp.freeze_support()
         #p = mp.Process(target=self.GenerateFinder,args=(self.targetobject,))
-        #p.start()
         #self.process_list.append(p)
-        #plt.show()
+        #p.start()
+        #p.join(5)
+
     # ----------------------------------------------------------------------------------
     def GenerateFinder(self, target, survey='DSS', fov_radius=18*u.arcmin,
                           log=False, ax=None, grid=False, reticle=False,
@@ -2652,7 +2658,7 @@ class TCC(wx.Frame):
 
 
         #__all__ = ['plot_finder_image']
-        print "Hello?"
+        print "Generating Finder"
         coord = target if not hasattr(target, 'coord') else target.coord
         position = coord.icrs
         coordinates = 'icrs'
@@ -2664,11 +2670,13 @@ class TCC(wx.Frame):
         #wcs = WCS(hdu.header)
         wx.CallAfter(self.plotFinder, ax, hdu, grid, log, fov_radius, reticle,
         style_kwargs, reticle_style_kwargs, target_name)
+        #self.plotFinder(ax,hdu,grid,log,fov_radius,reticle,style_kwargs,reticle_style_kwargs,target_name)
 
     # ----------------------------------------------------------------------------------
 
     def plotFinder(self, ax, hdu, grid, log, fov_radius,reticle,
     style_kwargs, reticle_style_kwargs, target_name):
+        print "Plotting Finder"
         wcs = WCS(hdu.header)
         # Set up axes & plot styles if needed.
         if ax is None:
@@ -2713,10 +2721,35 @@ class TCC(wx.Frame):
         # Redraw the figure for interactive sessions.
         ax.figure.canvas.draw()
         self.plot_open = True
+        self.finder_routine_complete = True
         print "plotted"
         self.target.finder_button.Enable()
         plt.show()
         return ax, hdu
+    # ----------------------------------------------------------------------------------
+    def timeout(self,t,value):
+        #t.join(value)
+        dot_count=0
+        timeout=0
+        while self.finder_routine_complete == False:
+            wx.CallAfter(self.target.finder_button.Disable)
+            wx.CallAfter(self.target.finder_button.SetLabel,("Downloading"+"."*dot_count))
+            if dot_count == 3:
+                dot_count=0
+            dot_count+=1
+            timeout+=1
+            time.sleep(1.0)
+            if timeout>=value:
+                wx.CallAfter(self.log,("Failed to Load Finder Chart. Try again. Restart Bifrost Software if issue persists."))
+                wx.CallAfter(self.target.finder_button.Enable)
+                wx.CallAfter(self.target.finder_button.SetLabel,("Load Finder Chart"))
+                self.finder_routine_complete=True
+                break
+
+        t.join()
+        wx.CallAfter(self.target.finder_button.Enable)
+        wx.CallAfter(self.target.finder_button.SetLabel,("Load Finder Chart"))
+        return
 
     # ----------------------------------------------------------------------------------
     def ExportOpen(self,event):
