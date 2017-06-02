@@ -36,7 +36,7 @@ import subprocess
 import Queue
 from astroquery.skyview import SkyView
 from astropy.wcs import WCS
-import multiprocessing as mp
+import webbrowser
 
 global pipe
 pipe=None
@@ -1236,8 +1236,13 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_MENU, self.pre_on, id=1120)
         self.Bind(wx.EVT_MENU, self.pre_off, id=1121)
 
+        helpMenu = wx.Menu()
+        helpMenu.Append(1300, "&Help")
+        self.Bind(wx.EVT_MENU, self.onHelp, id=1300)
+
         self.menubar.Append(menu_file, "&File")
         self.menubar.Append(tool_file, "&Tools")
+        self.menubar.Append(helpMenu, "&Help")
 
         self.SetMenuBar(self.menubar)
 
@@ -1362,6 +1367,18 @@ class TCC(wx.Frame):
         self.log("Precession disabled")
         return
 
+    # ----------------------------------------------------------------------------------
+    def onHelp(self, event):
+        """
+        Opens the TCC wiki
+                Args:
+                    event: handler to allow function to be tethered to a wx widget.
+                Returns:
+                    None
+        """
+
+        self.log("Opening Web Browser to load TCC wiki")
+        webbrowser.open("https://github.com/UWMRO/TCC/wiki/User-Manual")
     # ----------------------------------------------------------------------------------
     def log(self, input):
         """
