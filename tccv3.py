@@ -2505,8 +2505,8 @@ class TCC(wx.Frame):
 
         """
         try:
-            #f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
-            f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
+            f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
+            #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
         except IOError:
             dlg = wx.MessageDialog(self,
                            "Path Error: File not Found.",
@@ -2655,8 +2655,14 @@ class TCC(wx.Frame):
     def GenerateFinder(self, target, survey='DSS', fov_radius=18*u.arcmin,
                           log=False, ax=None, grid=False, reticle=False,
                           style_kwargs=None, reticle_style_kwargs=None):
-
-
+        """
+        Download command for finder chart of selected object. Look at Astroplan plot_finder_image
+        for detailed documentation.
+            Args:
+                None
+            Returns:
+                None
+        """
         #__all__ = ['plot_finder_image']
         print "Generating Finder"
         coord = target if not hasattr(target, 'coord') else target.coord
@@ -2676,6 +2682,14 @@ class TCC(wx.Frame):
 
     def plotFinder(self, ax, hdu, grid, log, fov_radius,reticle,
     style_kwargs, reticle_style_kwargs, target_name):
+        """
+        Plot Command for finder chart downloaded in GenerateFinder(). Look at Astroplan plot_finder_image
+        for detailed documentation.
+            Args:
+                None
+            Returns:
+                None
+        """
         print "Plotting Finder"
         wcs = WCS(hdu.header)
         # Set up axes & plot styles if needed.
@@ -2728,6 +2742,14 @@ class TCC(wx.Frame):
         return ax, hdu
     # ----------------------------------------------------------------------------------
     def timeout(self,t,value):
+        """
+        Timeout for Load Finder Chart if the process fails to download.
+            Args:
+                t (threading.Thread): Thread object to have a timeout associated with it
+                value (float): Timeout duration in seconds
+            Returns:
+                None
+        """
         #t.join(value)
         dot_count=0
         timeout=0
