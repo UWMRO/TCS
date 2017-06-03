@@ -2661,7 +2661,7 @@ class TCC(wx.Frame):
         f_thread.daemon = True
         f_thread.start()
         #f_thread.join(10)
-        thread.start_new_thread(self.timeout,(f_thread,20.0))
+        thread.start_new_thread(self.timeout,(f_thread,30.0))
         #mp.freeze_support()
         #p = mp.Process(target=self.GenerateFinder,args=(self.targetobject,))
         #self.process_list.append(p)
