@@ -2076,9 +2076,14 @@ class TCC(wx.Frame):
         if self.telescope_status.get('precession')==True:
             self.target_coords['RA']= self.ra_out #Store target RA for pointing routine
             self.target_coords['DEC']=self.dec_out #Store target DEC for pointing routine
+            self.log('Precessed RA: '+str(self.ra_out))
+            self.log('Precessed DEC: '+str(self.dec_out))
         else:
+            self.log("Warning: Precession is not on.")
             self.target_coords['RA']= self.input_frame.ra.degree #Store target RA for pointing routine
             self.target_coords['DEC']=self.input_frame.dec.degree #Store target DEC for pointing routine
+            self.log('unprecessed RA: '+str(self.ra_out))
+            self.log('unprecessed DEC: '+str(self.dec_out))
         self.telescope_status['slewing'] = True
         thread.start_new_thread(self.velwatch,(True,self.decimalcoords,))
         return
@@ -3079,9 +3084,13 @@ class TCC(wx.Frame):
     	self.LST=self.LST.split(':')
     	self.LST=float(self.LST[0])+float(self.LST[1])/60.+float(self.LST[2])/3600.
         print "point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST)
+
         try:
     	    #self.protocol.sendCommand("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
             self.command_queue.put("point "+str(self.targetRA)+ " "+str(self.targetDEC)+" "+str(self.LST))
+            self.log("Pointing Successful: Telescope coordinates updated to coordinates of " +self.target_coords.get('Name'))
+            self.log("Updated RA: "+str(self.targetRA))
+            self.log("Updated DEC: "+str(self.targetDEC))
         except AttributeError:
             print "Not Connected to Telescope"
         self.telescope_status['pointState']=True
