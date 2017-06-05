@@ -37,6 +37,7 @@ import Queue
 from astroquery.skyview import SkyView
 from astropy.wcs import WCS
 import webbrowser
+import glob
 
 global pipe
 pipe=None
@@ -347,13 +348,26 @@ class Target(wx.Panel):
     def __init__(self,parent, debug, night):
         """Create the Target panel"""
         wx.Panel.__init__(self,parent)
+        self.parent = parent
+        self.listpath='/home/mro/Desktop/targetlists/*'
+        #self.listpath=('/home/doug/TCC/targetlists/*')
+
+        self.listglob=glob.glob(self.listpath)
+        self.targetlists=[]
+        for list in self.listglob:
+            filename=list.split("/")[-1]
+            self.targetlists.append(filename)
+
 
         #############################################################
 
         #Target List Retrieval
         self.fileLabel=wx.StaticText(self, size=(-1,-1))
         self.fileLabel.SetLabel('Object List File Name:   ')
-        self.fileText=wx.TextCtrl(self,size=(400,-1))
+        #self.fileText=wx.TextCtrl(self,size=(400,-1))
+
+        self.fileText = wx.ComboBox(self, -1, size = (400,-1), style = wx.CB_DROPDOWN,
+                                        choices = self.targetlists)
 
         #############################################################
 
@@ -417,6 +431,7 @@ class Target(wx.Panel):
         self.finder_button=wx.Button(self,-1,"Load Finder Chart")
         self.finder_button.SetBackgroundColour("Lime Green")
         self.finder_button.SetForegroundColour("White")
+        self.refresh_button=wx.Button(self,-1,"Refresh Choices")
 
         #Turn Buttons off initially, enable on initialization
         self.listButton.Disable()
@@ -440,6 +455,8 @@ class Target(wx.Panel):
         self.hbox1.Add(self.fileLabel,0,wx.ALIGN_CENTER)
         self.hbox1.Add(self.fileText,0, wx.ALIGN_CENTER)
         self.hbox1.Add(self.listButton,0, wx.ALIGN_CENTER)
+        self.hbox1.AddSpacer(5)
+        self.hbox1.Add(self.refresh_button,0,wx.ALIGN_CENTER)
 
         #Populate Manual Target Input Box
         self.gbox.Add(self.nameLabel, 0, wx.ALIGN_RIGHT)
@@ -1100,6 +1117,9 @@ class TCC(wx.Frame):
 
         self.stop_time = 250 #Waiting time for tracking to finish 500 works
 
+        #self.targetlists=glob.glob('/home/mro/Desktop/targetlists/*')
+        #self.targetlists=glob.glob('/home/doug/TCC/targetlists/*')
+
         #############################################################
 
         #Setup Notebook
@@ -1111,6 +1131,8 @@ class TCC(wx.Frame):
         guiderControlPage=GuiderControl(nb,debug,self.night) #Guider Control Tab
         initPage=Initialization(nb, debug, self.night) #Initialization Tab
         logPage=NightLog(nb, debug, self.night) #Night Log Tab
+
+        self.targetlists=glob.glob('/home/doug/TCC/targetlists/*')
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
@@ -1149,6 +1171,7 @@ class TCC(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         self.Bind(wx.EVT_BUTTON,self.FinderOpen,self.target.finder_button)
+        self.Bind(wx.EVT_BUTTON,self.refreshList,self.target.refresh_button)
 
         #Guider Control Tab Bindings
         #self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
@@ -2531,7 +2554,7 @@ class TCC(wx.Frame):
             #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
         except IOError:
             dlg = wx.MessageDialog(self,
-                           "Path Error: File not Found.",
+                           "Path Error: File not Found. Verify that the file exists in /home/mro/Desktop/targetlists/\n\nNote: This is the folder on the desktop.",
                            "Error", wx.OK|wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
@@ -2575,8 +2598,32 @@ class TCC(wx.Frame):
 
         f_in.close()
         return
-
     # ----------------------------------------------------------------------------------
+    def refreshList(self,event):
+        """
+        Updates the choices of the file path combobox on the target tab to the current files in
+        the Desktop folder.
+
+        Use Case: User starts software and adds new file to targetlist folder, the "Refresh Choices"
+        button is clicked and then the new file is accessible via dropdown in the combobox.
+
+        Args:
+                event: handler to allow function to be tethered to a wx widget.
+                Tethered to the "Refresh Choices" button in the target list tab.
+
+        Returns:
+                None
+
+        """
+        listpath = '/home/mro/Desktop/targetlists/*'
+        #listpath = '/home/doug/TCC/targetlists/*'
+        targetlists=glob.glob(listpath)
+        self.target.fileText.Clear()
+        for list in targetlists:
+            list=list.split('/')[-1]
+            self.target.fileText.Append(list)
+        #self.target.fileText.SetParameters(list_format)
+    # ------------------w----------------------------------------------------------------
     def removeFromList(self,event):
         """
         Remove selected item from list. Operates by clearing list and then regenerating surviving entries.
