@@ -2505,7 +2505,7 @@ class TCC(wx.Frame):
         mag  = self.target.magText.GetValue()
         epoch_now = self.control.currentEpochPos.GetLabel()
 
-        if not epoch[0].isalpha():
+        if not str(epoch[0]).isalpha():
             dlg = wx.MessageDialog(self,
                            "Entry Error: Epoch Entry is missing identifier ('J'2000 or 'B'1950). Please enter the appropriate identifier."
                            "Error", wx.OK|wx.ICON_ERROR)
