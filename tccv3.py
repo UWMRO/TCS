@@ -1132,7 +1132,6 @@ class TCC(wx.Frame):
         initPage=Initialization(nb, debug, self.night) #Initialization Tab
         logPage=NightLog(nb, debug, self.night) #Night Log Tab
 
-        self.targetlists=glob.glob('/home/doug/TCC/targetlists/*')
 
         nb.AddPage(controlPage,"Telescope Control")
         self.control=nb.GetPage(0)
@@ -2505,6 +2504,14 @@ class TCC(wx.Frame):
         epoch = self.target.epochText.GetValue()
         mag  = self.target.magText.GetValue()
         epoch_now = self.control.currentEpochPos.GetLabel()
+
+        if not epoch[0].isalpha():
+            dlg = wx.MessageDialog(self,
+                           "Entry Error: Epoch Entry is missing identifier ('J'2000 or 'B'1950). Please enter the appropriate identifier."
+                           "Error", wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
 
         self.inputcoordSorter(input_ra,input_dec,epoch)
 
