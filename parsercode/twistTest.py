@@ -48,8 +48,9 @@ class TestSender(wx.Frame):
 
         # Widgets
         self.statTxt = wx.StaticText(self, id=100, label="Command Prompt")
-        self.enterTxt = wx.TextCtrl(self, id=101, size=(200,-1))
+        self.enterTxt = wx.TextCtrl(self, id=101, size=(200,-1), style=wx.TE_PROCESS_ENTER)
         self.btn = wx.Button(self, id=102, size=(100, -1), label="OK")
+        
 
         self.vertSizer.Add(self.statTxt, flag=wx.ALIGN_CENTER)
         AddLinearSpacer(self.vertSizer, 10)
@@ -58,13 +59,15 @@ class TestSender(wx.Frame):
         self.vertSizer.Add(self.btn, flag=wx.ALIGN_CENTER)
 
         self.Bind(wx.EVT_BUTTON, self.onButton, id=102)
-        
+        self.Bind(wx.EVT_TEXT_ENTER, self.onButton, id=101)        
+
         self.SetSizer(self.vertSizer)
         self.vertSizer.Fit(self)
 
     def onButton(self, e):
         val = str(self.enterTxt.GetValue())
         print "sending: ", val
+        #print "literal: ", repr(val)
         self.protocol.sendCommand(val)
 
 class Forwarder(basic.LineReceiver):
