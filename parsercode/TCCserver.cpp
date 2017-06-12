@@ -331,7 +331,7 @@ const char *parser(std::string input) {
 	 		{
 	 			pastDECpos = curDECpos;
 	 			pastRApos = curRApos;
-				paddle = "Telescope Still Moving; If this loops tap E or W on the Paddle"; //Issue here with N-S jog
+				paddle = "Paddle Pressed"; //Issue here with N-S jog
 			return paddle;
 	 		}
 			/*
