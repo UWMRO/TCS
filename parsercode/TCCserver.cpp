@@ -182,11 +182,14 @@ const char *parser(std::string input) {
    	ira_hrs=ira_deg/15.0;
    	std::ostringstream RAstr;
 		std::ostringstream DECstr;
+		std::ostringstream zthetastr;
 		RAstr << LST_hrs-ira_hrs; //current RA in hours
 		DECstr << 46.951166666667-idec_deg; //current DEC in degrees
+		zthetastr << idec_deg;
    	std::string curRAstr = RAstr.str();
    	std::string curDECstr = DECstr.str();
-   	std::string data=tokens[1]+" "+curRAstr+" "+curDECstr+" "+tokens[2]+" "+tokens[3];
+		std::string ztheta = zthetastr.str();
+   	std::string data=tokens[1]+" "+curRAstr+" "+curDECstr+" "+tokens[2]+" "+tokens[3]+" "+ztheta;
    	std::ofstream log(tokens[4], std::ios_base::app | std::ios_base::out);
    	//myfile.open (tokens[4]);
    	log << data+"\n";
@@ -538,7 +541,9 @@ void Listener(void) {
 		if(results != "Checked Hand Paddle") {
 			if(results != "File Written") {
 				if(results != "velmeasure; 0") {
-					send(new_fd, results, strlen(results), 0);
+					if(results !="Paddle Pressed") {
+						send(new_fd, results, strlen(results), 0);
+					}
 				}
 			}
 		}
