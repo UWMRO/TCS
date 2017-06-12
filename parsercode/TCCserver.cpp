@@ -538,7 +538,9 @@ void Listener(void) {
 		if(results != "Checked Hand Paddle") {
 			if(results != "File Written") {
 				if(results != "velmeasure; 0") {
-					send(new_fd, results, strlen(results), 0);
+					if(results != "Paddle Pressed") {
+						send(new_fd, results, strlen(results), 0);
+					}
 				}
 			}
 		}
