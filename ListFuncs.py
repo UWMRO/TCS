@@ -106,16 +106,24 @@ def readToList(self,event):
             None
 
     """
-    try:
-        f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
-        #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
-    except IOError:
-        dlg = wx.MessageDialog(self,
-                       "Path Error: File not Found. Verify that the file exists in /home/mro/Desktop/targetlists/\n\nNote: This is the folder on the desktop.",
-                       "Error", wx.OK|wx.ICON_ERROR)
-        dlg.ShowModal()
-        dlg.Destroy()
-        return
+    frame = wx.Frame(None, -1, '')
+    frame.SetDimensions(0,0,200,50)
+
+    openBox = wx.FileDialog(frame, "Open", "", "", "Text Files (*.txt)|*.txt", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+    openBox.ShowModal()
+    f_in = open(openBox.GetPath())
+    openBox.Destroy()
+
+    # try:
+    #     f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
+    #     #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
+    # except IOError:
+    #     dlg = wx.MessageDialog(self,
+    #                    "Path Error: File not Found. Verify that the file exists in /home/mro/Desktop/targetlists/\n\nNote: This is the folder on the desktop.",
+    #                    "Error", wx.OK|wx.ICON_ERROR)
+    #     dlg.ShowModal()
+    #     dlg.Destroy()
+    #     return
     #f_in=open(self.target.fileText.GetValue())
     for line in f_in:
         l = line.split(';')

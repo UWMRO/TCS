@@ -1,0 +1,136 @@
+20180226T165230,==== Initializing Parameters ====
+20180226T165230,Reading in config file ....
+20180226T165230,['elevation', '1198']
+20180226T165230,['lastGuiderRot', 'None']
+20180226T165230,['lastRA', 'None']
+20180226T165230,['decWrap', '{-270,270}']
+20180226T165230,['horizonLimit', '20']
+20180226T165230,['lat', '46.9528']
+20180226T165230,['lastFocusPos', '1500']
+20180226T165230,['RAtrackingRate', '15.04108']
+20180226T165230,['lon', '-120.7278']
+20180226T165230,['maxdRA', '2']
+20180226T165230,['maxdDEC', '2']
+20180226T165230,['lastDEC', 'None']
+20180226T165230,Configuration parameters read
+20180226T165239,Failed to connect to telescope. Restart the application.
+20180226T165239,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T165322,==== Initializing Parameters ====
+20180226T165322,Reading in config file ....
+20180226T165322,['elevation', '1198']
+20180226T165322,['lastGuiderRot', 'None']
+20180226T165322,['lastRA', 'None']
+20180226T165322,['decWrap', '{-270,270}']
+20180226T165322,['horizonLimit', '20']
+20180226T165322,['lat', '46.9528']
+20180226T165322,['lastFocusPos', '1500']
+20180226T165322,['RAtrackingRate', '15.04108']
+20180226T165322,['lon', '-120.7278']
+20180226T165322,['maxdRA', '2']
+20180226T165322,['maxdDEC', '2']
+20180226T165322,['lastDEC', 'None']
+20180226T165322,Configuration parameters read
+20180226T165330,Failed to connect to telescope. Restart the application.
+20180226T165330,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T165436,==== Initializing Parameters ====
+20180226T165436,Reading in config file ....
+20180226T165436,['elevation', '1198']
+20180226T165436,['lastGuiderRot', 'None']
+20180226T165436,['lastRA', 'None']
+20180226T165436,['decWrap', '{-270,270}']
+20180226T165436,['horizonLimit', '20']
+20180226T165436,['lat', '46.9528']
+20180226T165436,['lastFocusPos', '1500']
+20180226T165436,['RAtrackingRate', '15.04108']
+20180226T165436,['lon', '-120.7278']
+20180226T165436,['maxdRA', '2']
+20180226T165436,['maxdDEC', '2']
+20180226T165436,['lastDEC', 'None']
+20180226T165436,Configuration parameters read
+20180226T165444,Failed to connect to telescope. Restart the application.
+20180226T165444,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T165518,==== Initializing Parameters ====
+20180226T165518,Reading in config file ....
+20180226T165518,['elevation', '1198']
+20180226T165518,['lastGuiderRot', 'None']
+20180226T165518,['lastRA', 'None']
+20180226T165518,['decWrap', '{-270,270}']
+20180226T165518,['horizonLimit', '20']
+20180226T165518,['lat', '46.9528']
+20180226T165518,['lastFocusPos', '1500']
+20180226T165518,['RAtrackingRate', '15.04108']
+20180226T165518,['lon', '-120.7278']
+20180226T165518,['maxdRA', '2']
+20180226T165518,['maxdDEC', '2']
+20180226T165518,['lastDEC', 'None']
+20180226T165518,Configuration parameters read
+20180226T165524,Failed to connect to telescope. Restart the application.
+20180226T165524,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T165734,==== Initializing Parameters ====
+20180226T165734,Reading in config file ....
+20180226T165734,['elevation', '1198']
+20180226T165734,['lastGuiderRot', 'None']
+20180226T165734,['lastRA', 'None']
+20180226T165734,['decWrap', '{-270,270}']
+20180226T165734,['horizonLimit', '20']
+20180226T165734,['lat', '46.9528']
+20180226T165734,['lastFocusPos', '1500']
+20180226T165734,['RAtrackingRate', '15.04108']
+20180226T165734,['lon', '-120.7278']
+20180226T165734,['maxdRA', '2']
+20180226T165734,['maxdDEC', '2']
+20180226T165734,['lastDEC', 'None']
+20180226T165734,Configuration parameters read
+20180226T165741,Failed to connect to telescope. Restart the application.
+20180226T165741,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T165935,==== Initializing Parameters ====
+20180226T165935,Reading in config file ....
+20180226T165935,['elevation', '1198']
+20180226T165935,['lastGuiderRot', 'None']
+20180226T165935,['lastRA', 'None']
+20180226T165935,['decWrap', '{-270,270}']
+20180226T165935,['horizonLimit', '20']
+20180226T165935,['lat', '46.9528']
+20180226T165935,['lastFocusPos', '1500']
+20180226T165935,['RAtrackingRate', '15.04108']
+20180226T165935,['lon', '-120.7278']
+20180226T165935,['maxdRA', '2']
+20180226T165935,['maxdDEC', '2']
+20180226T165935,['lastDEC', 'None']
+20180226T165935,Configuration parameters read
+20180226T165941,Failed to connect to telescope. Restart the application.
+20180226T165941,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T170106,==== Initializing Parameters ====
+20180226T170106,Reading in config file ....
+20180226T170106,['elevation', '1198']
+20180226T170106,['lastGuiderRot', 'None']
+20180226T170106,['lastRA', 'None']
+20180226T170106,['decWrap', '{-270,270}']
+20180226T170106,['horizonLimit', '20']
+20180226T170106,['lat', '46.9528']
+20180226T170106,['lastFocusPos', '1500']
+20180226T170106,['RAtrackingRate', '15.04108']
+20180226T170106,['lon', '-120.7278']
+20180226T170106,['maxdRA', '2']
+20180226T170106,['maxdDEC', '2']
+20180226T170106,['lastDEC', 'None']
+20180226T170106,Configuration parameters read
+20180226T170113,Failed to connect to telescope. Restart the application.
+20180226T170113,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
+20180226T170155,==== Initializing Parameters ====
+20180226T170155,Reading in config file ....
+20180226T170155,['elevation', '1198']
+20180226T170155,['lastGuiderRot', 'None']
+20180226T170155,['lastRA', 'None']
+20180226T170155,['decWrap', '{-270,270}']
+20180226T170155,['horizonLimit', '20']
+20180226T170155,['lat', '46.9528']
+20180226T170155,['lastFocusPos', '1500']
+20180226T170155,['RAtrackingRate', '15.04108']
+20180226T170155,['lon', '-120.7278']
+20180226T170155,['maxdRA', '2']
+20180226T170155,['maxdDEC', '2']
+20180226T170155,['lastDEC', 'None']
+20180226T170155,Configuration parameters read
+20180226T170200,Failed to connect to telescope. Restart the application.
+20180226T170200,tracking: False | initState: True | connectState: False | guiding: False | slewing: False | pointState: False | Dec: Unknown | guider_rot: False | precession: True | RA: Unknown | 
