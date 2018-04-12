@@ -239,10 +239,11 @@ class TCC(wx.Frame):
 	try:
         	img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
         	img=mpimg.imread(img_default)
+		self.guiderControl.ax_r.imshow(img, picker=False)
+        	self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
 	except:
 		print('');
-        #self.guiderControl.ax_r.imshow(img, picker=False)
-        #self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
+        
 
     # ----------------------------------------------------------------------------------
 
