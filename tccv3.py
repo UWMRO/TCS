@@ -236,8 +236,11 @@ class TCC(wx.Frame):
         #self.target.epochText.SetValue('J2000')
         #self.target.magText.SetValue('3.43')
 
-        img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
-        img=mpimg.imread(img_default)
+	try:
+        	img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
+        	img=mpimg.imread(img_default)
+	except:
+		print('');
         #self.guiderControl.ax_r.imshow(img, picker=False)
         #self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
 
