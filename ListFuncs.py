@@ -35,6 +35,22 @@ import glob
 global pipe
 pipe=None
 
+
+def populateCurrPos(self,event):
+    """
+        Add current values to the input fields when the button is clicked.
+    """
+    self.target.nameText.Clear()
+    self.target.raText.Clear()
+    self.target.decText.Clear()
+    self.target.epochText.Clear()
+
+    self.target.nameText.WriteText(self.control.currentNamePos.GetLabel())
+    self.target.raText.WriteText(self.control.currentRaPos.GetLabel())
+    self.target.decText.WriteText(self.control.currentDecPos.GetLabel())
+    self.target.epochText.WriteText(self.control.currentEpochPos.GetLabel())
+    #self.target.magText.WriteText(self.target.magText.GetValue())
+
 def addToList(self,event):
     """
     Add a manual text item from the target panel to the list control. Requires valid inputs for coordinate sorter.
@@ -106,16 +122,29 @@ def readToList(self,event):
             None
 
     """
-    try:
-        f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
-        #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
-    except IOError:
-        dlg = wx.MessageDialog(self,
-                       "Path Error: File not Found. Verify that the file exists in /home/mro/Desktop/targetlists/\n\nNote: This is the folder on the desktop.",
-                       "Error", wx.OK|wx.ICON_ERROR)
-        dlg.ShowModal()
-        dlg.Destroy()
-        return
+    frame = wx.Frame(None, -1, '')
+    frame.SetDimensions(0,0,200,50)
+
+    #TURN ON AT MRO TO OPEN THE DIRECTORY DEFAULT HERE
+    #openBox = wx.FileDialog(frame, "Open", "/home/mro/Desktop/targetlists/", "", "Text Files (*.txt)|*.txt", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+
+    openBox = wx.FileDialog(frame, "Open", "", "", "Text Files (*.txt)|*.txt", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+    openBox.ShowModal()
+    f_in = open(openBox.GetPath())
+    self.target.fileText.WriteText(openBox.GetPath().split('/targetlists/')[1])
+    openBox.Destroy()
+
+
+    # try:
+    #     f_in=open('/home/mro/Desktop/targetlists/'+self.target.fileText.GetValue())
+    #     #f_in=open('/home/doug/TCC/targetlists/'+self.target.fileText.GetValue())
+    # except IOError:
+    #     dlg = wx.MessageDialog(self,
+    #                    "Path Error: File not Found. Verify that the file exists in /home/mro/Desktop/targetlists/\n\nNote: This is the folder on the desktop.",
+    #                    "Error", wx.OK|wx.ICON_ERROR)
+    #     dlg.ShowModal()
+    #     dlg.Destroy()
+    #     return
     #f_in=open(self.target.fileText.GetValue())
     for line in f_in:
         l = line.split(';')
@@ -156,30 +185,30 @@ def readToList(self,event):
     f_in.close()
     return
 # ----------------------------------------------------------------------------------
-def refreshList(self,event):
-    """
-    Updates the choices of the file path combobox on the target tab to the current files in
-    the Desktop folder.
-
-    Use Case: User starts software and adds new file to targetlist folder, the "Refresh Choices"
-    button is clicked and then the new file is accessible via dropdown in the combobox.
-
-    Args:
-            event: handler to allow function to be tethered to a wx widget.
-            Tethered to the "Refresh Choices" button in the target list tab.
-
-    Returns:
-            None
-
-    """
-    listpath = '/home/mro/Desktop/targetlists/*'
-    #listpath = '/home/doug/TCC/targetlists/*'
-    targetlists=glob.glob(listpath)
+# def refreshList(self,event):
+#     """
+#     Updates the choices of the file path combobox on the target tab to the current files in
+#     the Desktop folder.
+#
+#     Use Case: User starts software and adds new file to targetlist folder, the "Refresh Choices"
+#     button is clicked and then the new file is accessible via dropdown in the combobox.
+#
+#     Args:
+#             event: handler to allow function to be tethered to a wx widget.
+#             Tethered to the "Refresh Choices" button in the target list tab.
+#
+#     Returns:
+#             None
+#
+#     """
+#     listpath = '/home/mro/Desktop/targetlists/*'
+#     #listpath = '/home/doug/TCC/targetlists/*'
+#     targetlists=glob.glob(listpath)
     self.target.fileText.Clear()
-    for list in targetlists:
-        list=list.split('/')[-1]
-        self.target.fileText.Append(list)
-    #self.target.fileText.SetParameters(list_format)
+#     for list in targetlists:
+#         list=list.split('/')[-1]
+#         self.target.fileText.Append(list)
+#     #self.target.fileText.SetParameters(list_format)
 # ------------------w----------------------------------------------------------------
 def removeFromList(self,event):
     """

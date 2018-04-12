@@ -184,13 +184,14 @@ class TCC(wx.Frame):
         #Target Tab Bindings
         self.Bind(wx.EVT_BUTTON, self.set_target, self.target.selectButton)
         self.Bind(wx.EVT_BUTTON, self.addToList, self.target.enterButton)
+        self.Bind(wx.EVT_BUTTON, self.populateCurrPos, self.target.popButton)
         self.Bind(wx.EVT_BUTTON, self.readToList, self.target.listButton)
         self.Bind(wx.EVT_BUTTON, self.removeFromList,self.target.removeButton)
         self.Bind(wx.EVT_BUTTON, self.ExportOpen,self.target.exportButton)
         self.Bind(wx.EVT_BUTTON, self.target_plot, self.target.plot_button)
         self.Bind(wx.EVT_BUTTON, self.airmass_plot, self.target.airmass_button)
         self.Bind(wx.EVT_BUTTON,self.FinderOpen,self.target.finder_button)
-        self.Bind(wx.EVT_BUTTON,self.refreshList,self.target.refresh_button)
+        #self.Bind(wx.EVT_BUTTON,self.refreshList,self.target.refresh_button)
 
         #Guider Control Tab Bindings
         #self.Bind(wx.EVT_BUTTON,self.on_Rot,self.guiderControl.guiderRotButton)
@@ -539,14 +540,17 @@ class TCC(wx.Frame):
                 thread.start_new_thread(self.Rotate,(phi_or,))
 
     # ----------------------------------------------------------------------------------
+    def populateCurrPos(self,event):
+        ListFuncs.populateCurrPos(self,event)
+    # ----------------------------------------------------------------------------------
     def addToList(self,event):
         ListFuncs.addToList(self,event)
     # # ----------------------------------------------------------------------------------
     def readToList(self,event):
         ListFuncs.readToList(self, event)
     # # ----------------------------------------------------------------------------------
-    def refreshList(self,event):
-        ListFuncs.refreshList(self,event)
+    # def refreshList(self,event):
+    #     ListFuncs.refreshList(self,event)
     # # ------------------w----------------------------------------------------------------
     def removeFromList(self,event):
         ListFuncs.removeFromList(self,event)

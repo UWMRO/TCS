@@ -55,13 +55,13 @@ class Target(wx.Panel):
 
         #############################################################
 
-        #Target List Retrieval
+        # #Target List Retrieval
         self.fileLabel=wx.StaticText(self, size=(-1,-1))
-        self.fileLabel.SetLabel('Object List File Name:   ')
-        #self.fileText=wx.TextCtrl(self,size=(400,-1))
-
-        self.fileText = wx.ComboBox(self, -1, size = (400,-1), style = wx.CB_DROPDOWN,
-                                        choices = self.targetlists)
+        self.fileLabel.SetLabel('Current Target List:   ')
+        self.fileText=wx.TextCtrl(self,size=(400,-1))
+        #
+        #self.fileText = wx.ComboBox(self, -1, size = (400,-1), style = wx.CB_DROPDOWN,
+        #                                 choices = self.targetlists)
 
         #############################################################
 
@@ -114,6 +114,7 @@ class Target(wx.Panel):
         self.listButton = wx.Button(self, -1, "Retrieve List")
         self.selectButton = wx.Button(self, -1, "Select Target")
         self.enterButton = wx.Button(self, -1, "Add to List")
+        self.popButton = wx.Button(self, -1, "Populate Current Info")
         self.removeButton=wx.Button(self,-1,"Remove Selected from List")
         self.exportButton=wx.Button(self,-1,"Export List")
         self.plot_button=wx.Button(self,-1,'Plot Target')
@@ -125,7 +126,7 @@ class Target(wx.Panel):
         self.finder_button=wx.Button(self,-1,"Load Finder Chart")
         self.finder_button.SetBackgroundColour("Lime Green")
         self.finder_button.SetForegroundColour("White")
-        self.refresh_button=wx.Button(self,-1,"Refresh Choices")
+        #self.refresh_button=wx.Button(self,-1,"Refresh Choices")
 
         #Turn Buttons off initially, enable on initialization
         self.listButton.Disable()
@@ -150,7 +151,10 @@ class Target(wx.Panel):
         self.hbox1.Add(self.fileText,0, wx.ALIGN_CENTER)
         self.hbox1.Add(self.listButton,0, wx.ALIGN_CENTER)
         self.hbox1.AddSpacer(5)
-        self.hbox1.Add(self.refresh_button,0,wx.ALIGN_CENTER)
+
+        self.hbox1.Add(self.popButton,0, wx.ALIGN_CENTER)
+        self.hbox1.AddSpacer(10)
+        #self.hbox1.Add(self.refresh_button,0,wx.ALIGN_CENTER)
 
         #Populate Manual Target Input Box
         self.gbox.Add(self.nameLabel, 0, wx.ALIGN_RIGHT)
