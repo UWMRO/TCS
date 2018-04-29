@@ -19,7 +19,7 @@ Graphical User Interface (GUI), Bifrost, built in Python 2.7 for controlling the
 ## Try it!
 
 On Ubuntu 17.10:
-
+```
 sudo git clone https://github.com/UWMRO/TCC.git
 
 sudo apt-get install python-wxgtk3.0
@@ -35,3 +35,4 @@ sudo apt-get install python-astroquery
 
 /TCC$ mkdir logs
 /TCC$ tccv3.py
+```
