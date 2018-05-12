@@ -1,3 +1,24 @@
+/*
+    Dome Paddle for MRO using Xbox 360 Controller. Written by Sierra Dodd, Jagdeep Singh and Eva Smerekanych.
+    May 2018
+    
+    Pin Connections on Arduino:
+        1) North (black) to pin 2
+        2) South (blue) to pin 3
+        3) West (green) to pin 4
+        5) East (brown) to pin 5
+    
+    How to Use: 
+        1) Connect controller to the arduino using wireless reciever.
+        2) Make sure arduino is on
+        3) Test controller ouput by holding left trigger on controller and pressing buttons on d-pad, 
+           lights on controller should change.
+        4) Start Bifrost
+        5) Turn telescope key
+        6) Initialize the telescope
+        7) Good to go!
+*/
+
 #include <XBOXRECV.h>
 #include <SoftwareSerial.h>
 
