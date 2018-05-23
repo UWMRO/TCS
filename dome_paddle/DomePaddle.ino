@@ -99,6 +99,20 @@ void loop() {
   if (Xbox.XboxReceiverConnected) {
     for (uint8_t i = 0; i < 4; i++){
       if (Xbox.Xbox360Connected[i]) {
+        
+        /*
+        // Speed high and low for telescope movement
+        if (Xbox.getButtonClick(START, i)) {
+          Xbox.setLedMode(ROTATING, i);
+          // speed high
+        }
+
+        if (Xbox.getButtonClick(BACK, i)) {
+          Xbox.setLedBlink(ALL, i);
+          // speed low 
+        }
+        */
+          
         if (Xbox.getButtonPress(L2, i)) {
           
           // NORTHWEST and SOUTHWEST
