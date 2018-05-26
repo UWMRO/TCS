@@ -1,17 +1,17 @@
 /*
     Dome Paddle for MRO using Xbox 360 Controller. Written by Sierra Dodd, Jagdeep Singh and Eva Smerekanych.
     May 2018
-    
+
     Pin Connections on Arduino:
         1) North (black) to pin 2
         2) South (blue) to pin 3
         3) West (green) to pin 4
         5) East (brown) to pin 5
-    
-    How to Use: 
+
+    How to Use:
         1) Connect controller to the arduino using wireless reciever.
         2) Make sure arduino is on
-        3) Test controller ouput by holding left trigger on controller and pressing buttons on d-pad, 
+        3) Test controller ouput by holding left trigger on controller and pressing buttons on d-pad,
            lights on controller should change.
         4) Start Bifrost
         5) Turn telescope key
@@ -82,6 +82,7 @@ class Axis {
 
 Axis N_S_Axis(2,3);
 Axis E_W_Axis(4,5);
+int SetSlewPin = 6;
 
 void setup() {
   Serial.begin(115200);
@@ -93,29 +94,28 @@ void setup() {
     while (1); //halt
   }
   Serial.print(F("\r\nXBOX USB Library Started"));
+
+  pinMode(SetSlewPin, OUTPUT);
 }
+
 void loop() {
   Usb.Task();
   if (Xbox.XboxReceiverConnected) {
     for (uint8_t i = 0; i < 4; i++){
       if (Xbox.Xbox360Connected[i]) {
-        
-        /*
+
         // Speed high and low for telescope movement
         if (Xbox.getButtonClick(START, i)) {
           Xbox.setLedMode(ROTATING, i);
-          // speed high
+          digitalWrite(SetSlewPin, LOW);
         }
 
         if (Xbox.getButtonClick(BACK, i)) {
           Xbox.setLedBlink(ALL, i);
-          // speed low 
+          digitalWrite(SetSlewPin, HIGH);
         }
-        */
-          
+
         if (Xbox.getButtonPress(L2, i)) {
-          
-          // NORTHWEST and SOUTHWEST
           if (Xbox.getButtonPress(UP, i) && Xbox.getButtonPress(RIGHT, i)) {
             N_S_Axis.MovePositive();
             E_W_Axis.MovePositive();
@@ -124,10 +124,7 @@ void loop() {
             N_S_Axis.MoveNegative();
             E_W_Axis.MovePositive();
             Serial.print("SOUTHWEST");
-          } 
-
-          // NORTHEAST and SOUTHEAST
-          if (Xbox.getButtonPress(UP, i) && Xbox.getButtonPress(LEFT, i)) {
+          } else if (Xbox.getButtonPress(UP, i) && Xbox.getButtonPress(LEFT, i)) {
             N_S_Axis.MovePositive();
             E_W_Axis.MoveNegative();
             Serial.print("NORTHEAST");
@@ -135,26 +132,23 @@ void loop() {
             N_S_Axis.MoveNegative();
             E_W_Axis.MoveNegative();
             Serial.print("SOUTHEAST");
-          }
-          
-          
-          if (Xbox.getButtonPress(UP, i)) {  // North
-            Xbox.setLedOn(LED1);
+          } else if (Xbox.getButtonPress(UP, i)) {  // North
+            E_W_Axis.Stop();
             N_S_Axis.MovePositive();
             Serial.print("N");
             break;
           } else if (Xbox.getButtonPress(DOWN, i)) {  // South
-            Xbox.setLedOn(LED4);
+            E_W_Axis.Stop();
             N_S_Axis.MoveNegative();
             Serial.print("S");
             break;
           } else if (Xbox.getButtonPress(RIGHT, i)) {  // West
-            Xbox.setLedOn(LED3);
+            N_S_Axis.Stop();
             E_W_Axis.MovePositive();
             Serial.print("W");
             break;
           } else if (Xbox.getButtonPress(LEFT, i)) {  // East
-            Xbox.setLedOn(LED2);
+            N_S_Axis.Stop();
             E_W_Axis.MoveNegative();
             Serial.print("E");
             break;
