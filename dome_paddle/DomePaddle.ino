@@ -156,6 +156,9 @@ void loop() {
             N_S_Axis.Stop();
             E_W_Axis.Stop();
           }
+        } else {
+          N_S_Axis.Stop();
+          E_W_Axis.Stop();
         }
       }
     }
