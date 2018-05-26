@@ -20,7 +20,6 @@
 */
 
 #include <XBOXRECV.h>
-#include <SoftwareSerial.h>
 
 // Satisfy the IDE, which needs to see the include statment in the ino too.
 #ifdef dobogusinclude
@@ -71,7 +70,6 @@ class Axis {
       _state = 0;
     }
   }
-
   private:
     char _state;
     double _posPin;
@@ -79,9 +77,60 @@ class Axis {
     unsigned long _lastCommandTime;
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////Dome
+class DomeAxis {
+  public:
+
+  DomeAxis(char LeftPin, char RightPin) {
+    _LPin = LeftPin;
+    _RPin = RightPin;
+    _lastCommandTime = 0;
+    _state = 0;
+
+    pinMode(_LPin, OUTPUT);
+    pinMode(_RPin, OUTPUT);
+  }
+
+  boolean MoveLeft() {
+    if (_state != 'R') {
+      digitalWrite(_LPin, HIGH);
+      _state = 'L';
+      _lastCommandTime = millis();
+      return true;//returns true if it moved Left
+    }
+    return false;//return false if it did not move Left
+  }
+
+  boolean MoveRight() {
+    if (_state != 'L') {
+      digitalWrite(_RPin, HIGH);
+      _state = 'R';
+      _lastCommandTime = millis();
+      return true;//return true if it moved Right
+    }
+    return false;//return false if it did not move Right
+  }
+
+  void Stop() {
+    if (millis() - _lastCommandTime > 200) {
+      digitalWrite(_LPin, LOW);
+      digitalWrite(_RPin, LOW);
+      _state = 0;
+    }
+  }
+  private:
+    char _state;
+    char _LPin;
+    char _RPin;
+    unsigned long _lastCommandTime;
+};
+ ////////////////////////////////////////////////////////////////////////////////Dome End
+
+
 
 Axis N_S_Axis(2,3);
 Axis E_W_Axis(4,5);
+DomeAxis _DomeAxis(A2, A0);
 int SetSlewPin = 6;
 
 void setup() {
@@ -116,6 +165,15 @@ void loop() {
         }
 
         if (Xbox.getButtonPress(L2, i)) {
+          if (Xbox.getButtonPress(X, i)){ //Dome Left
+            _DomeAxis.MoveLeft();
+            Serial.print("Left");
+          }else if (Xbox.getButtonPress(B, i)){ //Dome Right
+            _DomeAxis.MoveRight();
+            Serial.print("Right");
+          }else{
+             _DomeAxis.Stop();
+          }
           if (Xbox.getButtonPress(UP, i) && Xbox.getButtonPress(RIGHT, i)) {
             N_S_Axis.MovePositive();
             E_W_Axis.MovePositive();
@@ -159,6 +217,7 @@ void loop() {
         } else {
           N_S_Axis.Stop();
           E_W_Axis.Stop();
+          _DomeAxis.Stop();
         }
       }
     }
