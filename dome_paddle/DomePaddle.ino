@@ -1,13 +1,11 @@
 /*
     Dome Paddle for MRO using Xbox 360 Controller. Written by Sierra Dodd, Jagdeep Singh and Eva Smerekanych.
     May 2018
-
     Pin Connections on Arduino:
         1) North (black) to pin 2
         2) South (blue) to pin 3
         3) West (green) to pin 4
         5) East (brown) to pin 5
-
     How to Use:
         1) Connect controller to the arduino using wireless reciever.
         2) Make sure arduino is on
@@ -17,6 +15,15 @@
         5) Turn telescope key
         6) Initialize the telescope
         7) Good to go!
+    Controls:
+        Telescope:
+            North: Up
+            West:  Right
+            East:  Left
+            South: Down
+        Dome:
+            Left:  B
+            Right: X
 */
 
 #include <XBOXRECV.h>
@@ -165,15 +172,6 @@ void loop() {
         }
 
         if (Xbox.getButtonPress(L2, i)) {
-          if (Xbox.getButtonPress(X, i)){ //Dome Left
-            _DomeAxis.MoveLeft();
-            Serial.print("Left");
-          }else if (Xbox.getButtonPress(B, i)){ //Dome Right
-            _DomeAxis.MoveRight();
-            Serial.print("Right");
-          }else{
-             _DomeAxis.Stop();
-          }
           if (Xbox.getButtonPress(UP, i) && Xbox.getButtonPress(RIGHT, i)) {
             N_S_Axis.MovePositive();
             E_W_Axis.MovePositive();
@@ -214,6 +212,18 @@ void loop() {
             N_S_Axis.Stop();
             E_W_Axis.Stop();
           }
+        } else if (Xbox.getButtonPress(R2, i)) {
+          
+          if (Xbox.getButtonPress(X, i)){ //Dome Left
+            _DomeAxis.MoveLeft();
+            Serial.print("Left");
+          }else if (Xbox.getButtonPress(B, i)){ //Dome Right
+            _DomeAxis.MoveRight();
+            Serial.print("Right");
+          }else{
+             _DomeAxis.Stop();
+          }
+        
         } else {
           N_S_Axis.Stop();
           E_W_Axis.Stop();
