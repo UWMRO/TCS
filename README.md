@@ -3,10 +3,12 @@
 More information, including installation instructions, are available under the Wiki tab.
 
 ## Purpose
-This repository contains code for use at Manastash Ridge Observatory (MRO). It provides a
-Graphical User Interface (GUI), Bifrost, built in Python 2.7 for controlling the primary Ritchey-Chretien Telescope. This GUI is intended to allow control of the telescope as well as a new auto-guiding system being developed for MRO. The new TCC saw first use in Summer 2017.
+This repository contains code for use at Manastash Ridge Observatory (MRO). It provides
 
-## Dependencies
+- Bifrost, the GUI, built in Python 2.7, for controlling the primary Ritchey-Chretien Telescope. This GUI is intended to allow control of the telescope as well as a new auto-guiding system being developed for MRO. The new TCC saw first use in Summer 2017.
+- TelescopePi software, including a server for a Telescope-mounted Raspberry Pi that controls the filter wheel and (soon) various other telescope functions. 
+
+## Bifrost Dependencies
 - WxPython: https://wxpython.org/
 - Astropy: http://www.astropy.org/
 - Astroplan: https://astroplan.readthedocs.io/en/latest/
