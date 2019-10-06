@@ -1,6 +1,6 @@
 #!/bin/bash
-num=`ps -ef | grep "test" | wc -l`
+num=`ps -ef | grep "TelescopeServer" | wc -l`
 echo $num
 if [ $num == 1 ]; then
-   python /home/mro/TCC/tccv3.py
+   python ./tccv3.py
 fi

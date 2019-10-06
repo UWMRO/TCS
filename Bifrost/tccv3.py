@@ -237,7 +237,7 @@ class TCC(wx.Frame):
         #self.target.magText.SetValue('3.43')
 
 	try:
-        	img_default=os.path.join(self.dir,'gimg','gcam_56901_859.jpg')
+        	img_default=os.path.join(self.dir,'gcam_56901_859.jpg')
         	img=mpimg.imread(img_default)
 		self.guiderControl.ax_r.imshow(img, picker=False)
         	self.guiderControl.canvas_l.mpl_connect('pick_event', self.on_pick)
@@ -715,7 +715,7 @@ if __name__=="__main__":
   		app.frame = TCC()
   		app.frame.Show()
   		reactor.registerWxApp(app)
-  		pipe= subprocess.Popen("./parsercode/test",shell=True, preexec_fn=os.setsid)
+  		pipe= subprocess.Popen("../TelescopeServer/TelescopeServer",shell=True, preexec_fn=os.setsid)
   		time.sleep(2.0)
   		reactor.connectTCP('localhost',5501,TCCClient(app.frame))
   		reactor.run()
