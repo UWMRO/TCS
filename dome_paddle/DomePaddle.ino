@@ -55,9 +55,9 @@ class Axis {
       digitalWrite(_posPin, LOW);
       _state = 'P';
       _lastCommandTime = millis();
-      return true;//returns true if it moved positively
+      return true; //returns true if it moved positively
     }
-    return false;//return false if it did not move positively
+    return false; //return false if it did not move positively
   }
 
   boolean MoveNegative() {
@@ -65,9 +65,9 @@ class Axis {
       digitalWrite(_negPin, LOW);
       _state = 'N';
       _lastCommandTime = millis();
-      return true;//return true if it moved negatively
+      return true; //return true if it moved negatively
     }
-    return false;//return false if it did not move negatively
+    return false; //return false if it did not move negatively
   }
 
   void Stop() {

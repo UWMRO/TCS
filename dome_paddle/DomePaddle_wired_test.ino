@@ -1,26 +1,26 @@
 #include <SoftwareSerial.h>
 
-class Axis
-{
+class Axis {
   public:
-  
+
   Axis(int PositivePin, int NegativePin) {
     _posPin = PositivePin;
     _negPin = NegativePin;
     _lastCommandTime = 0;
+    _state = 0;
+
     pinMode(_posPin, OUTPUT);
     pinMode(_negPin, OUTPUT);
-    _state = 0;
   }
-  
+
   boolean MovePositive() {
     if (_state != 'N') {
       digitalWrite(_posPin, LOW);
       _state = 'P';
       _lastCommandTime = millis();
-      return true;//returns true if it moved positively
+      return true; //returns true if it moved positively
     }
-    return false;//return false if it did not move positively
+    return false; //return false if it did not move positively
   }
 
   boolean MoveNegative() {
@@ -28,19 +28,18 @@ class Axis
       digitalWrite(_negPin, LOW);
       _state = 'N';
       _lastCommandTime = millis();
-      return true;//return true if it moved negatively
+      return true; //return true if it moved negatively
     }
-    return false;//return false if it did not move negatively
+    return false; //return false if it did not move negatively
   }
-  
+
   void Stop() {
     if (millis() - _lastCommandTime > 200) {
       digitalWrite(_posPin, HIGH);
       digitalWrite(_negPin, HIGH);
-      _state = 0;  
+      _state = 0;
     }
   }
-
   private:
     char _state;
     double _posPin;
