@@ -1,9 +1,3 @@
 # Telescope Control System (TCS)
 
-This repository contains the assorted code for controlling telescope functsions at Manastash Ridge Observatory (MRO). It provides
-
-- Bifrost, the GUI, built in Python 2.7, for controlling the primary Ritchey-Chretien Telescope. This GUI is intended to allow control of the telescope as well as a new auto-guiding system being developed for MRO. The new TCC saw first use in Summer 2017.
-- TelescopePi, software for the Telescope-mounted Raspberry Pi that controls the filter wheel and (soon) various other telescope functions. 
-- TelescopeServer, software that interprets commands from Bifrost and sends them to motor control board that communicates with the telescope hardware.
-
-More information, including installation instructions, is available under "Developer Manual" the Wiki tab.
+This repository contains the Telescope Control System (TCS) for Manastash Ridge Observatory (MRO), developed by the Astronomy Undergraduate Engineering Group (AUEG) at the University of Washington. The TCS allows the user to control the 0.8m Ritchey-Chretien Telescope and its associated systems. A user manual for the graphical user interface, Bifrost, and developer information are available in the repository's wiki.
