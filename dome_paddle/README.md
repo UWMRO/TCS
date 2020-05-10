@@ -8,5 +8,3 @@ to the telescopes traditional dome paddle circuitry. We're using an wireless X-B
 
 ## Installing
 Game controller library is USB Host Shield (https://github.com/felis/USB_Host_Shield_2.0)
-
-Unknown how we'll connect to the telescope hardware at this point.
