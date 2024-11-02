@@ -459,6 +459,7 @@ const char *parser(std::string input) {
 }
 
 void run_commands(int fd) {
+  while(1) {
 	ssize_t bytes_received;
 	char incoming_data_buffer[1000];
 	bytes_received = recv(fd, incoming_data_buffer, 1000, 0);
@@ -492,6 +493,7 @@ void run_commands(int fd) {
 			}
 		}
 	}
+  }
 }
 
 void Listener(void) {
