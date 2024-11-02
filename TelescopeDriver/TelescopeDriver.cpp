@@ -593,18 +593,18 @@ void Listener(void) {
 }
 
 
-int run_commands(int fd) {
+void run_commands(int fd) {
 	ssize_t bytes_received;
 	char incoming_data_buffer[1000];
 	bytes_received = recv(fd, incoming_data_buffer, 1000, 0);
 
 	if(bytes_received == 0) {
-	std::cout << "host shut down." << std::endl;
-	break;
+		std::cout << "host shut down." << std::endl;
+		return;
 	}
 	if(bytes_received == -1) {
-	std::cout << "receive error!" << std::endl;
-	break;
+		std::cout << "receive error!" << std::endl;
+		return;
 	}
 
 
