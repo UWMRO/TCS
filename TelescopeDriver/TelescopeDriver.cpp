@@ -578,7 +578,7 @@ void Listener(void) {
 
   std::cout << "Waiting to recieve data..." << std::endl;
 
-  pid = fork();
+  int pid = fork();
   if(pid < 0){
 	std:cout  << "Error on fork" << std::endl;
   }
