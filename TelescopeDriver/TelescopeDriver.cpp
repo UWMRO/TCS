@@ -458,6 +458,44 @@ const char *parser(std::string input) {
 	return "Invalid Command";
 }
 
+void run_commands(int fd) {
+  while(1) {
+	ssize_t bytes_received;
+	char incoming_data_buffer[1000];
+	bytes_received = recv(fd, incoming_data_buffer, 1000, 0);
+
+	if(bytes_received == 0) {
+		std::cout << "host shut down." << std::endl;
+		return;
+	}
+	if(bytes_received == -1) {
+		std::cout << "receive error!" << std::endl;
+		return;
+	}
+
+
+	incoming_data_buffer[bytes_received] = '\0';
+
+	std::string input = (std::string) incoming_data_buffer;
+	std::vector <std::string> commands = separator(input);
+	//std::cout << commands.size()-1 <<std::endl;
+	for(int i=0; i <commands.size()-1; i++) {
+		//std::cout << commands[i] << std::endl;
+		const char* results = parser(commands[i]);
+		std::cout << results << std::endl;
+		if(results != "Checked Hand Paddle") {
+			if(results != "File Written") {
+				if(results != "velmeasure; 0") {
+					if(results !="Paddle Pressed") {
+						send(fd, results, strlen(results), 0);
+					}
+				}
+			}
+		}
+	}
+  }
+}
+
 void Listener(void) {
   /* To start a server we need to first create a socket.  This happens with first defining your address
      info (e.g. IPv4 vs IPv6 or TCP vs UDP).  Once the socket has been made there is a descriptor used
@@ -511,6 +549,7 @@ void Listener(void) {
   int new_fd;
   struct sockaddr_storage their_addr;
   socklen_t addr_size = sizeof(their_addr);
+  /*
   new_fd = accept(socketfd, (struct sockaddr*) &their_addr, &addr_size);
 
   if(new_fd == -1) {
@@ -562,9 +601,35 @@ void Listener(void) {
   // clean up
   close(new_fd);
   close(socketfd);
+  */
 
 
+ while(1) {
+  new_fd = accept(socketfd, (struct sockaddr*) &their_addr, &addr_size);
+
+  if(new_fd == -1) {
+	std::cout << "listen error" << std::endl;
+  }
+  else {
+	std::cout << "Connection accepted. Using new socketfd : " << new_fd << std::endl;
+  }
+
+  std::cout << "Waiting to recieve data..." << std::endl;
+
+  int pid = fork();
+  if(pid < 0){
+	std:cout  << "Error on fork" << std::endl;
+  }
+  if(pid == 0){
+	close(socketfd);
+	run_commands(new_fd);
+	exit(0);
+  }else {
+	close(new_fd);
+  }
+ }
 }
+
 
 int main(int argc, char *argv[])
 {
